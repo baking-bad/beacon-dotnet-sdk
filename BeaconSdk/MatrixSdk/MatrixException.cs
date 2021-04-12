@@ -6,7 +6,6 @@ namespace MatrixSdk
 
     public class MatrixException : Exception
     {
-
         public Uri Uri { get; }
 
         public string RequestContent { get; }
