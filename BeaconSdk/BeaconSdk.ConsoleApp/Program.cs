@@ -7,11 +7,11 @@
 
     internal class Program
     {
-        private static readonly string userId = "";
+        private const string userId = "";
 
-        private static readonly string password = "";
+        private const string password = "";
 
-        private static readonly string deviceId = "";
+        private const string deviceId = "";
 
         private static async Task Main(string[] args)
         {

@@ -2,15 +2,15 @@ namespace MatrixSdk.Login
 {
     public class Identifier
     {
-        public string type { get; set; }
-        public string user { get; set; }
+        public string Type { get; set; }
+        public string User { get; set; }
     }
 
     public class RequestLoginDto
     {
-        public Identifier identifier { get; set; }
-        public string password { get; set; }
-        public string device_id { get; set; }
-        public string type { get; set; }
+        public Identifier Identifier { get; set; }
+        public string Password { get; set; }
+        public string DeviceId { get; set; }
+        public string Type { get; set; }
     }
 }
