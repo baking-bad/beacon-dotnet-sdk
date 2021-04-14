@@ -1,4 +1,5 @@
 // ReSharper disable ClassNeverInstantiated.Global
+
 namespace MatrixSdk.Login
 {
     public class ResponseLoginDto

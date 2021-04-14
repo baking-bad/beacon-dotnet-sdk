@@ -17,7 +17,7 @@ namespace MatrixSdk
             {
                 NamingStrategy = new SnakeCaseNamingStrategy()
             };
-            
+
             var settings = new JsonSerializerSettings
             {
                 ContractResolver = contractResolver
@@ -30,7 +30,7 @@ namespace MatrixSdk
             var result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new MatrixException(response.RequestMessage.RequestUri, 
+                throw new MatrixException(response.RequestMessage.RequestUri,
                     json, result, response.StatusCode);
 
             return JsonConvert.DeserializeObject<TResponse>(result, settings);
