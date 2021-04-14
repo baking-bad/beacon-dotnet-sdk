@@ -27,8 +27,12 @@
             var password = $"ed:{hexSignature}:{hexPublicKey}";
             var deviceId = hexPublicKey;
 
-            var userService = serviceProvider.GetService<UserService>();
-            var response = await userService.LoginAsync(hexId, password, deviceId);
+            var matrixClientService = serviceProvider.GetService<MatrixClientService>();
+            var responseLogin = await matrixClientService.LoginAsync(hexId, password, deviceId);
+
+            var member = "@1fe20c08a8ec413104208cfae20e288f084b6a5153c9d297088939130d3ac891:matrix.papers.tech";
+            var responseCreateRoom = 
+                await matrixClientService.CreateRoomAsync(responseLogin.AccessToken, member);
         }
     }
 }

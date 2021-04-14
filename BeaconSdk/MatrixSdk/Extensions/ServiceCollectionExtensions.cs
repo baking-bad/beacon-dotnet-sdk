@@ -7,7 +7,7 @@ namespace MatrixSdk
         public static IServiceCollection AddMatrixSdk(this IServiceCollection services)
         {
             services.AddHttpClient();
-            services.AddSingleton<UserService>();
+            services.AddSingleton<MatrixClientService>();
 
             return services;
         }

@@ -4,6 +4,7 @@ namespace MatrixSdk
     using System.Text;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
 
     public static class HttpClientExtensions
@@ -22,10 +23,11 @@ namespace MatrixSdk
             {
                 ContractResolver = contractResolver
             };
+            settings.Converters.Add(new StringEnumConverter());
 
             var json = JsonConvert.SerializeObject(model, settings);
             var content = new StringContent(json, Encoding.Default, "application/json");
-
+            
             var response = await httpClient.PostAsync(requestUri, content);
             var result = await response.Content.ReadAsStringAsync();
 
