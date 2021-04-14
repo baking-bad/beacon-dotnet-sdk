@@ -27,15 +27,15 @@ namespace MatrixSdk
         public async Task<ResponseLoginDto> LoginAsync(string userId, string password, string deviceId) =>
             await HttpClient.PostAsJsonAsync<ResponseLoginDto>("_matrix/client/r0/login",
                 new RequestLoginDto
-                {
-                    Identifier = new Identifier
-                    {
-                        Type = "m.id.user",
-                        User = userId
-                    },
-                    DeviceId = deviceId,
-                    Password = password,
-                    Type = "m.login.password"
-                });
+                (
+                    new Identifier
+                    (
+                        "m.id.user", 
+                        userId
+                    ),
+                    password,
+                    deviceId,
+                    "m.login.password"
+                ));
     }
 }
