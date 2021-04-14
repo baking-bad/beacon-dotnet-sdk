@@ -8,7 +8,9 @@ namespace MatrixSdk
 
     public static class HttpClientExtensions
     {
-        public static async Task<TResponse> PostJsonAsync<TResponse>(this HttpClient httpClient,
+        // Todo: Refactor
+        // See: https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-how-to?pivots=dotnet-5-0#httpclient-and-httpcontent-extension-methods
+        public static async Task<TResponse> PostAsJsonAsync<TResponse>(this HttpClient httpClient,
             string requestUri, object model)
         {
             var contractResolver = new DefaultContractResolver
@@ -31,7 +33,7 @@ namespace MatrixSdk
                 throw new MatrixException(response.RequestMessage.RequestUri, 
                     json, result, response.StatusCode);
 
-            return JsonConvert.DeserializeObject<TResponse>(result);
+            return JsonConvert.DeserializeObject<TResponse>(result, settings);
         }
     }
 }
