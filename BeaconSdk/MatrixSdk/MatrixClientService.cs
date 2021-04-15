@@ -60,10 +60,5 @@ namespace MatrixSdk
 
             return await httpClient.PostAsJsonAsync<ResponseCreateRoomDto>($"{RequestUri}/createRoom", model);
         }
-
-        public record RequestCreateRoomDto2(string room_alias_name);
-
-        // return await httpClient.PostAsJsonAsync<ResponseCreateRoomDto>($"{RequestUri}/createRoom", 
-        //     new RequestCreateRoomDto2("dfgsdgsgsfsdsdfsrewrwrdgsdg"));
     }
 }
