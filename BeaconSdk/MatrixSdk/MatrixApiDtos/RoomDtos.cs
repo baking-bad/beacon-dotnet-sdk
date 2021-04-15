@@ -25,7 +25,7 @@ namespace MatrixSdk.MatrixApiDtos
         string? Name = null,
         string? Topic = null,
         string[]? Invite = null,
-        string? RoomVersion = null, 
+        string? RoomVersion = null,
         Preset? Preset = null,
         bool? IsDirect = null);
 

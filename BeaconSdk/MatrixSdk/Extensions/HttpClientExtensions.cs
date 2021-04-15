@@ -22,10 +22,10 @@ namespace MatrixSdk.Extensions
 
             var settings = new JsonSerializerSettings
             {
-                ContractResolver = contractResolver, 
-                
+                ContractResolver = contractResolver,
+
                 //MatrixClientService.CreateRoomAsync not working with null in Json
-                NullValueHandling = NullValueHandling.Ignore, 
+                NullValueHandling = NullValueHandling.Ignore
             };
             settings.Converters.Add(new StringEnumConverter());
 

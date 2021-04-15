@@ -31,7 +31,7 @@
             var responseLogin = await matrixClientService.LoginAsync(hexId, password, deviceId);
 
             var member = "";
-            var responseCreateRoom = 
+            var responseCreateRoom =
                 await matrixClientService.CreateRoomAsync(responseLogin.AccessToken, null);
         }
     }

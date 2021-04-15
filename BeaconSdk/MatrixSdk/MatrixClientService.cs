@@ -1,4 +1,5 @@
 // ReSharper disable ArgumentsStyleNamedExpression
+
 namespace MatrixSdk
 {
     using System;
@@ -44,8 +45,6 @@ namespace MatrixSdk
 
             return await HttpClient.PostAsJsonAsync<ResponseLoginDto>($"{RequestUri}/login", model);
         }
-        
-        public record RequestCreateRoomDto2(string room_alias_name);
 
         public async Task<ResponseCreateRoomDto> CreateRoomAsync(string accessToken, string member)
         {
@@ -53,7 +52,7 @@ namespace MatrixSdk
             {
                 // Invite = new [] {member},
                 Preset = Preset.TrustedPrivateChat,
-                IsDirect = true,
+                IsDirect = true
             };
 
             var httpClient = HttpClient;
@@ -61,8 +60,10 @@ namespace MatrixSdk
 
             return await httpClient.PostAsJsonAsync<ResponseCreateRoomDto>($"{RequestUri}/createRoom", model);
         }
-            
-            // return await httpClient.PostAsJsonAsync<ResponseCreateRoomDto>($"{RequestUri}/createRoom", 
-            //     new RequestCreateRoomDto2("dfgsdgsgsfsdsdfsrewrwrdgsdg"));
+
+        public record RequestCreateRoomDto2(string room_alias_name);
+
+        // return await httpClient.PostAsJsonAsync<ResponseCreateRoomDto>($"{RequestUri}/createRoom", 
+        //     new RequestCreateRoomDto2("dfgsdgsgsfsdsdfsrewrwrdgsdg"));
     }
 }
