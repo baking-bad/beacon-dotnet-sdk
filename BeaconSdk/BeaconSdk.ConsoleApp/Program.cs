@@ -21,7 +21,7 @@
             var guid = Guid.NewGuid();
             var keyPair = cryptoService.GenerateKeyPairFromSeed(guid.ToString());
             var hexSignature = cryptoService.GenerateHexSignature(loginDigest, keyPair.PrivateKey);
-            var hexPublicKey = Convert.ToHexString(keyPair.PublicKey);
+            var hexPublicKey = Convert.ToHexString(keyPair.PublicKey).ToLower();
 
             var hexId = cryptoService.GenerateHexId(keyPair.PublicKey);
             var password = $"ed:{hexSignature}:{hexPublicKey}";
@@ -30,9 +30,9 @@
             var matrixClientService = serviceProvider.GetService<MatrixClientService>();
             var responseLogin = await matrixClientService.LoginAsync(hexId, password, deviceId);
 
-            var member = "@1fe20c08a8ec413104208cfae20e288f084b6a5153c9d297088939130d3ac891:matrix.papers.tech";
+            var member = "";
             var responseCreateRoom = 
-                await matrixClientService.CreateRoomAsync(responseLogin.AccessToken, member);
+                await matrixClientService.CreateRoomAsync(responseLogin.AccessToken, null);
         }
     }
 }

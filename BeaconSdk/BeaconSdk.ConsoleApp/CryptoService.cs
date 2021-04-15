@@ -32,14 +32,14 @@ namespace BeaconSdk.ConsoleApp
         {
             var signature = cryptoAlgorithmsProvider.SignDetached(loginDigest, secretKey);
 
-            return Convert.ToHexString(signature);
+            return Convert.ToHexString(signature).ToLower();
         }
 
         public string GenerateHexId(byte[] publicKey)
         {
             var hash = cryptoAlgorithmsProvider.Hash(publicKey, publicKey.Length);
 
-            return Convert.ToHexString(hash);
+            return Convert.ToHexString(hash).ToLower();
         }
     }
 }

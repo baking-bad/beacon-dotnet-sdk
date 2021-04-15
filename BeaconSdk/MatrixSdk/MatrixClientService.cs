@@ -3,14 +3,14 @@ namespace MatrixSdk
 {
     using System;
     using System.Net.Http;
-    using System.Net.Http.Headers;
     using System.Threading.Tasks;
+    using Extensions;
     using Login;
     using MatrixApiDtos;
 
     public class MatrixClientService
     {
-        private const string requestUri = "_matrix/client/r0";
+        private const string RequestUri = "_matrix/client/r0";
         private readonly IHttpClientFactory httpClientFactory;
 
         public MatrixClientService(IHttpClientFactory httpClientFactory)
@@ -42,24 +42,27 @@ namespace MatrixSdk
                 "m.login.password"
             );
 
-            return await HttpClient.PostAsJsonAsync<ResponseLoginDto>($"{requestUri}/login", model);
+            return await HttpClient.PostAsJsonAsync<ResponseLoginDto>($"{RequestUri}/login", model);
         }
+        
+        public record RequestCreateRoomDto2(string room_alias_name);
 
         public async Task<ResponseCreateRoomDto> CreateRoomAsync(string accessToken, string member)
         {
-            var model = new RequestCreateRoomDto(
-                Visibility: Visibility.Private, 
-                Invite: new []{member},
-                Preset: Preset.TrustedPrivateChat,
-                IsDirect: true);
+            var model = new RequestCreateRoomDto
+            {
+                // Invite = new [] {member},
+                Preset = Preset.TrustedPrivateChat,
+                IsDirect = true,
+            };
 
             var httpClient = HttpClient;
-            // httpClient.DefaultRequestHeaders.Authorization =
-            //     new AuthenticationHeaderValue("Bearer", accessToken);
-            
-            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
-            
-            return await httpClient.PostAsJsonAsync<ResponseCreateRoomDto>($"{requestUri}/createRoom", model);
+            httpClient.AddBearerToken(accessToken);
+
+            return await httpClient.PostAsJsonAsync<ResponseCreateRoomDto>($"{RequestUri}/createRoom", model);
         }
+            
+            // return await httpClient.PostAsJsonAsync<ResponseCreateRoomDto>($"{RequestUri}/createRoom", 
+            //     new RequestCreateRoomDto2("dfgsdgsgsfsdsdfsrewrwrdgsdg"));
     }
 }

@@ -20,7 +20,7 @@ namespace MatrixSdk.MatrixApiDtos
     }
 
     public record RequestCreateRoomDto(
-        Visibility? Visibility,
+        Visibility? Visibility = null,
         string? RoomAliasName = null,
         string? Name = null,
         string? Topic = null,
