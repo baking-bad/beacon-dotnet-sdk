@@ -18,8 +18,8 @@
 
             // See: https://github.com/airgap-it/beacon-node/blob/master/docker/crypto_auth_provider.py
             var loginDigest = cryptoService.GenerateLoginDigest();
-            var guid = Guid.NewGuid();
-            var keyPair = cryptoService.GenerateKeyPairFromSeed(guid.ToString());
+            var seed = Guid.NewGuid().ToString(); //Todo: generate once and then store seed?
+            var keyPair = cryptoService.GenerateKeyPairFromSeed(seed);
             var hexSignature = cryptoService.GenerateHexSignature(loginDigest, keyPair.PrivateKey);
             var hexPublicKey = Convert.ToHexString(keyPair.PublicKey).ToLower();
 
@@ -32,7 +32,7 @@
 
             var member = "";
             var responseCreateRoom =
-                await matrixClientService.CreateRoomAsync(responseLogin.AccessToken, null);
+                await matrixClientService.CreateRoomAsync(responseLogin.AccessToken, member);
         }
     }
 }
