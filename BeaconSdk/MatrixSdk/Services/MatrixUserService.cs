@@ -11,23 +11,23 @@ namespace MatrixSdk.Services
     {
         private const string RequestUri = "_matrix/client/r0";
 
-        private readonly CryptoService cryptoService;
+        private readonly MatrixCryptoService matrixCryptoService;
         private readonly IHttpClientFactory httpClientFactory;
 
-        public MatrixUserService(IHttpClientFactory httpClientFactory, CryptoService cryptoService)
+        public MatrixUserService(IHttpClientFactory httpClientFactory, MatrixCryptoService matrixCryptoService)
         {
             this.httpClientFactory = httpClientFactory;
-            this.cryptoService = cryptoService;
+            this.matrixCryptoService = matrixCryptoService;
         }
 
         public async Task<ResponseLoginDto> LoginAsync(string seed)
         {
-            var loginDigest = cryptoService!.GenerateLoginDigest();
-            var keyPair = cryptoService.GenerateKeyPairFromSeed(seed);
+            var loginDigest = matrixCryptoService!.GenerateLoginDigest();
+            var keyPair = matrixCryptoService.GenerateKeyPairFromSeed(seed);
 
-            var hexSignature = cryptoService.GenerateHexSignature(loginDigest, keyPair.PrivateKey);
-            var hexPublicKey = cryptoService.ToHexString(keyPair.PublicKey);
-            var hexId = cryptoService.GenerateHexId(keyPair.PublicKey);
+            var hexSignature = matrixCryptoService.GenerateHexSignature(loginDigest, keyPair.PrivateKey);
+            var hexPublicKey = matrixCryptoService.ToHexString(keyPair.PublicKey);
+            var hexId = matrixCryptoService.GenerateHexId(keyPair.PublicKey);
 
             var password = $"ed:{hexSignature}:{hexPublicKey}";
             var deviceId = hexPublicKey;

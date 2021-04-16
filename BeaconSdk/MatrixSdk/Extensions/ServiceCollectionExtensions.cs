@@ -15,7 +15,7 @@ namespace MatrixSdk.Extensions
             services.AddSingleton<MatrixRoomService>();
 
             services.AddSingleton<AccessTokenProvider>();
-            services.AddSingleton<CryptoService>();
+            services.AddSingleton<MatrixCryptoService>();
             services.AddSingleton<ICryptoAlgorithmsProvider, LibsodiumAlgorithmsProvider>();
 
             return services;

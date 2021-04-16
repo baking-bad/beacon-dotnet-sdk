@@ -6,14 +6,14 @@
 
     public sealed class AccessTokenProvider
     {
-        private readonly CryptoService cryptoService;
+        private readonly MatrixCryptoService matrixCryptoService;
         private readonly MatrixUserService userService;
         private string? accessToken;
 
-        public AccessTokenProvider(MatrixUserService userService, CryptoService cryptoService)
+        public AccessTokenProvider(MatrixUserService userService, MatrixCryptoService matrixCryptoService)
         {
             this.userService = userService;
-            this.cryptoService = cryptoService;
+            this.matrixCryptoService = matrixCryptoService;
         }
 
         public async Task<string> GetAccessToken() => accessToken ??= await ObtainAccessToken();
