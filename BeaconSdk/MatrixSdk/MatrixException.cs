@@ -16,6 +16,11 @@ namespace MatrixSdk
             StatusCode = statusCode;
         }
 
+        public MatrixException(Uri uri, string responseContent, HttpStatusCode statusCode)
+            : this(uri, "", responseContent, statusCode)
+        {
+        }
+
         public Uri Uri { get; }
 
         public string RequestContent { get; }

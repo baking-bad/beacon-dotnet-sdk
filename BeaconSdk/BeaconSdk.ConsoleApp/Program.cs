@@ -2,39 +2,33 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MatrixSdk;
+    using MatrixSdk.Extensions;
+    using MatrixSdk.Services;
     using Microsoft.Extensions.DependencyInjection;
 
-    internal class Program
+    internal static class Program
     {
         private static async Task Main(string[] args)
         {
             Console.WriteLine("Init Dependencies");
             var serviceProvider = new ServiceCollection()
                 .AddMatrixSdk()
+                .AddConsoleApp()
                 .BuildServiceProvider();
 
-            var cryptoService = new CryptoService(new LibsodiumAlgorithmsProvider());
+            var matrixUserService = serviceProvider.GetService<MatrixUserService>();
+            var matrixRoomService = serviceProvider.GetService<MatrixRoomService>();
 
-            // See: https://github.com/airgap-it/beacon-node/blob/master/docker/crypto_auth_provider.py
-            var loginDigest = cryptoService.GenerateLoginDigest();
             var seed = Guid.NewGuid().ToString(); //Todo: generate once and then store seed?
-            var keyPair = cryptoService.GenerateKeyPairFromSeed(seed);
-            var hexSignature = cryptoService.GenerateHexSignature(loginDigest, keyPair.PrivateKey);
-            var hexPublicKey = Convert.ToHexString(keyPair.PublicKey).ToLower();
 
-            var hexId = cryptoService.GenerateHexId(keyPair.PublicKey);
-            var password = $"ed:{hexSignature}:{hexPublicKey}";
-            var deviceId = hexPublicKey;
+            var responseLogin = await matrixUserService!.LoginAsync(seed);
+            var responseCreateRoom = await matrixRoomService!.CreateRoomAsync(responseLogin.AccessToken, "");
+            var responseJoinedRooms = await matrixRoomService.GetJoinedRoomsAsync(responseLogin.AccessToken);
 
-            var matrixClientService = serviceProvider.GetService<MatrixClientService>();
-            var responseLogin = await matrixClientService!.LoginAsync(hexId, password, deviceId);
-
-            var member = "";
-            var responseCreateRoom =
-                await matrixClientService.CreateRoomAsync(responseLogin.AccessToken, member);
-            
             Console.WriteLine($"RoomId: {responseCreateRoom.RoomId}");
+
+            foreach (var room in responseJoinedRooms.joinedRooms)
+                Console.WriteLine($"Joined room: {room}");
         }
     }
 }

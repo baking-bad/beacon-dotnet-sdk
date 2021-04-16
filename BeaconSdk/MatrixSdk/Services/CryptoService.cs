@@ -1,6 +1,7 @@
-namespace BeaconSdk.ConsoleApp
+namespace MatrixSdk.Services
 {
     using System;
+    using Providers;
     using Sodium;
 
     public class CryptoService
@@ -11,6 +12,15 @@ namespace BeaconSdk.ConsoleApp
         public CryptoService(ICryptoAlgorithmsProvider cryptoAlgorithmsProvider)
         {
             this.cryptoAlgorithmsProvider = cryptoAlgorithmsProvider;
+        }
+
+        public string ToHexString(byte[] input)
+        {
+            var hexString = BitConverter.ToString(input);
+
+            var result = hexString.Replace("-", "");
+
+            return result.ToLower();
         }
 
         public byte[] GenerateLoginDigest()
@@ -32,14 +42,14 @@ namespace BeaconSdk.ConsoleApp
         {
             var signature = cryptoAlgorithmsProvider.SignDetached(loginDigest, secretKey);
 
-            return Convert.ToHexString(signature).ToLower();
+            return ToHexString(signature);
         }
 
         public string GenerateHexId(byte[] publicKey)
         {
             var hash = cryptoAlgorithmsProvider.Hash(publicKey, publicKey.Length);
 
-            return Convert.ToHexString(hash).ToLower();
+            return ToHexString(hash);
         }
     }
 }

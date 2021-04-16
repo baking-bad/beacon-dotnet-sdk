@@ -1,4 +1,4 @@
-namespace BeaconSdk.ConsoleApp
+namespace MatrixSdk.Providers
 {
     using Sodium;
 
