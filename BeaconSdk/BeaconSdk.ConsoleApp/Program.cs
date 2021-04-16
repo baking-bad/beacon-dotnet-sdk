@@ -28,11 +28,13 @@
             var deviceId = hexPublicKey;
 
             var matrixClientService = serviceProvider.GetService<MatrixClientService>();
-            var responseLogin = await matrixClientService.LoginAsync(hexId, password, deviceId);
+            var responseLogin = await matrixClientService!.LoginAsync(hexId, password, deviceId);
 
             var member = "";
             var responseCreateRoom =
                 await matrixClientService.CreateRoomAsync(responseLogin.AccessToken, member);
+            
+            Console.WriteLine($"RoomId: {responseCreateRoom.RoomId}");
         }
     }
 }
