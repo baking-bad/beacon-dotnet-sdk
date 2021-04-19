@@ -12,7 +12,7 @@ namespace MatrixSdk.Login
 {
     public record Identifier(string Type, string User);
 
-    public record RequestLoginDto(Identifier Identifier, string Password, string DeviceId, string Type);
+    public record MatrixLoginRequest(Identifier Identifier, string Password, string DeviceId, string Type);
 
-    public record ResponseLoginDto(string UserId, string AccessToken, string HomeServer, string DeviceId);
+    public record MatrixLoginResponse(string UserId, string AccessToken, string HomeServer, string DeviceId);
 }

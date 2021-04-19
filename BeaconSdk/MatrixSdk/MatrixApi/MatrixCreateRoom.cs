@@ -1,4 +1,4 @@
-namespace MatrixSdk.MatrixApiDtos
+namespace MatrixSdk.MatrixApi
 {
     using System.Runtime.Serialization;
 
@@ -19,7 +19,7 @@ namespace MatrixSdk.MatrixApiDtos
         TrustedPrivateChat
     }
 
-    public record RequestCreateRoomDto(
+    public record MatrixCreateRoomRequest(
         Visibility? Visibility = null,
         string? RoomAliasName = null,
         string? Name = null,
@@ -29,5 +29,5 @@ namespace MatrixSdk.MatrixApiDtos
         Preset? Preset = null,
         bool? IsDirect = null);
 
-    public record ResponseCreateRoomDto(string? RoomId = null);
+    public record MatrixCreateRoomResponse(string? RoomId = null);
 }

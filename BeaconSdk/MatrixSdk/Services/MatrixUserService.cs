@@ -7,7 +7,7 @@ namespace MatrixSdk.Services
     using Extensions;
     using Login;
 
-    public sealed class MatrixUserService
+    public class MatrixUserService
     {
         private const string RequestUri = "_matrix/client/r0";
 
@@ -20,7 +20,7 @@ namespace MatrixSdk.Services
             this.matrixCryptoService = matrixCryptoService;
         }
 
-        public async Task<ResponseLoginDto> LoginAsync(string seed)
+        public async Task<MatrixLoginResponse> LoginAsync(string seed)
         {
             var loginDigest = matrixCryptoService!.GenerateLoginDigest();
             var keyPair = matrixCryptoService.GenerateKeyPairFromSeed(seed);
@@ -32,7 +32,7 @@ namespace MatrixSdk.Services
             var password = $"ed:{hexSignature}:{hexPublicKey}";
             var deviceId = hexPublicKey;
 
-            var model = new RequestLoginDto
+            var model = new MatrixLoginRequest
             (
                 new Identifier
                 (
@@ -46,7 +46,7 @@ namespace MatrixSdk.Services
 
             var httpClient = httpClientFactory.CreateClient(Constants.Matrix);
 
-            return await httpClient.PostAsJsonAsync<ResponseLoginDto>($"{RequestUri}/login", model);
+            return await httpClient.PostAsJsonAsync<MatrixLoginResponse>($"{RequestUri}/login", model);
         }
     }
 }

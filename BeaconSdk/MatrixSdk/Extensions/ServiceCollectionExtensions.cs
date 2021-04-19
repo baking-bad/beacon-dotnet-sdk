@@ -11,11 +11,12 @@ namespace MatrixSdk.Extensions
         {
             services.AddHttpClient(Constants.Matrix, c => { c.BaseAddress = new Uri("https://matrix.papers.tech/"); });
 
-            services.AddSingleton<MatrixUserService>();
-            services.AddSingleton<MatrixRoomService>();
-
-            services.AddSingleton<AccessTokenProvider>();
             services.AddSingleton<MatrixCryptoService>();
+            services.AddSingleton<MatrixEventService>();
+            services.AddSingleton<MatrixRoomService>();
+            services.AddSingleton<MatrixUserService>();
+            
+            services.AddSingleton<AccessTokenProvider>();
             services.AddSingleton<ICryptoAlgorithmsProvider, LibsodiumAlgorithmsProvider>();
 
             return services;

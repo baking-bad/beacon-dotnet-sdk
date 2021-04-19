@@ -27,7 +27,7 @@
 
             Console.WriteLine($"RoomId: {responseCreateRoom.RoomId}");
 
-            foreach (var room in responseJoinedRooms.joinedRooms)
+            foreach (var room in responseJoinedRooms.JoinedRooms)
                 Console.WriteLine($"Joined room: {room}");
         }
     }

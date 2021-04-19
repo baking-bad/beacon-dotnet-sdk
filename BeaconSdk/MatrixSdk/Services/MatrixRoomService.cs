@@ -3,9 +3,9 @@
     using System.Net.Http;
     using System.Threading.Tasks;
     using Extensions;
-    using MatrixApiDtos;
+    using MatrixApi;
 
-    public sealed class MatrixRoomService
+    public class MatrixRoomService
     {
         private const string RequestUri = "_matrix/client/r0";
         private readonly IHttpClientFactory httpClientFactory;
@@ -15,9 +15,9 @@
             this.httpClientFactory = httpClientFactory;
         }
 
-        public async Task<ResponseCreateRoomDto> CreateRoomAsync(string accessToken, string member)
+        public async Task<MatrixCreateRoomResponse> CreateRoomAsync(string accessToken, string member)
         {
-            var model = new RequestCreateRoomDto
+            var model = new MatrixCreateRoomRequest
             {
                 // Invite = new [] {member},
                 Preset = Preset.TrustedPrivateChat,
@@ -27,15 +27,15 @@
             var httpClient = httpClientFactory.CreateClient(Constants.Matrix);
             httpClient.AddBearerToken(accessToken);
 
-            return await httpClient.PostAsJsonAsync<ResponseCreateRoomDto>($"{RequestUri}/createRoom", model);
+            return await httpClient.PostAsJsonAsync<MatrixCreateRoomResponse>($"{RequestUri}/createRoom", model);
         }
 
-        public async Task<ResponseJoinedRoomsDto> GetJoinedRoomsAsync(string accessToken)
+        public async Task<MatrixJoinedRoomsResponse> GetJoinedRoomsAsync(string accessToken)
         {
             var httpClient = httpClientFactory.CreateClient(Constants.Matrix);
             httpClient.AddBearerToken(accessToken);
 
-            return await httpClient.GetAsJsonAsync<ResponseJoinedRoomsDto>($"{RequestUri}/joined_rooms");
+            return await httpClient.GetAsJsonAsync<MatrixJoinedRoomsResponse>($"{RequestUri}/joined_rooms");
         }
     }
 }

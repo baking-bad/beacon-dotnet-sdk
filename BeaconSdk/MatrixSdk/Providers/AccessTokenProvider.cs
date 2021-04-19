@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using Services;
 
+    [Obsolete]
     public sealed class AccessTokenProvider
     {
         private readonly MatrixCryptoService matrixCryptoService;
