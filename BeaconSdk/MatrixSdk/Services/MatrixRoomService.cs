@@ -2,8 +2,8 @@
 {
     using System.Net.Http;
     using System.Threading.Tasks;
+    using Dto;
     using Extensions;
-    using MatrixApi;
 
     public class MatrixRoomService
     {

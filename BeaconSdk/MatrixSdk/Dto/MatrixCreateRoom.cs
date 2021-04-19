@@ -1,4 +1,4 @@
-namespace MatrixSdk.MatrixApi
+namespace MatrixSdk.Dto
 {
     using System.Runtime.Serialization;
 

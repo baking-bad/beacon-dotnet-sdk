@@ -8,7 +8,7 @@ namespace System.Runtime.CompilerServices
     public record IsExternalInit;
 }
 
-namespace MatrixSdk.Login
+namespace MatrixSdk.Dto
 {
     public record Identifier(string Type, string User);
 
