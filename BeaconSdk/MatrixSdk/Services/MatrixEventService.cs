@@ -21,13 +21,6 @@
             httpClient.AddBearerToken(accessToken);
 
             return await httpClient.GetAsJsonAsync<MatrixSyncResponse>($"{RequestUri}/sync");
-
-            // var t = new MatrixSyncResponse();
-            // // t.MatrixRooms.Invite[0].InviteState.Events[0].
-            // // var k = t.Rooms.Join[0].TimeLine.Events[0].Sender;
-            // // Dto.Sync.Rooms a = t.Rooms;
-            // // Dto.Sync.Rooms? b = t.Rooms;
-            // return await Task.FromResult(42);
         }
     }
 }

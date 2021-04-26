@@ -3,6 +3,7 @@ namespace MatrixSdk.Extensions
     using System;
     using Microsoft.Extensions.DependencyInjection;
     using Providers;
+    using Repositories;
     using Services;
 
     public static class ServiceCollectionExtensions
@@ -18,6 +19,8 @@ namespace MatrixSdk.Extensions
 
             services.AddSingleton<AccessTokenProvider>();
             services.AddSingleton<ICryptoAlgorithmsProvider, LibsodiumAlgorithmsProvider>();
+            
+            services.AddSingleton<ISeedRepository, InMemorySeedRepository>();
 
             return services;
         }
