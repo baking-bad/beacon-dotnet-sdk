@@ -22,5 +22,17 @@
 
             return await httpClient.GetAsJsonAsync<MatrixSyncResponse>($"{RequestUri}/sync");
         }
+        
+        public async Task<EventResponse> SendEventAsync(string accessToken, string roomId, string txnId, string msgtype)
+        {
+            var httpClient = httpClientFactory.CreateClient(Constants.Matrix);
+            httpClient.AddBearerToken(accessToken);
+
+            var type = "m.room.message";
+
+            var model = new MessageEvent(msgtype);
+            
+            return await httpClient.PutAsJsonAsync<EventResponse>($"{RequestUri}/rooms/{roomId}/send/{type}/{txnId}", model);
+        }
     }
 }

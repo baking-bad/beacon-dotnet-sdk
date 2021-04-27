@@ -33,12 +33,4 @@
         public string history_visibility { get; set; }
         public string guest_access { get; set; }
     }
-    
-    // public class Event
-    // {
-    //     public string type { get; set; } //
-    //     public Content content { get; set; } //
-    //     public string sender { get; set; } //
-    //     public string event_id { get; set; } //
-    // }
 }

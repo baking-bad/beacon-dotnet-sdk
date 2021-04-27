@@ -49,6 +49,26 @@ namespace MatrixSdk.Extensions
             return JsonConvert.DeserializeObject<TResponse>(result, settings)!;
         }
 
+        // Todo: Refactor
+        // See: https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-how-to?pivots=dotnet-5-0#httpclient-and-httpcontent-extension-methods
+        public static async Task<TResponse> PutAsJsonAsync<TResponse>(this HttpClient httpClient,
+            string requestUri, object model)
+        {
+            var settings = GetJsonSettings();
+
+            var json = JsonConvert.SerializeObject(model, settings);
+            var content = new StringContent(json, Encoding.Default, "application/json");
+
+            var response = await httpClient.PutAsync(requestUri, content);
+            var result = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+                throw new MatrixException(response.RequestMessage.RequestUri,
+                    json, result, response.StatusCode);
+
+            return JsonConvert.DeserializeObject<TResponse>(result, settings)!;
+        }
+        
         public static async Task<TResponse> GetAsJsonAsync<TResponse>(this HttpClient httpClient,
             string requestUri)
         {
