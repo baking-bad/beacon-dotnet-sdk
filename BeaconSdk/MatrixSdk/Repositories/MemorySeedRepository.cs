@@ -8,7 +8,7 @@
         Task<Guid> GetSeed();
     }
 
-    public sealed class InMemorySeedRepository : ISeedRepository
+    public sealed class MemorySeedRepository : ISeedRepository
     {
         private static readonly Guid Seed = Guid.NewGuid(); // Todo: refactor
 

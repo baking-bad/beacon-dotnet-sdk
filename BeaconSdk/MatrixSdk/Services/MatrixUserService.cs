@@ -3,6 +3,7 @@
 namespace MatrixSdk.Services
 {
     using System.Net.Http;
+    using System.Threading;
     using System.Threading.Tasks;
     using Dto;
     using Extensions;
@@ -20,7 +21,7 @@ namespace MatrixSdk.Services
             this.matrixCryptoService = matrixCryptoService;
         }
 
-        public async Task<MatrixLoginResponse> LoginAsync(string seed)
+        public async Task<MatrixLoginResponse> LoginAsync(string seed, CancellationToken cancellationToken)
         {
             var loginDigest = matrixCryptoService!.GenerateLoginDigest();
             var keyPair = matrixCryptoService.GenerateKeyPairFromSeed(seed);
@@ -46,7 +47,7 @@ namespace MatrixSdk.Services
 
             var httpClient = httpClientFactory.CreateClient(Constants.Matrix);
 
-            return await httpClient.PostAsJsonAsync<MatrixLoginResponse>($"{RequestUri}/login", model);
+            return await httpClient.PostAsJsonAsync<MatrixLoginResponse>($"{RequestUri}/login", model, cancellationToken);
         }
     }
 }

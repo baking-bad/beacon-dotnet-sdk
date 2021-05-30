@@ -1,39 +1,63 @@
 ﻿namespace BeaconSdk.ConsoleApp
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
+    using MatrixSdk;
     using MatrixSdk.Extensions;
     using MatrixSdk.Services;
     using Microsoft.Extensions.DependencyInjection;
+    using Serilog;
 
     internal static class Program
     {
         private static async Task Main(string[] args)
         {
-            Console.WriteLine("Init Dependencies");
             var serviceProvider = new ServiceCollection()
                 .AddMatrixSdk()
                 .AddConsoleApp()
                 .BuildServiceProvider();
 
-            var matrixUserService = serviceProvider.GetService<MatrixUserService>();
-            var matrixRoomService = serviceProvider.GetService<MatrixRoomService>();
-            var matrixEventService = serviceProvider.GetService<MatrixEventService>();
+            var theme = LoggerSetup.SetupTheme();
 
+            Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .WriteTo.Console(theme: theme)
+                .CreateLogger();
+
+            
+            var cts = new CancellationTokenSource();
+            
+            
+            // var matrixUserService = serviceProvider.GetService<MatrixUserService>();
+            // var matrixRoomService = serviceProvider.GetService<MatrixRoomService>();
+            // var matrixEventService = serviceProvider.GetService<MatrixEventService>();
+            //
+            // var seed = Guid.NewGuid().ToString(); //Todo: generate once and then store seed?
+            // var responseLogin = await matrixUserService!.LoginAsync(seed);
+            //
+            // var accessToken = responseLogin.AccessToken;
+            //
+            // var responseCreateRoom = await matrixRoomService!.CreateRoomAsync(accessToken, "");
+            // var responseJoinedRooms = await matrixRoomService.GetJoinedRoomsAsync(accessToken, cts.Token);
+            //
+            // Console.WriteLine($"RoomId: {responseCreateRoom.RoomId}");
+            //
+            // foreach (var room in responseJoinedRooms.JoinedRooms)
+            //     Console.WriteLine($"Joined room: {room}");
+            //
+            // var t = await matrixEventService!.SyncAsync(accessToken, cts.Token);
+
+            var matrixClient = serviceProvider.GetService<MatrixClient>();
+            
             var seed = Guid.NewGuid().ToString(); //Todo: generate once and then store seed?
-            var responseLogin = await matrixUserService!.LoginAsync(seed);
+            await matrixClient!.StartAsync(seed);
+            // await matrixClient.CreateTrustedPrivateRoomAsync();
+            var joinedRooms = await matrixClient.GetJoinedRoomsAsync();
+            foreach (var room in joinedRooms)
+                Console.WriteLine($"Room: {room}");
 
-            var accessToken = responseLogin.AccessToken;
-
-            var responseCreateRoom = await matrixRoomService!.CreateRoomAsync(accessToken, "");
-            var responseJoinedRooms = await matrixRoomService.GetJoinedRoomsAsync(accessToken);
-
-            Console.WriteLine($"RoomId: {responseCreateRoom.RoomId}");
-
-            foreach (var room in responseJoinedRooms.JoinedRooms)
-                Console.WriteLine($"Joined room: {room}");
-
-            var t = await matrixEventService!.SyncAsync(accessToken);
+            Console.ReadLine();
         }
     }
 }

@@ -19,7 +19,6 @@
             b) 'JoinedRoom' inner record for 'Rooms' (and 'MatrixSyncResponse'), so avoid 'Matrix'.
             c) 'InvitedRoom' and 'LeftRoom' same as a) b)
     */
-    
     using System.Collections.Generic;
 
     public record MatrixSyncRequestParams (int? Timeout = null, string? Since = null);
@@ -30,7 +29,6 @@
     public record State(List<MatrixStateEvent> Events);
 
     public record InviteState(List<MatrixStateEvent> Events);
-
 
     public record JoinedRoom(TimeLine TimeLine, State State);
 

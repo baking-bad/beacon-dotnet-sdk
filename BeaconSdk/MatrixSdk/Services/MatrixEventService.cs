@@ -1,6 +1,8 @@
 ﻿namespace MatrixSdk.Services
 {
+    using System;
     using System.Net.Http;
+    using System.Threading;
     using System.Threading.Tasks;
     using Dto;
     using Extensions;
@@ -15,14 +17,22 @@
             this.httpClientFactory = httpClientFactory;
         }
 
-        public async Task<MatrixSyncResponse> SyncAsync(string accessToken)
+        public async Task<MatrixSyncResponse> SyncAsync(string accessToken, CancellationToken cancellationToken, ulong? timeout = null, string? nextBatch = null)
         {
             var httpClient = httpClientFactory.CreateClient(Constants.Matrix);
             httpClient.AddBearerToken(accessToken);
+           
+            var uri = new Uri(httpClient.BaseAddress + $"{RequestUri}/sync");
 
-            return await httpClient.GetAsJsonAsync<MatrixSyncResponse>($"{RequestUri}/sync");
+            if (timeout != null)
+                uri = uri.AddParameter("timeout", timeout.ToString());
+            
+            if (nextBatch != null)
+                uri = uri.AddParameter("since", nextBatch);
+           
+            return await httpClient.GetAsJsonAsync<MatrixSyncResponse>(uri.ToString(), cancellationToken);
         }
-        
+
         public async Task<EventResponse> SendEventAsync(string accessToken, string roomId, string txnId, string msgtype)
         {
             var httpClient = httpClientFactory.CreateClient(Constants.Matrix);
@@ -31,7 +41,7 @@
             var type = "m.room.message";
 
             var model = new MessageEvent(msgtype);
-            
+
             return await httpClient.PutAsJsonAsync<EventResponse>($"{RequestUri}/rooms/{roomId}/send/{type}/{txnId}", model);
         }
     }

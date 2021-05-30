@@ -16,11 +16,12 @@ namespace MatrixSdk.Extensions
             services.AddSingleton<MatrixEventService>();
             services.AddSingleton<MatrixRoomService>();
             services.AddSingleton<MatrixUserService>();
+            services.AddTransient<MatrixClient>();
 
             services.AddSingleton<AccessTokenProvider>();
             services.AddSingleton<ICryptoAlgorithmsProvider, LibsodiumAlgorithmsProvider>();
-            
-            services.AddSingleton<ISeedRepository, InMemorySeedRepository>();
+
+            services.AddSingleton<ISeedRepository, MemorySeedRepository>();
 
             return services;
         }
