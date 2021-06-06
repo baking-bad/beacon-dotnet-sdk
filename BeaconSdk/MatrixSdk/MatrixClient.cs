@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Extensions;
     using Microsoft.Extensions.Logging;
     using Services;
 
@@ -18,6 +19,8 @@
 
         private Timer pollingTimer;
         private MatrixClientState state;
+        
+        public string UserId => state.UserId!;
 
         public MatrixClient(ILogger<MatrixClient> logger, MatrixUserService matrixUserService, MatrixRoomService matrixRoomService,
             MatrixEventService matrixEventService)
@@ -36,6 +39,7 @@
 
             state = new MatrixClientState
             {
+                UserId = response.UserId,
                 AccessToken = response.AccessToken,
                 Timeout = 0,
                 TransactionNumber = 0
@@ -54,16 +58,18 @@
 
             var response = await matrixEventService.SyncAsync(state.AccessToken!, timeout: state.Timeout, nextBatch: state.NextBatch!,
                 cancellationToken: cancellationToken);
+            
             state.Timeout = 30000;
             state.NextBatch = response.NextBatch;
 
-            Console.WriteLine($"Invite: {response.Rooms.Invite.Count}");
-            Console.WriteLine($"Join: {response.Rooms.Join.Count}");
-            Console.WriteLine($"Leave: {response.Rooms.Leave.Count}");
+            logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Invite: {response.Rooms.Invite.Count}");
+            logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Join: {response.Rooms.Join.Count}");
+            logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Leave: {response.Rooms.Leave.Count}");
             
             pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
         }
-
+        
+        
         public async Task CreateTrustedPrivateRoomAsync(string[]? members = null)
         {
             ThrowIfAccessTokenIsEmpty();

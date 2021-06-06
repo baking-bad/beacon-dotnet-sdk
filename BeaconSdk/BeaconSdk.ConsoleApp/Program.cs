@@ -48,14 +48,22 @@
             //
             // var t = await matrixEventService!.SyncAsync(accessToken, cts.Token);
 
-            var matrixClient = serviceProvider.GetService<MatrixClient>();
+            var firstClient = serviceProvider.GetService<MatrixClient>();
+            var secondClient = serviceProvider.GetService<MatrixClient>();
             
-            var seed = Guid.NewGuid().ToString(); //Todo: generate once and then store seed?
-            await matrixClient!.StartAsync(seed);
-            // await matrixClient.CreateTrustedPrivateRoomAsync();
-            var joinedRooms = await matrixClient.GetJoinedRoomsAsync();
-            foreach (var room in joinedRooms)
-                Console.WriteLine($"Room: {room}");
+            await firstClient!.StartAsync(Guid.NewGuid().ToString());//Todo: generate once and then store seed?
+            await secondClient!.StartAsync(Guid.NewGuid().ToString());
+            await firstClient.CreateTrustedPrivateRoomAsync(new[] {secondClient.UserId});
+            
+            // await firstClient.CreateTrustedPrivateRoomAsync(new[] {secondClient.UserId});
+            // await firstClient.CreateTrustedPrivateRoomAsync(new[] {secondClient.UserId});
+            
+            
+            // var joinedRooms = await firstClient.GetJoinedRoomsAsync();
+            // foreach (var room in joinedRooms)
+            //     Console.WriteLine($"Room: {room}");
+            
+            
 
             Console.ReadLine();
         }

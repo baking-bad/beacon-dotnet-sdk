@@ -7,7 +7,7 @@
     using Services;
 
     [Obsolete]
-    public sealed class AccessTokenProvider
+    internal sealed class AccessTokenProvider
     {
         private readonly ISeedRepository memorySeedRepository;
         private readonly MatrixUserService userService;

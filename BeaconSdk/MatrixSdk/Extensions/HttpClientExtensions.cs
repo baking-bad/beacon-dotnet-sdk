@@ -9,7 +9,7 @@ namespace MatrixSdk.Extensions
     using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
 
-    public static class HttpClientExtensions
+    internal static class HttpClientExtensions
     {
         private static JsonSerializerSettings GetJsonSettings()
         {

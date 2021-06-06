@@ -2,7 +2,7 @@ namespace MatrixSdk
 {
     using System.Threading.Tasks;
 
-    public class MemoryMatrixClientStateRepository : IMatrixClientStateRepository
+    internal class MemoryMatrixClientStateRepository : IMatrixClientStateRepository
     {
         private MatrixClientState matrixState;
         public Task<MatrixClientState> ReadState() => Task.FromResult(matrixState);

@@ -2,7 +2,7 @@ namespace MatrixSdk.Providers
 {
     using Sodium;
 
-    public class LibsodiumAlgorithmsProvider : ICryptoAlgorithmsProvider
+    internal class LibsodiumAlgorithmsProvider : ICryptoAlgorithmsProvider
     {
         public byte[] GenerateRandomBytes(int count) => SodiumCore.GetRandomBytes(count);
 

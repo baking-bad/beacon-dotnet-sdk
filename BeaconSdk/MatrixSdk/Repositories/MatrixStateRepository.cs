@@ -2,7 +2,7 @@ namespace MatrixSdk.Repositories
 {
 
 
-    public class MatrixStateRepository
+    internal class MatrixStateRepository
     {
         // private string AccessToken;
         //

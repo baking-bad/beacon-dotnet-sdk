@@ -3,7 +3,7 @@ namespace MatrixSdk.Extensions
     using System;
     using System.Web;
 
-    public static class UriExtensions
+    internal static class UriExtensions
     {
         /// <summary>
         ///     Adds the specified parameter to the Query String.
