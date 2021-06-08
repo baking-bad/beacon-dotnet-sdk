@@ -6,6 +6,7 @@ namespace MatrixSdk.Services
     using System.Threading;
     using System.Threading.Tasks;
     using Dto;
+    using Dto.Login;
     using Extensions;
 
     public class MatrixUserService
@@ -21,7 +22,7 @@ namespace MatrixSdk.Services
             this.matrixCryptoService = matrixCryptoService;
         }
 
-        public async Task<MatrixLoginResponse> LoginAsync(string seed, CancellationToken cancellationToken)
+        public async Task<LoginResponse> LoginAsync(string seed, CancellationToken cancellationToken)
         {
             var loginDigest = matrixCryptoService!.GenerateLoginDigest();
             var keyPair = matrixCryptoService.GenerateKeyPairFromSeed(seed);
@@ -33,7 +34,7 @@ namespace MatrixSdk.Services
             var password = $"ed:{hexSignature}:{hexPublicKey}";
             var deviceId = hexPublicKey;
 
-            var model = new MatrixLoginRequest
+            var model = new LoginRequest
             (
                 new Identifier
                 (
@@ -47,7 +48,7 @@ namespace MatrixSdk.Services
 
             var httpClient = httpClientFactory.CreateClient(Constants.Matrix);
 
-            return await httpClient.PostAsJsonAsync<MatrixLoginResponse>($"{RequestUri}/login", model, cancellationToken);
+            return await httpClient.PostAsJsonAsync<LoginResponse>($"{RequestUri}/login", model, cancellationToken);
         }
     }
 }

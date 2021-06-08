@@ -1,8 +1,12 @@
 ﻿namespace MatrixSdk.Dto
 {
     using System.Collections.Generic;
+    using System.ComponentModel;
     using Newtonsoft.Json;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public record IsExternalInit;
+    
     public class Condition
     {
         public string kind { get; set; }

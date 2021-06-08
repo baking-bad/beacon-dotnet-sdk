@@ -4,8 +4,11 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Dto.Room.Event;
+    using Dto.Room.Event.State.Content;
     using Extensions;
     using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
     using Services;
 
     public class MatrixClient
@@ -65,6 +68,35 @@
             logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Invite: {response.Rooms.Invite.Count}");
             logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Join: {response.Rooms.Join.Count}");
             logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Leave: {response.Rooms.Leave.Count}");
+
+            if (response.Rooms.Invite.Count > 0)
+            {
+                var joined = response.Rooms.Invite;
+
+                foreach (var (roomId,joinedRoom) in joined)
+                {
+                    var joinedRoomEvents = joinedRoom.InviteState.Events;
+                    foreach (var joinedRoomEvent in joinedRoomEvents)
+                    {
+                        var type = joinedRoomEvent.Type;
+                        switch (type)
+                        {
+                            case RoomEventType.Create:
+                                var roomCreateContent = joinedRoomEvent.Content.ToObject<RoomCreateContent>(); 
+                                break;
+                            case RoomEventType.JoinRules:
+                                var roomJoinRulesContent = joinedRoomEvent.Content.ToObject<RoomJoinRulesContent>(); 
+                                break;
+                            case RoomEventType.Member:
+                                var roomMemberContent = joinedRoomEvent.Content.ToObject<RoomMemberContent>(); 
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
+                    }
+                }
+            }
+            
             
             pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
         }

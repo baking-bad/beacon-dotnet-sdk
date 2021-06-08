@@ -20,30 +20,64 @@
             c) 'InvitedRoom' and 'LeftRoom' same as a) b)
     */
     using System.Collections.Generic;
-    using RoomEvent.RoomStateEvent;
+    using Room.Event.State;
+    
 
-    public record MatrixSyncRequestParams (int? Timeout = null, string? Since = null);
+    public record MatrixSyncRequestParams (int? Timeout = null, string? Since = null)
+    {
+        public int? Timeout { get; } = Timeout;
+        public string? Since { get; } = Since;
+    }
 
 
-    public record TimeLine(List<RoomStateEvent> Events);
+    public record TimeLine(List<RoomStateEvent> Events)
+    {
+        public List<RoomStateEvent> Events { get; } = Events;
+    }
 
-    public record State(List<RoomStateEvent> Events);
+    public record State(List<RoomStateEvent> Events)
+    {
+        public List<RoomStateEvent> Events { get; } = Events;
+    }
 
-    public record InviteState(List<RoomStateEvent> Events);
+    public record InviteState(List<RoomStateEvent> Events)
+    {
+        public List<RoomStateEvent> Events { get; } = Events;
+    }
 
-    public record JoinedRoom(TimeLine TimeLine, State State);
+    public record JoinedRoom(TimeLine TimeLine, State State)
+    {
+        public TimeLine TimeLine { get; } = TimeLine;
+        public State State { get; } = State;
+    }
 
-    public record InvitedRoom(InviteState InviteState);
+    public record InvitedRoom(InviteState InviteState)
+    {
+        public InviteState InviteState { get; } = InviteState;
+    }
 
-    public record LeftRoom(TimeLine TimeLine, State State);
+    public record LeftRoom(TimeLine TimeLine, State State)
+    {
+        public TimeLine TimeLine { get; } = TimeLine;
+        public State State { get; } = State;
+    }
 
 
     public record Rooms(
         Dictionary<string, JoinedRoom> Join,
         Dictionary<string, InvitedRoom> Invite,
-        Dictionary<string, LeftRoom> Leave);
+        Dictionary<string, LeftRoom> Leave)
+    {
+        public Dictionary<string, JoinedRoom> Join { get; } = Join;
+        public Dictionary<string, InvitedRoom> Invite { get; } = Invite;
+        public Dictionary<string, LeftRoom> Leave { get; } = Leave;
+    }
 
-    public record MatrixSyncResponse(string NextBatch, Rooms Rooms);
+    public record MatrixSyncResponse(string NextBatch, Rooms Rooms)
+    {
+        public string NextBatch { get; } = NextBatch;
+        public Rooms Rooms { get; } = Rooms;
+    }
 }
 
  // public class Content

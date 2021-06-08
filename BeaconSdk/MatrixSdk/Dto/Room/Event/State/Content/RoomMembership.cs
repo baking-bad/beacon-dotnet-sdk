@@ -1,4 +1,4 @@
-namespace MatrixSdk.Dto.RoomEvent.RoomStateEvent.Content
+namespace MatrixSdk.Dto.Room.Event.State.Content
 {
     public enum RoomMembership
     {

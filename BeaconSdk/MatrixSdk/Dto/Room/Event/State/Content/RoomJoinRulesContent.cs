@@ -1,6 +1,10 @@
-namespace MatrixSdk.Dto.RoomEvent.RoomStateEvent.Content
+namespace MatrixSdk.Dto.Room.Event.State.Content
 {
+    using System.ComponentModel;
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public record IsExternalInit;
+    
     ///<remarks>
     ///m.room.join_rules
     ///</remarks> 
@@ -10,6 +14,6 @@ namespace MatrixSdk.Dto.RoomEvent.RoomStateEvent.Content
         /// <b>Required.</b> The type of rules used for users wishing to join this room.
         /// One of: ["public", "knock", "invite", "private"]
         /// </summary>
-        public RoomJoinRule RoomJoinRule { get; init; } = RoomJoinRule;
+        public RoomJoinRule RoomJoinRule { get; } = RoomJoinRule;
     }
 }
