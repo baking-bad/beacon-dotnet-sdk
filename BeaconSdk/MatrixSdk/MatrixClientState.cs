@@ -1,6 +1,7 @@
 namespace MatrixSdk
 {
     using Dto;
+    using Dto.Room.Sync;
 
     public class MatrixClientState
     {

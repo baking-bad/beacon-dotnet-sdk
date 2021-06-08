@@ -5,6 +5,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Dto;
+    using Dto.Room.Sync;
     using Extensions;
 
     public class MatrixEventService
@@ -17,7 +18,7 @@
             this.httpClientFactory = httpClientFactory;
         }
 
-        public async Task<MatrixSyncResponse> SyncAsync(string accessToken, CancellationToken cancellationToken, ulong? timeout = null, string? nextBatch = null)
+        public async Task<SyncResponse> SyncAsync(string accessToken, CancellationToken cancellationToken, ulong? timeout = null, string? nextBatch = null)
         {
             var httpClient = httpClientFactory.CreateClient(Constants.Matrix);
             httpClient.AddBearerToken(accessToken);
@@ -30,7 +31,7 @@
             if (nextBatch != null)
                 uri = uri.AddParameter("since", nextBatch);
            
-            return await httpClient.GetAsJsonAsync<MatrixSyncResponse>(uri.ToString(), cancellationToken);
+            return await httpClient.GetAsJsonAsync<SyncResponse>(uri.ToString(), cancellationToken);
         }
 
         public async Task<EventResponse> SendEventAsync(string accessToken, string roomId, string txnId, string msgtype)

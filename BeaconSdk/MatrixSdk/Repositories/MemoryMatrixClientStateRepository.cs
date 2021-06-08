@@ -1,4 +1,4 @@
-namespace MatrixSdk
+namespace MatrixSdk.Repositories
 {
     using System.Threading.Tasks;
 
