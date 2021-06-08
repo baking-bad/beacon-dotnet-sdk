@@ -64,7 +64,7 @@
         public List<Underride> underride { get; set; }
         public List<object> sender { get; set; }
         public List<object> room { get; set; }
-        public List<Content> content { get; set; }
+        // public List<Content> content { get; set; }
         public List<Override> @override { get; set; }
     }
 
@@ -75,7 +75,7 @@
     public class Event
     {
         public string type { get; set; }
-        public Content content { get; set; }
+        // public Content content { get; set; }
 
         [JsonProperty("m.room.name")] public int MRoomName { get; set; }
 

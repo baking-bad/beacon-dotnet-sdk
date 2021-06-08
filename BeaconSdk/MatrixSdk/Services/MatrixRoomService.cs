@@ -4,6 +4,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Dto;
+    using Dto.Room.Create;
     using Extensions;
 
     public class MatrixRoomService
@@ -16,9 +17,9 @@
             this.httpClientFactory = httpClientFactory;
         }
 
-        public async Task<MatrixCreateRoomResponse> CreateRoomAsync(string accessToken, string[]? members, CancellationToken cancellationToken)
+        public async Task<CreateRoomResponse> CreateRoomAsync(string accessToken, string[]? members, CancellationToken cancellationToken)
         {
-            var model = new MatrixCreateRoomRequest
+            var model = new CreateRoomRequest
             {
                 Invite = members,
                 Preset = Preset.TrustedPrivateChat,
@@ -28,7 +29,7 @@
             var httpClient = httpClientFactory.CreateClient(Constants.Matrix);
             httpClient.AddBearerToken(accessToken);
 
-            return await httpClient.PostAsJsonAsync<MatrixCreateRoomResponse>($"{RequestUri}/createRoom", model, cancellationToken);
+            return await httpClient.PostAsJsonAsync<CreateRoomResponse>($"{RequestUri}/createRoom", model, cancellationToken);
         }
 
         public async Task<MatrixJoinedRoomsResponse> GetJoinedRoomsAsync(string accessToken, CancellationToken cancellationToken)
