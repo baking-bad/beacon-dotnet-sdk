@@ -9,19 +9,19 @@
     using Dto.Room.Sync;
     using Extensions;
 
-    public class MatrixEventService
+    public class EventService
     {
         private const string RequestUri = "_matrix/client/r0";
         private readonly IHttpClientFactory httpClientFactory;
 
-        public MatrixEventService(IHttpClientFactory httpClientFactory)
+        public EventService(IHttpClientFactory httpClientFactory)
         {
             this.httpClientFactory = httpClientFactory;
         }
 
         public async Task<SyncResponse> SyncAsync(string accessToken, CancellationToken cancellationToken, ulong? timeout = null, string? nextBatch = null)
         {
-            var httpClient = httpClientFactory.CreateClient(Constants.Matrix);
+            var httpClient = httpClientFactory.CreateClient(MatrixConstants.Matrix);
             httpClient.AddBearerToken(accessToken);
            
             var uri = new Uri(httpClient.BaseAddress + $"{RequestUri}/sync");
@@ -37,7 +37,7 @@
 
         public async Task<EventResponse> SendEventAsync(string accessToken, string roomId, string txnId, string msgtype)
         {
-            var httpClient = httpClientFactory.CreateClient(Constants.Matrix);
+            var httpClient = httpClientFactory.CreateClient(MatrixConstants.Matrix);
             httpClient.AddBearerToken(accessToken);
 
             var type = "m.room.message";

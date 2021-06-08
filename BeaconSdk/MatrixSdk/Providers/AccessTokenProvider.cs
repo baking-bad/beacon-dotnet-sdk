@@ -10,11 +10,11 @@
     internal sealed class AccessTokenProvider
     {
         private readonly ISeedRepository memorySeedRepository;
-        private readonly MatrixUserService userService;
+        private readonly UserService userService;
 
         private string? accessToken;
 
-        public AccessTokenProvider(MatrixUserService userService, MemorySeedRepository memorySeedRepository)
+        public AccessTokenProvider(UserService userService, MemorySeedRepository memorySeedRepository)
         {
             this.userService = userService;
             this.memorySeedRepository = memorySeedRepository;

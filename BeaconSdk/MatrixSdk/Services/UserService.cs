@@ -9,27 +9,27 @@ namespace MatrixSdk.Services
     using Dto.Login;
     using Extensions;
 
-    public class MatrixUserService
+    public class UserService
     {
         private const string RequestUri = "_matrix/client/r0";
         private readonly IHttpClientFactory httpClientFactory;
 
-        private readonly MatrixCryptoService matrixCryptoService;
+        private readonly CryptoService cryptoService;
 
-        public MatrixUserService(IHttpClientFactory httpClientFactory, MatrixCryptoService matrixCryptoService)
+        public UserService(IHttpClientFactory httpClientFactory, CryptoService cryptoService)
         {
             this.httpClientFactory = httpClientFactory;
-            this.matrixCryptoService = matrixCryptoService;
+            this.cryptoService = cryptoService;
         }
 
         public async Task<LoginResponse> LoginAsync(string seed, CancellationToken cancellationToken)
         {
-            var loginDigest = matrixCryptoService!.GenerateLoginDigest();
-            var keyPair = matrixCryptoService.GenerateKeyPairFromSeed(seed);
+            var loginDigest = cryptoService!.GenerateLoginDigest();
+            var keyPair = cryptoService.GenerateKeyPairFromSeed(seed);
 
-            var hexSignature = matrixCryptoService.GenerateHexSignature(loginDigest, keyPair.PrivateKey);
-            var hexPublicKey = matrixCryptoService.ToHexString(keyPair.PublicKey);
-            var hexId = matrixCryptoService.GenerateHexId(keyPair.PublicKey);
+            var hexSignature = cryptoService.GenerateHexSignature(loginDigest, keyPair.PrivateKey);
+            var hexPublicKey = cryptoService.ToHexString(keyPair.PublicKey);
+            var hexId = cryptoService.GenerateHexId(keyPair.PublicKey);
 
             var password = $"ed:{hexSignature}:{hexPublicKey}";
             var deviceId = hexPublicKey;
@@ -46,7 +46,7 @@ namespace MatrixSdk.Services
                 "m.login.password"
             );
 
-            var httpClient = httpClientFactory.CreateClient(Constants.Matrix);
+            var httpClient = httpClientFactory.CreateClient(MatrixConstants.Matrix);
 
             return await httpClient.PostAsJsonAsync<LoginResponse>($"{RequestUri}/login", model, cancellationToken);
         }

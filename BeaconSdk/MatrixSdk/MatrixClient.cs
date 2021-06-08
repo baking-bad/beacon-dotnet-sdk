@@ -16,29 +16,29 @@
         private readonly CancellationTokenSource cancellationTokenSource = new();
         private readonly ILogger<MatrixClient> logger;
 
-        private readonly MatrixEventService matrixEventService;
-        private readonly MatrixRoomService matrixRoomService;
-        private readonly MatrixUserService matrixUserService;
+        private readonly EventService eventService;
+        private readonly RoomService roomService;
+        private readonly UserService userService;
 
         private Timer pollingTimer;
         private MatrixClientState state;
         
         public string UserId => state.UserId!;
 
-        public MatrixClient(ILogger<MatrixClient> logger, MatrixUserService matrixUserService, MatrixRoomService matrixRoomService,
-            MatrixEventService matrixEventService)
+        public MatrixClient(ILogger<MatrixClient> logger, UserService userService, RoomService roomService,
+            EventService eventService)
         {
             this.logger = logger;
-            this.matrixUserService = matrixUserService;
-            this.matrixRoomService = matrixRoomService;
-            this.matrixEventService = matrixEventService;
+            this.userService = userService;
+            this.roomService = roomService;
+            this.eventService = eventService;
         }
 
         public async Task StartAsync(string seed)
         {
             logger.LogInformation("Start matrix client ...");
 
-            var response = await matrixUserService!.LoginAsync(seed, cancellationTokenSource.Token);
+            var response = await userService!.LoginAsync(seed, cancellationTokenSource.Token);
 
             state = new MatrixClientState
             {
@@ -59,7 +59,7 @@
 
             ThrowIfAccessTokenIsEmpty();
 
-            var response = await matrixEventService.SyncAsync(state.AccessToken!, timeout: state.Timeout, nextBatch: state.NextBatch!,
+            var response = await eventService.SyncAsync(state.AccessToken!, timeout: state.Timeout, nextBatch: state.NextBatch!,
                 cancellationToken: cancellationToken);
             
             state.Timeout = 30000;
@@ -106,14 +106,14 @@
         {
             ThrowIfAccessTokenIsEmpty();
 
-            await matrixRoomService.CreateRoomAsync(state.AccessToken!, members, cancellationTokenSource.Token);
+            await roomService.CreateRoomAsync(state.AccessToken!, members, cancellationTokenSource.Token);
         }
 
         public async Task<List<string>> GetJoinedRoomsAsync()
         {
             ThrowIfAccessTokenIsEmpty();
 
-            var response = await matrixRoomService.GetJoinedRoomsAsync(state.AccessToken!, cancellationTokenSource.Token);
+            var response = await roomService.GetJoinedRoomsAsync(state.AccessToken!, cancellationTokenSource.Token);
 
             return response.JoinedRooms;
         }

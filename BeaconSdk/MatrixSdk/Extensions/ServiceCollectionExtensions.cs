@@ -10,12 +10,12 @@ namespace MatrixSdk.Extensions
     {
         public static IServiceCollection AddMatrixSdk(this IServiceCollection services)
         {
-            services.AddHttpClient(Constants.Matrix, c => { c.BaseAddress = new Uri("https://matrix.papers.tech/"); });
+            services.AddHttpClient(MatrixConstants.Matrix, c => { c.BaseAddress = new Uri("https://matrix.papers.tech/"); });
 
-            services.AddSingleton<MatrixCryptoService>();
-            services.AddSingleton<MatrixEventService>();
-            services.AddSingleton<MatrixRoomService>();
-            services.AddSingleton<MatrixUserService>();
+            services.AddSingleton<CryptoService>();
+            services.AddSingleton<EventService>();
+            services.AddSingleton<RoomService>();
+            services.AddSingleton<UserService>();
             services.AddTransient<MatrixClient>();
 
             services.AddSingleton<AccessTokenProvider>();
