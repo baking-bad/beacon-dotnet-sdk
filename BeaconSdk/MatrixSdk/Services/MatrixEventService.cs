@@ -5,6 +5,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Dto;
+    using Dto.Event;
     using Dto.Room.Sync;
     using Extensions;
 
