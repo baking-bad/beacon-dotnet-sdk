@@ -12,8 +12,4 @@
     <PackageReference Include="Sodium.Core" Version="1.2.3" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Dto\Room\Event\Message\Content" />
-  </ItemGroup>
-
 </Project>

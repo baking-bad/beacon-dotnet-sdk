@@ -1,9 +1,13 @@
 ﻿namespace MatrixSdk.Dto.Room.Joined
 {
     using System.Collections.Generic;
+    using Newtonsoft.Json;
 
-    public record JoinedRoomsResponse(List<string> JoinedRooms)
+    public record JoinedRoomsResponse(List<string> JoinedRoomIds)
     {
-        public List<string> JoinedRooms { get; } = JoinedRooms;
+        /// <summary>
+        ///     <b>Required.</b> The ID of each room in which the user has joined membership.
+        /// </summary>
+        [JsonProperty("joined_rooms")] public List<string> JoinedRoomIds { get; } = JoinedRoomIds;
     }
 }

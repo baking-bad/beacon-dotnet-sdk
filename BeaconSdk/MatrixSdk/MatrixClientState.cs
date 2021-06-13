@@ -1,20 +1,19 @@
 namespace MatrixSdk
 {
-    using Dto;
-    using Dto.Room.Sync;
+    using System.Collections.Concurrent;
 
     public class MatrixClientState
     {
-        public string? UserId { get; set; }
-        
+        public string? UserId { get; init; }
+
         public string? AccessToken { get; set; }
 
         public ulong Timeout { get; set; }
 
         public string? NextBatch { get; set; }
-        
-        public Rooms? Rooms { get; set; }
-        
+
         public ulong TransactionNumber { get; set; }
+
+        public ConcurrentDictionary<string, MatrixRoom> MatrixRooms { get; init; }
     }
 }

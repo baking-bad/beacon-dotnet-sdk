@@ -10,7 +10,7 @@ namespace MatrixSdk.Extensions
     {
         public static IServiceCollection AddMatrixSdk(this IServiceCollection services)
         {
-            services.AddHttpClient(MatrixConstants.Matrix, c => { c.BaseAddress = new Uri("https://matrix.papers.tech/"); });
+            services.AddHttpClient(MatrixConstants.Matrix, c => { c.BaseAddress = new Uri(MatrixConstants.BaseAddress); });
 
             services.AddSingleton<CryptoService>();
             services.AddSingleton<EventService>();

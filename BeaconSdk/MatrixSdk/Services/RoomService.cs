@@ -3,8 +3,8 @@
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
-    using Dto;
     using Dto.Room.Create;
+    using Dto.Room.Join;
     using Dto.Room.Joined;
     using Extensions;
 
@@ -13,32 +13,37 @@
         private const string RequestUri = "_matrix/client/r0";
         private readonly IHttpClientFactory httpClientFactory;
 
+        private HttpClient CreateHttpClient(string accessToken)
+        {
+            var httpClient = httpClientFactory.CreateClient(MatrixConstants.Matrix);
+            httpClient.AddBearerToken(accessToken);
+
+            return httpClient;
+        }
+        
         public RoomService(IHttpClientFactory httpClientFactory)
         {
             this.httpClientFactory = httpClientFactory;
         }
-
+        
         public async Task<CreateRoomResponse> CreateRoomAsync(string accessToken, string[]? members, CancellationToken cancellationToken)
         {
             var model = new CreateRoomRequest
-            (   
+            (
                 Invite: members,
                 Preset: Preset.TrustedPrivateChat,
-                IsDirect : true
+                IsDirect: true
             );
 
-            var httpClient = httpClientFactory.CreateClient(MatrixConstants.Matrix);
-            httpClient.AddBearerToken(accessToken);
-
-            return await httpClient.PostAsJsonAsync<CreateRoomResponse>($"{RequestUri}/createRoom", model, cancellationToken);
+            return await CreateHttpClient(accessToken).PostAsJsonAsync<CreateRoomResponse>($"{RequestUri}/createRoom", model, cancellationToken);
         }
 
-        public async Task<JoinedRoomsResponse> GetJoinedRoomsAsync(string accessToken, CancellationToken cancellationToken)
-        {
-            var httpClient = httpClientFactory.CreateClient(MatrixConstants.Matrix);
-            httpClient.AddBearerToken(accessToken);
+        public async Task<JoinRoomResponse> JoinRoomAsync(string accessToken, string roomId, CancellationToken cancellationToken) =>
+            await CreateHttpClient(accessToken)
+                .GetAsJsonAsync<JoinRoomResponse>($"{RequestUri}/rooms/{roomId}join", cancellationToken);
 
-            return await httpClient.GetAsJsonAsync<JoinedRoomsResponse>($"{RequestUri}/joined_rooms", cancellationToken);
-        }
+        public async Task<JoinedRoomsResponse> GetJoinedRoomsAsync(string accessToken, CancellationToken cancellationToken) =>
+            await CreateHttpClient(accessToken)
+                .GetAsJsonAsync<JoinedRoomsResponse>($"{RequestUri}/joined_rooms", cancellationToken);
     }
 }

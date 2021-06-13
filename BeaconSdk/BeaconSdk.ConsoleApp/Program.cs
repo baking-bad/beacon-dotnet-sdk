@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using MatrixSdk;
     using MatrixSdk.Extensions;
-    using MatrixSdk.Services;
     using Microsoft.Extensions.DependencyInjection;
     using Serilog;
 
@@ -25,10 +24,10 @@
                 .WriteTo.Console(theme: theme)
                 .CreateLogger();
 
-            
+
             var cts = new CancellationTokenSource();
-            
-            
+
+
             // var matrixUserService = serviceProvider.GetService<MatrixUserService>();
             // var matrixRoomService = serviceProvider.GetService<MatrixRoomService>();
             // var matrixEventService = serviceProvider.GetService<MatrixEventService>();
@@ -50,20 +49,24 @@
 
             var firstClient = serviceProvider.GetService<MatrixClient>();
             var secondClient = serviceProvider.GetService<MatrixClient>();
-            
-            await firstClient!.StartAsync(Guid.NewGuid().ToString());//Todo: generate once and then store seed?
+
+            await firstClient!.StartAsync(Guid.NewGuid().ToString()); //Todo: generate once and then store seed?
             await secondClient!.StartAsync(Guid.NewGuid().ToString());
-            await firstClient.CreateTrustedPrivateRoomAsync(new[] {secondClient.UserId});
-            
+            var firstClientMatrixRoom = await firstClient.CreateTrustedPrivateRoomAsync(new[]
+            {
+                secondClient.UserId
+            });
+
+            var secondClientMatrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
+
             // await firstClient.CreateTrustedPrivateRoomAsync(new[] {secondClient.UserId});
             // await firstClient.CreateTrustedPrivateRoomAsync(new[] {secondClient.UserId});
-            
-            
+
+
             // var joinedRooms = await firstClient.GetJoinedRoomsAsync();
             // foreach (var room in joinedRooms)
             //     Console.WriteLine($"Room: {room}");
-            
-            
+
 
             Console.ReadLine();
         }

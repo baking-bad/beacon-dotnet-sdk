@@ -1,7 +1,7 @@
 namespace MatrixSdk.Dto.Room.Sync
 {
     using System.Collections.Generic;
-    
+
     public record Rooms(
         Dictionary<string, JoinedRoom> Join,
         Dictionary<string, InvitedRoom> Invite,

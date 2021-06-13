@@ -5,16 +5,15 @@ namespace MatrixSdk.Services
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
-    using Dto;
     using Dto.Login;
     using Extensions;
 
     public class UserService
     {
         private const string RequestUri = "_matrix/client/r0";
-        private readonly IHttpClientFactory httpClientFactory;
 
         private readonly CryptoService cryptoService;
+        private readonly IHttpClientFactory httpClientFactory;
 
         public UserService(IHttpClientFactory httpClientFactory, CryptoService cryptoService)
         {
