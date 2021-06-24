@@ -4,12 +4,12 @@ namespace MatrixSdk.Services
     using Providers;
     using Sodium;
 
-    public class MatrixCryptoService
+    public class CryptoService
     {
         // Todo: maybe use https://nsec.rocks/ ?
         private readonly ICryptoAlgorithmsProvider cryptoAlgorithmsProvider;
 
-        public MatrixCryptoService(ICryptoAlgorithmsProvider cryptoAlgorithmsProvider)
+        public CryptoService(ICryptoAlgorithmsProvider cryptoAlgorithmsProvider)
         {
             this.cryptoAlgorithmsProvider = cryptoAlgorithmsProvider;
         }

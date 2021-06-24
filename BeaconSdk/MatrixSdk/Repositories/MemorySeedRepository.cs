@@ -3,12 +3,12 @@
     using System;
     using System.Threading.Tasks;
 
-    public interface ISeedRepository
+    internal interface ISeedRepository
     {
         Task<Guid> GetSeed();
     }
 
-    public sealed class InMemorySeedRepository : ISeedRepository
+    internal sealed class MemorySeedRepository : ISeedRepository
     {
         private static readonly Guid Seed = Guid.NewGuid(); // Todo: refactor
 
