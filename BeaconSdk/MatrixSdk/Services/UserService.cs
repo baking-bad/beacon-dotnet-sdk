@@ -15,11 +15,13 @@ namespace MatrixSdk.Services
         private readonly CryptoService cryptoService;
         private readonly IHttpClientFactory httpClientFactory;
 
+
         public UserService(IHttpClientFactory httpClientFactory, CryptoService cryptoService)
         {
             this.httpClientFactory = httpClientFactory;
             this.cryptoService = cryptoService;
         }
+        private HttpClient CreateHttpClient() => httpClientFactory.CreateClient(MatrixConstants.Matrix);
 
         public async Task<LoginResponse> LoginAsync(string seed, CancellationToken cancellationToken)
         {
@@ -45,9 +47,7 @@ namespace MatrixSdk.Services
                 "m.login.password"
             );
 
-            var httpClient = httpClientFactory.CreateClient(MatrixConstants.Matrix);
-
-            return await httpClient.PostAsJsonAsync<LoginResponse>($"{RequestUri}/login", model, cancellationToken);
+            return await CreateHttpClient().PostAsJsonAsync<LoginResponse>($"{RequestUri}/login", model, cancellationToken);
         }
     }
 }

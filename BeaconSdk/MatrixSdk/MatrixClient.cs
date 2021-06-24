@@ -5,6 +5,8 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Dto.Room.Sync.Event;
+    using Dto.Room.Sync.Event.State.Content;
     using Extensions;
     using Microsoft.Extensions.Logging;
     using Services;
@@ -12,14 +14,20 @@
     public class MatrixClient
     {
         private readonly CancellationTokenSource cancellationTokenSource = new();
-
         private readonly EventService eventService;
+
         private readonly ILogger<MatrixClient> logger;
         private readonly RoomService roomService;
+
+        private readonly MatrixClientState state = new()
+        {
+            Id = Guid.NewGuid(),
+            MatrixRooms = new ConcurrentDictionary<string, MatrixRoom>()
+        };
+
         private readonly UserService userService;
 
         private Timer pollingTimer;
-        private MatrixClientState state;
 
         public MatrixClient(ILogger<MatrixClient> logger, UserService userService, RoomService roomService,
             EventService eventService)
@@ -34,23 +42,19 @@
 
         public async Task StartAsync(string seed)
         {
-            logger.LogInformation($"{nameof(MatrixClient)}: Starting..");
+            logger.LogInformation($"{nameof(MatrixClient)}: Starting...");
 
             var response = await userService!.LoginAsync(seed, cancellationTokenSource.Token);
 
-            state = new MatrixClientState
-            {
-                UserId = response.UserId,
-                AccessToken = response.AccessToken,
-                Timeout = 0,
-                TransactionNumber = 0,
-                MatrixRooms = new ConcurrentDictionary<string, MatrixRoom>()
-            };
-            
+            state.UserId = response.UserId;
+            state.AccessToken = response.AccessToken;
+            state.Timeout = 0;
+            state.TransactionNumber = 0;
+
             pollingTimer = new Timer(async _ => await PollAsync(cancellationTokenSource.Token));
             pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
-            
-            logger.LogInformation($"{nameof(MatrixClient)}: Read");
+
+            logger.LogInformation($"{nameof(MatrixClient)}: Ready.");
         }
 
         private async Task PollAsync(CancellationToken cancellationToken)
@@ -68,18 +72,52 @@
             logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Invite: {response.Rooms.Invite.Count}");
             logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Join: {response.Rooms.Join.Count}");
             logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Leave: {response.Rooms.Leave.Count}");
-            
+
+            if (response.Rooms.Invite.Count > 0)
+            {
+                foreach (var (key, value) in response.Rooms.Invite)
+                {
+                    var roomId = key;
+                    
+                }
+                // var roomId = response.Rooms.Invite[0];
+                // var joined = response.Rooms.Invite;
+                //
+                // foreach (var (roomId, joinedRoom) in joined)
+                // {
+                //     var joinedRoomEvents = joinedRoom.InviteState.Events;
+                //     foreach (var joinedRoomEvent in joinedRoomEvents)
+                //     {
+                //         var type = joinedRoomEvent.RoomEventType;
+                //         switch (type)
+                //         {
+                //             case RoomEventType.Create:
+                //                 var roomCreateContent = joinedRoomEvent.Content.ToObject<RoomCreateContent>();
+                //                 break;
+                //             case RoomEventType.JoinRules:
+                //                 var roomJoinRulesContent = joinedRoomEvent.Content.ToObject<RoomJoinRulesContent>();
+                //                 break;
+                //             case RoomEventType.Member:
+                //                 var roomMemberContent = joinedRoomEvent.Content.ToObject<RoomMemberContent>();
+                //                 break;
+                //             default:
+                //                 throw new ArgumentOutOfRangeException();
+                //         }
+                //     }
+                // }
+            }
+
             pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
         }
 
-        public Task Stop()
+        public void Stop()
         {
+            logger.LogInformation($"{nameof(MatrixClient)}: Stopping...");
+
             cancellationTokenSource.Cancel();
             pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
 
-            logger.LogInformation($"{nameof(MatrixClient)}: Stopped");
-
-            return Task.CompletedTask;
+            logger.LogInformation($"{nameof(MatrixClient)}: Stopped.");
         }
 
         public async Task<MatrixRoom> CreateTrustedPrivateRoomAsync(string[]? invitedUserIds = null)
@@ -107,6 +145,15 @@
             return matrixRoom;
         }
 
+        public async Task SendMessageAsync(string roomId, string message)
+        {
+            ThrowIfAccessTokenIsEmpty();
+
+            var transactionId = CreateTransactionId();
+            var result = await eventService.SendMessageAsync(state.AccessToken, roomId, transactionId, message);
+            var id = result.EventId;
+        }
+ 
         public async Task<List<string>> GetJoinedRoomsIdsAsync()
         {
             ThrowIfAccessTokenIsEmpty();
@@ -127,7 +174,7 @@
          */
         private string CreateTransactionId()
         {
-            var timestamp = DateTimeOffset.Now;
+            var timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             var counter = state.TransactionNumber;
 
             state.TransactionNumber += 1;

@@ -1,10 +1,12 @@
 namespace MatrixSdk
 {
+    using System;
     using System.Collections.Concurrent;
 
     public class MatrixClientState
     {
-        public string? UserId { get; init; }
+        public Guid Id { get; init; }
+        public string? UserId { get; set; }
 
         public string? AccessToken { get; set; }
 

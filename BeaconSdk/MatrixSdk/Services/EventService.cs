@@ -12,17 +12,17 @@
     {
         private const string RequestUri = "_matrix/client/r0";
         private readonly IHttpClientFactory httpClientFactory;
+
+        public EventService(IHttpClientFactory httpClientFactory)
+        {
+            this.httpClientFactory = httpClientFactory;
+        }
         private HttpClient CreateHttpClient(string accessToken)
         {
             var httpClient = httpClientFactory.CreateClient(MatrixConstants.Matrix);
             httpClient.AddBearerToken(accessToken);
 
             return httpClient;
-        }
-        
-        public EventService(IHttpClientFactory httpClientFactory)
-        {
-            this.httpClientFactory = httpClientFactory;
         }
 
         public async Task<SyncResponse> SyncAsync(string accessToken, CancellationToken cancellationToken, ulong? timeout = null, string? nextBatch = null)
@@ -38,12 +38,15 @@
             return await CreateHttpClient(accessToken).GetAsJsonAsync<SyncResponse>(uri.ToString(), cancellationToken);
         }
 
-        public async Task<EventResponse> SendEventAsync(string accessToken, string roomId, string txnId, string msgtype)
+        public async Task<EventResponse> SendMessageAsync(string accessToken, string roomId, string transactionId, string message)
         {
-            var type = "m.room.message";
-            var model = new MessageEvent(msgtype);
+            // var eventType = InstantMessagingEventType.Message.ToString();
+            var eventType = "m.room.message";
+            var model = new MessageEvent(MessageType.Text, message);
 
-            return await CreateHttpClient(accessToken).PutAsJsonAsync<EventResponse>($"{RequestUri}/rooms/{roomId}/send/{type}/{txnId}", model);
+            return await CreateHttpClient(accessToken).PutAsJsonAsync<EventResponse>($"{RequestUri}/rooms/{roomId}/send/{eventType}/{transactionId}", model);
         }
+        
+        
     }
 }

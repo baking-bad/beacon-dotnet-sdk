@@ -1,10 +1,11 @@
 ﻿namespace MatrixSdk.Dto.Event
 {
-    // Todo: rename msgtype
-    public record MessageEvent(string msgtype, string messageType = "m.text")
-    {
-        public string msgtype { get; } = msgtype;
-        public string messageType { get; } = messageType;
-    }
+    using Newtonsoft.Json;
 
+    public record MessageEvent(MessageType messageType, string Message)
+    {
+        [JsonProperty("msgtype")] public MessageType messageType { get; } = messageType;
+
+        [JsonProperty("body")] public string Message { get; } = Message;
+    }
 }
