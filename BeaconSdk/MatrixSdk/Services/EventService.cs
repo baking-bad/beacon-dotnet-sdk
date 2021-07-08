@@ -5,7 +5,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Dto.Event;
-    using Dto.Room.Sync;
+    using Dto.Sync;
     using Extensions;
 
     public class EventService
@@ -17,6 +17,7 @@
         {
             this.httpClientFactory = httpClientFactory;
         }
+
         private HttpClient CreateHttpClient(string accessToken)
         {
             var httpClient = httpClientFactory.CreateClient(MatrixConstants.Matrix);
@@ -44,9 +45,8 @@
             var eventType = "m.room.message";
             var model = new MessageEvent(MessageType.Text, message);
 
-            return await CreateHttpClient(accessToken).PutAsJsonAsync<EventResponse>($"{RequestUri}/rooms/{roomId}/send/{eventType}/{transactionId}", model);
+            return await CreateHttpClient(accessToken)
+                .PutAsJsonAsync<EventResponse>($"{RequestUri}/rooms/{roomId}/send/{eventType}/{transactionId}", model);
         }
-        
-        
     }
 }

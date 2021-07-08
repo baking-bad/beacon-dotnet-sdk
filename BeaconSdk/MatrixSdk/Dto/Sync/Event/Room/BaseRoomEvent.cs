@@ -1,16 +1,16 @@
-namespace MatrixSdk.Dto.Room.Sync.Event
+namespace MatrixSdk.Dto.Sync.Event.Room
 {
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
     public record BaseRoomEvent(
             RoomEventType Type,
-            JObject Content,
+            JObject VariadicContent,
             string SenderUserId,
             string Id,
             long OriginHomeServerTimestamp,
             string RoomId)
-        : BaseEvent(Type, Content)
+        : BaseEvent(Type, VariadicContent)
     {
         /// <summary>
         ///     <b>Required.</b> Contains the fully-qualified ID of the user who sent this event.

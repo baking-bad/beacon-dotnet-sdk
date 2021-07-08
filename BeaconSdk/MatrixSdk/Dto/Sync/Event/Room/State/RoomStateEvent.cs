@@ -1,16 +1,16 @@
-﻿namespace MatrixSdk.Dto.Room.Sync.Event.State
+﻿namespace MatrixSdk.Dto.Sync.Event.Room.State
 {
     using Newtonsoft.Json.Linq;
 
     public record RoomStateEvent(
             RoomEventType Type,
-            JObject Content,
+            JObject VariadicContent,
             string SenderUserId,
             string Id,
             long OriginHomeServerTimestamp,
             string RoomId,
             string StateKey)
-        : BaseRoomEvent(Type, Content, SenderUserId, Id, OriginHomeServerTimestamp, RoomId)
+        : BaseRoomEvent(Type, VariadicContent, SenderUserId, Id, OriginHomeServerTimestamp, RoomId)
     {
         /// <summary>
         ///     <b>Required.</b>

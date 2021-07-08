@@ -3,13 +3,17 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Dto.Room.Sync.Event;
-    using Dto.Room.Sync.Event.State.Content;
     using Extensions;
     using Microsoft.Extensions.Logging;
     using Services;
+
+
+    public interface IEventListener
+    {
+    }
 
     public class MatrixClient
     {
@@ -22,7 +26,9 @@
         private readonly MatrixClientState state = new()
         {
             Id = Guid.NewGuid(),
-            MatrixRooms = new ConcurrentDictionary<string, MatrixRoom>()
+            MatrixRooms = new ConcurrentDictionary<string, MatrixRoom>(),
+            Timeout = 0,
+            TransactionNumber = 0
         };
 
         private readonly UserService userService;
@@ -40,16 +46,20 @@
 
         public string UserId => state.UserId!;
 
+        //Todo: store on disk
+        public MatrixRoom[] InvitedRooms => state.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Invited).ToArray();
+        public MatrixRoom[] JoinedRooms => state.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Joined).ToArray();
+
+        // public MatrixRoom[] InvitedRooms => state.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Invited).ToArray();
+
+
         public async Task StartAsync(string seed)
         {
             logger.LogInformation($"{nameof(MatrixClient)}: Starting...");
 
             var response = await userService!.LoginAsync(seed, cancellationTokenSource.Token);
-
             state.UserId = response.UserId;
             state.AccessToken = response.AccessToken;
-            state.Timeout = 0;
-            state.TransactionNumber = 0;
 
             pollingTimer = new Timer(async _ => await PollAsync(cancellationTokenSource.Token));
             pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
@@ -74,38 +84,35 @@
             logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Leave: {response.Rooms.Leave.Count}");
 
             if (response.Rooms.Invite.Count > 0)
-            {
                 foreach (var (key, value) in response.Rooms.Invite)
                 {
                     var roomId = key;
-                    
                 }
-                // var roomId = response.Rooms.Invite[0];
-                // var joined = response.Rooms.Invite;
-                //
-                // foreach (var (roomId, joinedRoom) in joined)
-                // {
-                //     var joinedRoomEvents = joinedRoom.InviteState.Events;
-                //     foreach (var joinedRoomEvent in joinedRoomEvents)
-                //     {
-                //         var type = joinedRoomEvent.RoomEventType;
-                //         switch (type)
-                //         {
-                //             case RoomEventType.Create:
-                //                 var roomCreateContent = joinedRoomEvent.Content.ToObject<RoomCreateContent>();
-                //                 break;
-                //             case RoomEventType.JoinRules:
-                //                 var roomJoinRulesContent = joinedRoomEvent.Content.ToObject<RoomJoinRulesContent>();
-                //                 break;
-                //             case RoomEventType.Member:
-                //                 var roomMemberContent = joinedRoomEvent.Content.ToObject<RoomMemberContent>();
-                //                 break;
-                //             default:
-                //                 throw new ArgumentOutOfRangeException();
-                //         }
-                //     }
-                // }
-            }
+            // var roomId = response.Rooms.Invite[0];
+            // var joined = response.Rooms.Invite;
+            //
+            // foreach (var (roomId, joinedRoom) in joined)
+            // {
+            //     var joinedRoomEvents = joinedRoom.InviteState.Events;
+            //     foreach (var joinedRoomEvent in joinedRoomEvents)
+            //     {
+            //         var type = joinedRoomEvent.RoomEventType;
+            //         switch (type)
+            //         {
+            //             case RoomEventType.Create:
+            //                 var roomCreateContent = joinedRoomEvent.Content.ToObject<RoomCreateContent>();
+            //                 break;
+            //             case RoomEventType.JoinRules:
+            //                 var roomJoinRulesContent = joinedRoomEvent.Content.ToObject<RoomJoinRulesContent>();
+            //                 break;
+            //             case RoomEventType.Member:
+            //                 var roomMemberContent = joinedRoomEvent.Content.ToObject<RoomMemberContent>();
+            //                 break;
+            //             default:
+            //                 throw new ArgumentOutOfRangeException();
+            //         }
+            //     }
+            // }
 
             pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
         }
@@ -153,7 +160,7 @@
             var result = await eventService.SendMessageAsync(state.AccessToken, roomId, transactionId, message);
             var id = result.EventId;
         }
- 
+
         public async Task<List<string>> GetJoinedRoomsIdsAsync()
         {
             ThrowIfAccessTokenIsEmpty();

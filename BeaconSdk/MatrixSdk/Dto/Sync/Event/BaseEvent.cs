@@ -1,10 +1,11 @@
-namespace MatrixSdk.Dto.Room.Sync.Event
+namespace MatrixSdk.Dto.Sync.Event
 {
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using Room;
 
 
-    public record BaseEvent(RoomEventType RoomEventType, JObject Content)
+    public record BaseEvent(RoomEventType RoomEventType, JObject VariadicContent)
     {
         /// <summary>
         ///     <b>Required.</b> The type of event.
@@ -16,6 +17,6 @@ namespace MatrixSdk.Dto.Room.Sync.Event
         ///     <b>Required.</b> The fields in this object will vary depending on the type of event.
         ///     When interacting with the REST API, this is the HTTP body.
         /// </summary>
-        public JObject Content { get; } = Content;
+        [JsonProperty("content")] protected JObject VariadicContent { get; } = VariadicContent;
     }
 }

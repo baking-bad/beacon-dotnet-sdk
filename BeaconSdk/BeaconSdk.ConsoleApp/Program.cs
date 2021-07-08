@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MatrixSdk;
     using MatrixSdk.Extensions;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -48,24 +47,31 @@
 
         private static async Task RunAsync(IServiceProvider serviceProvider)
         {
-            var firstClient = serviceProvider.GetRequiredService<MatrixClient>();
-            var secondClient = serviceProvider.GetRequiredService<MatrixClient>();
-
-            await firstClient!.StartAsync(Guid.NewGuid().ToString()); //Todo: generate once and then store seed?
-            await secondClient!.StartAsync(Guid.NewGuid().ToString());
-
-            var firstClientMatrixRoom = await firstClient.CreateTrustedPrivateRoomAsync(new[]
+            var numbers = new[]
             {
-                secondClient.UserId
-            });
-
-            var secondClientMatrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
-
-            await secondClient.SendMessageAsync(secondClientMatrixRoom.Id, "Hello world!");
-            Console.ReadLine();
-
-            firstClient.Stop();
-            secondClient.Stop();
+                "1",
+                "2",
+                "3"
+            };
+            Console.WriteLine(numbers);
+            // var firstClient = serviceProvider.GetRequiredService<MatrixClient>();
+            // var secondClient = serviceProvider.GetRequiredService<MatrixClient>();
+            //
+            // await firstClient!.StartAsync(Guid.NewGuid().ToString()); //Todo: generate once and then store seed?
+            // await secondClient!.StartAsync(Guid.NewGuid().ToString());
+            //
+            // var firstClientMatrixRoom = await firstClient.CreateTrustedPrivateRoomAsync(new[]
+            // {
+            //     secondClient.UserId
+            // });
+            //
+            // var secondClientMatrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
+            //
+            // await secondClient.SendMessageAsync(secondClientMatrixRoom.Id, "Hello world!");
+            // Console.ReadLine();
+            //
+            // firstClient.Stop();
+            // secondClient.Stop();
         }
     }
 }

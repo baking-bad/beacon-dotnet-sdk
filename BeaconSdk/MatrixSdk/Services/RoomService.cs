@@ -3,7 +3,6 @@
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Web;
     using Dto.Room.Create;
     using Dto.Room.Join;
     using Dto.Room.Joined;
@@ -42,7 +41,7 @@
         public async Task<JoinRoomResponse> JoinRoomAsync(string accessToken, string roomId, CancellationToken cancellationToken) =>
             await CreateHttpClient(accessToken)
                 .PostAsJsonAsync<JoinRoomResponse>($"{RequestUri}/rooms/{roomId}/join", null, cancellationToken);
-        
+
         public async Task<JoinedRoomsResponse> GetJoinedRoomsAsync(string accessToken, CancellationToken cancellationToken) =>
             await CreateHttpClient(accessToken)
                 .GetAsJsonAsync<JoinedRoomsResponse>($"{RequestUri}/joined_rooms", cancellationToken);
