@@ -54,7 +54,7 @@
             // await firstClient!.StartAsync(Guid.NewGuid().ToString()); //Todo: generate once and then store seed?
             // await secondClient!.StartAsync(Guid.NewGuid().ToString());
 
-            await firstClient!.StartAsync("777"); //Todo: generate once and then store seed?
+            await firstClient!.StartAsync("7777"); //Todo: generate once and then store seed?
             await secondClient!.StartAsync("877");
 
             // var room = await firstClient.CreateTrustedPrivateRoomAsync();

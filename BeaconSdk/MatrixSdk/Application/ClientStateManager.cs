@@ -6,7 +6,7 @@ namespace MatrixSdk.Application
     using System.Linq;
     using Domain;
 
-    public class MatrixClientStateManager
+    public class ClientStateManager
     {
         public readonly MatrixClientState state = new()
         {

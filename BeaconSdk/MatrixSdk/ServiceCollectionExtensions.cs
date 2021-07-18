@@ -20,7 +20,8 @@ namespace MatrixSdk
             services.AddSingleton<UserService>();
 
             services.AddTransient<MatrixClient>();
-            services.AddTransient<MatrixClientStateManager>();
+            services.AddTransient<ClientStateManager>();
+            services.AddTransient<RoomSyncService>();
 
             services.AddSingleton<AccessTokenProvider>();
             services.AddSingleton<ICryptoAlgorithmsProvider, LibsodiumAlgorithmsProvider>();

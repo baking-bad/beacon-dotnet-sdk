@@ -6,7 +6,7 @@ namespace MatrixSdk.Application
     using Domain.Room;
     using Infrastructure.Dto.Sync;
 
-    public class MatrixRoomSyncService
+    public class RoomSyncService
     {
         public List<MatrixRoom> GetMatrixRoomsFromSync(Rooms rooms)
         {

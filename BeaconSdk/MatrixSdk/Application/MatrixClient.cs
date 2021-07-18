@@ -36,7 +36,8 @@
     public class MatrixClient
     {
         private readonly CancellationTokenSource cancellationTokenSource = new();
-        private readonly MatrixClientStateManager clientStateManager;
+        private readonly ClientStateManager clientStateManager;
+        private readonly RoomSyncService roomSyncService;
         private readonly EventService eventService;
         private readonly ILogger<MatrixClient> logger;
         private readonly RoomService roomService;
@@ -48,14 +49,20 @@
 
         private string Seed;
 
-        public MatrixClient(ILogger<MatrixClient> logger, UserService userService, RoomService roomService,
-            EventService eventService, MatrixClientStateManager clientStateManager)
+        public MatrixClient(
+            ILogger<MatrixClient> logger,
+            ClientStateManager clientStateManager, 
+            RoomSyncService roomSyncService,
+            UserService userService, 
+            RoomService roomService,
+            EventService eventService)
         {
             this.logger = logger;
+            this.clientStateManager = clientStateManager;
+            this.roomSyncService = roomSyncService;
             this.userService = userService;
             this.roomService = roomService;
             this.eventService = eventService;
-            this.clientStateManager = clientStateManager;
         }
 
         public string UserId => clientStateManager.state.UserId!;
@@ -92,10 +99,10 @@
             clientStateManager.state.Timeout = 30000;
             clientStateManager.state.NextBatch = response.NextBatch;
 
-            var matrixRooms = clientStateManager.GetMatrixRoomsFromSync(response.Rooms);
+            var matrixRooms = roomSyncService.GetMatrixRoomsFromSync(response.Rooms);
             clientStateManager.UpdateStateWith(matrixRooms);
 
-            if (seed == "777")
+            if (seed == "7777")
             {
                 var t = clientStateManager.state.MatrixRooms;
             }
