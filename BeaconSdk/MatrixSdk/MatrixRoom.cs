@@ -10,6 +10,14 @@ namespace MatrixSdk
             Status = status;
             JoinedUserIds = joinedUserIds;
         }
+        
+        public MatrixRoom(string id, MatrixRoomStatus status)
+        {
+            Id = id;
+            Status = status;
+            JoinedUserIds = new List<string>();
+        }
+        
         public string Id { get; }
 
         public MatrixRoomStatus Status { get; }
