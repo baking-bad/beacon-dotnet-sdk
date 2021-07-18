@@ -1,22 +1,26 @@
 namespace MatrixSdk
 {
     using System;
+    using Application;
+    using Infrastructure;
+    using Infrastructure.Providers;
+    using Infrastructure.Repositories;
+    using Infrastructure.Services;
     using Microsoft.Extensions.DependencyInjection;
-    using Providers;
-    using Repositories;
-    using Services;
 
     public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddMatrixSdk(this IServiceCollection services)
         {
-            services.AddHttpClient(MatrixConstants.Matrix, c => { c.BaseAddress = new Uri(MatrixConstants.BaseAddress); });
+            services.AddHttpClient(MatrixApiConstants.Matrix, c => { c.BaseAddress = new Uri(MatrixApiConstants.BaseAddress); });
 
             services.AddSingleton<CryptoService>();
             services.AddSingleton<EventService>();
             services.AddSingleton<RoomService>();
             services.AddSingleton<UserService>();
+
             services.AddTransient<MatrixClient>();
+            services.AddTransient<MatrixClientStateManager>();
 
             services.AddSingleton<AccessTokenProvider>();
             services.AddSingleton<ICryptoAlgorithmsProvider, LibsodiumAlgorithmsProvider>();
