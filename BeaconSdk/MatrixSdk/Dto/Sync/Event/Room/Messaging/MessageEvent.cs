@@ -1,4 +1,4 @@
-namespace MatrixSdk.Domain.Messaging
+namespace MatrixSdk.Dto.Sync.Event.Room.Messaging
 {
 
     // public record MessageEvent(

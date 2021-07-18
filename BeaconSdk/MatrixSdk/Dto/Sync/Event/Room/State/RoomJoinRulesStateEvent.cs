@@ -1,7 +1,6 @@
-namespace MatrixSdk.Domain.State
+namespace MatrixSdk.Dto.Sync.Event.Room.State
 {
     using System;
-    using Dto.Sync.Event;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 

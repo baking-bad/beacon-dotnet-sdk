@@ -1,4 +1,4 @@
-namespace MatrixSdk.Dto.Sync.Event.Room.State
+namespace MatrixSdk.Dto.Sync.Event.Room
 {
     public record RoomStateEvent : RoomEvent
     {

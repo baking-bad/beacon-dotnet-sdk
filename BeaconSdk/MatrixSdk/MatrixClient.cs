@@ -6,9 +6,9 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Domain;
     using Dto.Sync;
     using Dto.Sync.Event;
-    using Dto.Sync.Event.Room;
     using Extensions;
     using Microsoft.Extensions.Logging;
     using Services;
@@ -56,17 +56,17 @@
             // var joinedRoomEvents = new List<RoomEvent>();
             foreach (var (roomId, room) in rooms.Join)
             {
-                // var rooms = new List<
-                // foreach (var VARIABLE in COLLECTION)
-                // {
-                //     
-                // }
-                joinedMatrixRooms.Add(new MatrixRoom(roomId, MatrixRoomStatus.Joined));
+                var joinedUserIds = new List<string>();
+                foreach (var roomEvent in room.Timeline.Events)
+                    if (JoinRoomEvent.Factory.TryBuildFrom(roomEvent, roomId, out var joinRoomEvent))
+                        joinedUserIds.Add(joinRoomEvent.SenderUserId);
+
+                joinedMatrixRooms.Add(new MatrixRoom(roomId, MatrixRoomStatus.Joined, joinedUserIds));
             }
 
             return null;
         }
-        
+
         // public List<RoomEvent>
     }
 
@@ -139,7 +139,7 @@
             // logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Invite: {response.Rooms.Invite.Count}");
             // logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Join: {response.Rooms.Join.Count}");
             // logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Leave: {response.Rooms.Leave.Count}");
-            
+
             if (response.Rooms.Join.Count > 0)
             {
                 var joinRooms = response.Rooms.Join;
@@ -152,7 +152,7 @@
             }
 
 
-            if (seed == "20000")
+            if (seed == "77")
             {
             }
             // if (response.Rooms.Invite.Count > 0)

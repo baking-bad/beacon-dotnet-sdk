@@ -4,22 +4,16 @@ namespace MatrixSdk
 
     public class MatrixRoom
     {
-        public MatrixRoom(string id, MatrixRoomStatus status, List<string> memberUserIds)
+        public MatrixRoom(string id, MatrixRoomStatus status, List<string> joinedUserIds)
         {
             Id = id;
             Status = status;
-            MemberUserIds = memberUserIds;
+            JoinedUserIds = joinedUserIds;
         }
-
-        public MatrixRoom(string id, MatrixRoomStatus status)
-        {
-            Id = id;
-            Status = status;
-            MemberUserIds = new List<string>();
-        }
-
         public string Id { get; }
-        public MatrixRoomStatus Status { get; set; }
-        public List<string> MemberUserIds { get; }
+
+        public MatrixRoomStatus Status { get; }
+
+        public List<string> JoinedUserIds { get; }
     }
 }

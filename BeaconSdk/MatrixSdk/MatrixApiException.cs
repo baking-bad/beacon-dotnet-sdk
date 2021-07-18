@@ -15,7 +15,7 @@ namespace MatrixSdk
             ResponseContent = responseContent;
             StatusCode = statusCode;
         }
-        
+
         public Uri Uri { get; }
 
         public string? RequestContent { get; }

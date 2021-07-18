@@ -1,9 +1,7 @@
 namespace MatrixSdk.Dto.Sync
 {
     using System.Collections.Generic;
-    using Event;
     using Event.Room;
-    using Event.Room.State;
 
     /// <summary>
     ///     Synchronization response.
@@ -67,6 +65,6 @@ namespace MatrixSdk.Dto.Sync
     ///     If the client joins the room then the current state will be given as a delta against the archived <c>state</c> not
     ///     the <c>invite_state</c>.
     /// </summary>
-    public record InviteState(List<StrippedState> Events);
+    public record InviteState(List<RoomStrippedState> Events);
 
 }
