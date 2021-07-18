@@ -5,8 +5,8 @@ namespace MatrixSdk.Domain
 
     public record CreateRoomEvent : BaseRoomEvent
     {
-        public CreateRoomEvent(string eventId, string roomId, long originServerTimestamp, string senderUserId, string roomCreatorUserId) :
-            base(eventId, roomId, originServerTimestamp, senderUserId)
+        private CreateRoomEvent(string roomId, string senderUserId, string roomCreatorUserId) :
+            base(roomId, senderUserId)
         {
             RoomCreatorUserId = roomCreatorUserId;
         }
@@ -15,7 +15,7 @@ namespace MatrixSdk.Domain
 
         public static class Factory
         {
-            public static bool TryBuildFrom(RoomEvent roomEvent, string roomId, out CreateRoomEvent? createRoomEvent)
+            public static bool TryCreateFrom(RoomEvent roomEvent, string roomId, out CreateRoomEvent? createRoomEvent)
             {
                 var content = roomEvent.Content.ToObject<RoomCreateContent>();
                 if (content == null)
@@ -24,13 +24,7 @@ namespace MatrixSdk.Domain
                     return false;
                 }
 
-                createRoomEvent = new CreateRoomEvent(
-                    roomEvent.EventId,
-                    roomId,
-                    roomEvent.OriginServerTimestamp,
-                    roomEvent.SenderUserId,
-                    content.RoomCreatorUserId);
-
+                createRoomEvent = new CreateRoomEvent(roomId, roomEvent.SenderUserId, content.RoomCreatorUserId);
                 return true;
             }
         }

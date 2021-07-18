@@ -48,26 +48,49 @@
 
         public IDisposable Subscribe(IObserver<BaseEvent> observer) => throw new NotImplementedException();
 
-        public List<MatrixRoom> GetRoomsFromSync(Rooms rooms)
+        public List<MatrixRoom> GetMatrixRoomsFromSync(Rooms rooms)
         {
-            // var joinedMatrixRooms = rooms.Join.Select(x => new MatrixRoom(x.Key, MatrixRoomStatus.Joined))
+            var joinedMatrixRooms = rooms.Join.Select(pair => CreateJoined(pair.Key, pair.Value)).ToList();
 
-            var joinedMatrixRooms = new List<MatrixRoom>();
-            // var joinedRoomEvents = new List<RoomEvent>();
-            foreach (var (roomId, room) in rooms.Join)
-            {
-                var joinedUserIds = new List<string>();
-                foreach (var roomEvent in room.Timeline.Events)
-                    if (JoinRoomEvent.Factory.TryBuildFrom(roomEvent, roomId, out var joinRoomEvent))
-                        joinedUserIds.Add(joinRoomEvent.SenderUserId);
+            // var invitedMatrixRooms = rooms.Invite
+            //     .Select(pair => CreateLeft(pair.Key, pair.Value))
+            //     .ToList();
 
-                joinedMatrixRooms.Add(new MatrixRoom(roomId, MatrixRoomStatus.Joined, joinedUserIds));
-            }
+            var leftMatrixRooms = rooms.Leave.Select(pair => CreateLeft(pair.Key, pair.Value)).ToList();
 
-            return null;
+
+            return joinedMatrixRooms.Concat(invitedMatrixRooms).Concat(leftMatrixRooms).ToList();
         }
 
-        // public List<RoomEvent>
+        private MatrixRoom CreateJoined(string roomId, JoinedRoom joinedRoom)
+        {
+            var joinedUserIds = new List<string>();
+            foreach (var timelineEvent in joinedRoom.Timeline.Events)
+                if (JoinRoomEvent.Factory.TryCreateFrom(timelineEvent, roomId, out var joinRoomEvent))
+                    joinedUserIds.Add(joinRoomEvent!.SenderUserId);
+
+            return new MatrixRoom(roomId, MatrixRoomStatus.Joined, joinedUserIds);
+        }
+
+        private MatrixRoom CreateInvite(string roomId, InvitedRoom invitedRoom)
+        {
+            var joinedUserIds = new List<string>();
+            foreach (var timelineEvent in invitedRoom.InviteState.Events)
+                if (JoinRoomEvent.Factory.TryCreateFrom(timelineEvent, roomId, out var joinRoomEvent))
+                    joinedUserIds.Add(joinRoomEvent!.SenderUserId);
+
+            return new MatrixRoom(roomId, MatrixRoomStatus.Joined, joinedUserIds);
+        }
+
+        private MatrixRoom CreateLeft(string roomId, LeftRoom leftRoom)
+        {
+            var joinedUserIds = new List<string>();
+            foreach (var timelineEvent in leftRoom.Timeline.Events)
+                if (JoinRoomEvent.Factory.TryCreateFrom(timelineEvent, roomId, out var joinRoomEvent))
+                    joinedUserIds.Add(joinRoomEvent!.SenderUserId);
+
+            return new MatrixRoom(roomId, MatrixRoomStatus.Left, joinedUserIds);
+        }
     }
 
     public class MatrixClient
