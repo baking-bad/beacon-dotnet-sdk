@@ -45,5 +45,8 @@
         public async Task<JoinedRoomsResponse> GetJoinedRoomsAsync(string accessToken, CancellationToken cancellationToken) =>
             await CreateHttpClient(accessToken)
                 .GetAsJsonAsync<JoinedRoomsResponse>($"{RequestUri}/joined_rooms", cancellationToken);
+
+        public async Task LeaveRoomAsync(string accessToken, string roomId, CancellationToken cancellationToken) => 
+            await CreateHttpClient(accessToken).PostAsync($"{RequestUri}/rooms/{roomId}/leave", cancellationToken);
     }
 }

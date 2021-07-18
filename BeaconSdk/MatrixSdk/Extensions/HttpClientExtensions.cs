@@ -30,6 +30,16 @@ namespace MatrixSdk.Extensions
             return settings;
         }
 
+        public static async Task PostAsync(this HttpClient httpClient,
+            string requestUri, CancellationToken cancellationToken)
+        {
+            var response = await httpClient.PostAsync(requestUri, null, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+                throw new MatrixApiException(response.RequestMessage.RequestUri,
+                    null, null, response.StatusCode);
+        }
+        
         // Todo: Refactor
         // See: https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-how-to?pivots=dotnet-5-0#httpclient-and-httpcontent-extension-methods
         public static async Task<TResponse> PostAsJsonAsync<TResponse>(this HttpClient httpClient,
@@ -77,7 +87,8 @@ namespace MatrixSdk.Extensions
             var result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new MatrixApiException(response.RequestMessage.RequestUri, result, response.StatusCode);
+                throw new MatrixApiException(response.RequestMessage.RequestUri, 
+                    null, result, response.StatusCode);
 
             return JsonConvert.DeserializeObject<TResponse>(result, GetJsonSettings())!;
         }

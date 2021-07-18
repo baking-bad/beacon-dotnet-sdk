@@ -1,22 +1,32 @@
 namespace MatrixSdk.Dto.Sync.Event
 {
-    using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using Room;
 
-
-    public record BaseEvent(RoomEventType RoomEventType, JObject VariadicContent)
+    public record BaseEvent
     {
         /// <summary>
         ///     <b>Required.</b> The type of event.
         ///     This SHOULD be namespaced similar to Java package naming conventions e.g. 'com.example.subdomain.event.type'
         /// </summary>
-        [JsonProperty("type")] public RoomEventType RoomEventType { get; } = RoomEventType;
+        public JObject Content { get; init; }
 
         /// <summary>
         ///     <b>Required.</b> The fields in this object will vary depending on the type of event.
         ///     When interacting with the REST API, this is the HTTP body.
         /// </summary>
-        [JsonProperty("content")] protected JObject VariadicContent { get; } = VariadicContent;
+        // ReSharper disable once MemberCanBePrivate.Global
+        public EventType EventType { get; private set; }
+
+        // ReSharper disable once UnusedMember.Global
+        public string Type
+        {
+            set => EventType = value switch
+            {
+                MatrixConstants.EventType.Create => EventType.Create,
+                MatrixConstants.EventType.Member => EventType.Member,
+                MatrixConstants.EventType.Message => EventType.Message,
+                _ => EventType.Unknown
+            };
+        }
     }
 }

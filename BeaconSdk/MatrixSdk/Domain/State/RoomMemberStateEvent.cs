@@ -1,17 +1,18 @@
-namespace MatrixSdk.Dto.Sync.Event.Room.State
+namespace MatrixSdk.Domain.State
 {
     using System;
+    using Dto.Sync.Event;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
     public record RoomMemberStateEvent (
-        RoomEventType Type,
+        EventType Type,
         JObject VariadicContent,
         string SenderUserId,
         string Id,
         long OriginHomeServerTimestamp,
         string RoomId,
-        string StateKey) : RoomStateEvent(Type, VariadicContent, SenderUserId, Id, OriginHomeServerTimestamp, RoomId, StateKey)
+        string StateKey) //: RoomStateEvent(Type, VariadicContent, SenderUserId, Id, OriginHomeServerTimestamp, RoomId, StateKey)
     {
 
         public enum UserMembershipState
@@ -25,7 +26,7 @@ namespace MatrixSdk.Dto.Sync.Event.Room.State
 
         public Content GetContent()
         {
-            if (Type != RoomEventType.Member)
+            if (Type != EventType.Member)
                 throw new InvalidOperationException($"Invalid operation: Content is not {nameof(Content)}");
 
             return VariadicContent.ToObject<Content>() ??

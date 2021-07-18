@@ -1,4 +1,4 @@
-namespace MatrixSdk.Extensions
+namespace MatrixSdk
 {
     using System;
     using Microsoft.Extensions.DependencyInjection;

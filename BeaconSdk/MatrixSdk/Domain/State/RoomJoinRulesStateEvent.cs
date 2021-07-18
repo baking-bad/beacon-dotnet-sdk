@@ -1,17 +1,19 @@
-namespace MatrixSdk.Dto.Sync.Event.Room.State
+namespace MatrixSdk.Domain.State
 {
     using System;
+    using Dto.Sync.Event;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
+    [Obsolete]
     public record RoomJoinRulesStateEvent (
-        RoomEventType Type,
+        EventType Type,
         JObject VariadicContent,
         string SenderUserId,
         string Id,
         long OriginHomeServerTimestamp,
         string RoomId,
-        string StateKey) : RoomStateEvent(Type, VariadicContent, SenderUserId, Id, OriginHomeServerTimestamp, RoomId, StateKey)
+        string StateKey) //: RoomStateEvent(Type, VariadicContent, SenderUserId, Id, OriginHomeServerTimestamp, RoomId, StateKey)
     {
 
         public enum JoinRule
@@ -20,14 +22,14 @@ namespace MatrixSdk.Dto.Sync.Event.Room.State
             Invite
         }
 
-        public Content GetContent()
-        {
-            if (Type != RoomEventType.JoinRules)
-                throw new InvalidOperationException($"Invalid operation: Content is not {nameof(Content)}");
-
-            return VariadicContent.ToObject<Content>() ??
-                   throw new InvalidOperationException($"Cannot parse {nameof(Content)}");
-        }
+        // public Content GetContent()
+        // {
+        //     if (Type != BaseEventType.JoinRules)
+        //         throw new InvalidOperationException($"Invalid operation: Content is not {nameof(Content)}");
+        //
+        //     return VariadicContent.ToObject<Content>() ??
+        //            throw new InvalidOperationException($"Cannot parse {nameof(Content)}");
+        // }
 
         /// <remarks>
         ///     m.room.join_rules

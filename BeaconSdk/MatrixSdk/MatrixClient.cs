@@ -6,13 +6,68 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Dto.Sync;
+    using Dto.Sync.Event;
+    using Dto.Sync.Event.Room;
     using Extensions;
     using Microsoft.Extensions.Logging;
     using Services;
 
-
-    public interface IEventListener
+    public struct Message
     {
+        public string SenderId { get; set; }
+
+        public string Text { get; set; }
+    }
+
+    public class MessageObserver : IObserver<BaseEvent>
+    {
+        public void OnCompleted()
+        {
+            throw new NotImplementedException();
+        }
+        public void OnError(Exception error)
+        {
+            throw new NotImplementedException();
+        }
+        public void OnNext(BaseEvent value)
+        {
+            if (value.EventType != EventType.Message) return;
+        }
+    }
+
+    public class MatrixManager : IObservable<BaseEvent>
+    {
+        public readonly MatrixClientState state = new()
+        {
+            Id = Guid.NewGuid(),
+            MatrixRooms = new ConcurrentDictionary<string, MatrixRoom>(),
+            Timeout = 0,
+            TransactionNumber = 0
+        };
+
+        public IDisposable Subscribe(IObserver<BaseEvent> observer) => throw new NotImplementedException();
+
+        public List<MatrixRoom> GetRoomsFromSync(Rooms rooms)
+        {
+            // var joinedMatrixRooms = rooms.Join.Select(x => new MatrixRoom(x.Key, MatrixRoomStatus.Joined))
+
+            var joinedMatrixRooms = new List<MatrixRoom>();
+            // var joinedRoomEvents = new List<RoomEvent>();
+            foreach (var (roomId, room) in rooms.Join)
+            {
+                // var rooms = new List<
+                // foreach (var VARIABLE in COLLECTION)
+                // {
+                //     
+                // }
+                joinedMatrixRooms.Add(new MatrixRoom(roomId, MatrixRoomStatus.Joined));
+            }
+
+            return null;
+        }
+        
+        // public List<RoomEvent>
     }
 
     public class MatrixClient
@@ -35,6 +90,10 @@
 
         private Timer pollingTimer;
 
+        // public MatrixRoom[] InvitedRooms => state.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Invited).ToArray();
+
+        private string Seed;
+
         public MatrixClient(ILogger<MatrixClient> logger, UserService userService, RoomService roomService,
             EventService eventService)
         {
@@ -49,12 +108,9 @@
         //Todo: store on disk
         public MatrixRoom[] InvitedRooms => state.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Invited).ToArray();
         public MatrixRoom[] JoinedRooms => state.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Joined).ToArray();
-
-        // public MatrixRoom[] InvitedRooms => state.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Invited).ToArray();
-
-
         public async Task StartAsync(string seed)
         {
+            Seed = seed;
             logger.LogInformation($"{nameof(MatrixClient)}: Starting...");
 
             var response = await userService!.LoginAsync(seed, cancellationTokenSource.Token);
@@ -69,6 +125,7 @@
 
         private async Task PollAsync(CancellationToken cancellationToken)
         {
+            var seed = Seed;
             pollingTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
             ThrowIfAccessTokenIsEmpty();
@@ -79,15 +136,30 @@
             state.Timeout = 30000;
             state.NextBatch = response.NextBatch;
 
-            logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Invite: {response.Rooms.Invite.Count}");
-            logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Join: {response.Rooms.Join.Count}");
-            logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Leave: {response.Rooms.Leave.Count}");
+            // logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Invite: {response.Rooms.Invite.Count}");
+            // logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Join: {response.Rooms.Join.Count}");
+            // logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Leave: {response.Rooms.Leave.Count}");
+            
+            if (response.Rooms.Join.Count > 0)
+            {
+                var joinRooms = response.Rooms.Join;
+                if (joinRooms.Count > 0)
+                    foreach (var (roomId, joinedRoom) in joinRooms)
+                    {
+                        logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, State.Events.Count: {joinedRoom.State.Events.Count}");
+                        logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, joinedRoom.Timeline.Events.Count: {joinedRoom.Timeline.Events.Count}");
+                    }
+            }
 
-            if (response.Rooms.Invite.Count > 0)
-                foreach (var (key, value) in response.Rooms.Invite)
-                {
-                    var roomId = key;
-                }
+
+            if (seed == "20000")
+            {
+            }
+            // if (response.Rooms.Invite.Count > 0)
+            //     foreach (var (key, value) in response.Rooms.Invite)
+            //     {
+            //         var roomId = key;
+            //     }
             // var roomId = response.Rooms.Invite[0];
             // var joined = response.Rooms.Invite;
             //
@@ -157,7 +229,7 @@
             ThrowIfAccessTokenIsEmpty();
 
             var transactionId = CreateTransactionId();
-            var result = await eventService.SendMessageAsync(state.AccessToken, roomId, transactionId, message);
+            var result = await eventService.SendMessageAsync(state.AccessToken!, roomId, transactionId, message);
             var id = result.EventId;
         }
 
@@ -168,6 +240,13 @@
             var response = await roomService.GetJoinedRoomsAsync(state.AccessToken!, cancellationTokenSource.Token);
 
             return response.JoinedRoomIds;
+        }
+
+        public async Task LeaveRoomAsync(string roomId)
+        {
+            ThrowIfAccessTokenIsEmpty();
+
+            await roomService.LeaveRoomAsync(state.AccessToken!, roomId, cancellationTokenSource.Token);
         }
 
         private void ThrowIfAccessTokenIsEmpty()
