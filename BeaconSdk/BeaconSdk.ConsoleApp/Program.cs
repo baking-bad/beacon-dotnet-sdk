@@ -3,7 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using MatrixSdk;
-    using MatrixSdk.Extensions;
+    using MatrixSdk.Application;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -51,21 +51,33 @@
             var firstClient = serviceProvider.GetRequiredService<MatrixClient>();
             var secondClient = serviceProvider.GetRequiredService<MatrixClient>();
 
-            await firstClient!.StartAsync(Guid.NewGuid().ToString()); //Todo: generate once and then store seed?
-            await secondClient!.StartAsync(Guid.NewGuid().ToString());
+            // await firstClient!.StartAsync(Guid.NewGuid().ToString()); //Todo: generate once and then store seed?
+            // await secondClient!.StartAsync(Guid.NewGuid().ToString());
+
+            await firstClient!.StartAsync("7777"); //Todo: generate once and then store seed?
+            await secondClient!.StartAsync("877");
+
+            // var room = await firstClient.CreateTrustedPrivateRoomAsync();
+            // await firstClient.SendMessageAsync(room.Id, "Test");
+            // await firstClient.SendMessageAsync(room.Id, "Test2");
 
             var firstClientMatrixRoom = await firstClient.CreateTrustedPrivateRoomAsync(new[]
             {
                 secondClient.UserId
             });
 
-            var secondClientMatrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
+            await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
 
-            await secondClient.SendMessageAsync(secondClientMatrixRoom.Id, "Hello world!");
+            // await firstClient.LeaveRoomAsync(firstClientMatrixRoom.Id);
+
+            // var secondClientMatrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
+
+            // await secondClient.SendMessageAsync(secondClientMatrixRoom.Id, "Hello world!");
+            // await firstClient.SendMessageAsync(firstClientMatrixRoom)
             Console.ReadLine();
 
             firstClient.Stop();
-            secondClient.Stop();
+            // secondClient.Stop();
         }
     }
 }
