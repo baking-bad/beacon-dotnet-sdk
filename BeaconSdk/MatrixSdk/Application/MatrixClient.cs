@@ -35,31 +35,30 @@
 
     public class MatrixClient
     {
+        private const int FirstSyncTimout = 0;
+        private const int LaterSyncTimout = 30000;
+
         private readonly CancellationTokenSource cancellationTokenSource = new();
         private readonly ClientStateManager clientStateManager;
-        private readonly RoomSyncService roomSyncService;
         private readonly EventService eventService;
         private readonly ILogger<MatrixClient> logger;
         private readonly RoomService roomService;
         private readonly UserService userService;
 
         private Timer pollingTimer;
-
-        // public MatrixRoom[] InvitedRooms => state.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Invited).ToArray();
-
+        
         private string Seed;
 
         public MatrixClient(
             ILogger<MatrixClient> logger,
-            ClientStateManager clientStateManager, 
-            RoomSyncService roomSyncService,
-            UserService userService, 
+            ClientStateManager clientStateManager,
+            MatrixRoomFactory matrixRoomFactory,
+            UserService userService,
             RoomService roomService,
             EventService eventService)
         {
             this.logger = logger;
             this.clientStateManager = clientStateManager;
-            this.roomSyncService = roomSyncService;
             this.userService = userService;
             this.roomService = roomService;
             this.eventService = eventService;
@@ -76,11 +75,12 @@
             logger.LogInformation($"{nameof(MatrixClient)}: Starting...");
 
             var response = await userService!.LoginAsync(seed, cancellationTokenSource.Token);
+
             clientStateManager.state.UserId = response.UserId;
             clientStateManager.state.AccessToken = response.AccessToken;
 
             pollingTimer = new Timer(async _ => await PollAsync(cancellationTokenSource.Token));
-            pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+            pollingTimer.Change(TimeSpan.FromSeconds(FirstSyncTimout), TimeSpan.FromMilliseconds(-1));
 
             logger.LogInformation($"{nameof(MatrixClient)}: Ready.");
         }
@@ -96,13 +96,14 @@
                 nextBatch: clientStateManager.state.NextBatch!,
                 cancellationToken: cancellationToken);
 
-            clientStateManager.state.Timeout = 30000;
+            clientStateManager.state.Timeout = LaterSyncTimout;
             clientStateManager.state.NextBatch = response.NextBatch;
 
-            var matrixRooms = roomSyncService.GetMatrixRoomsFromSync(response.Rooms);
-            clientStateManager.UpdateStateWith(matrixRooms);
+            var syncBatch = SyncBatch.Factory.CreateFromSync(clientStateManager.state.NextBatch, response.Rooms);
+            // var matrixRooms = matrixRoomFactory.GetMatrixRoomsFromSync(response.Rooms);
+            clientStateManager.UpdateStateWith(syncBatch.MatrixRooms);
 
-            if (seed == "7777")
+            if (seed == "77777")
             {
                 var t = clientStateManager.state.MatrixRooms;
             }

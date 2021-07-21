@@ -17,7 +17,7 @@ namespace MatrixSdk.Domain.Room
                 var content = roomEvent.Content.ToObject<RoomMemberContent>();
                 if (content == null || content.UserMembershipState != UserMembershipState.Join)
                 {
-                    joinRoomEvent = null;
+                    joinRoomEvent = new JoinRoomEvent("", "");
                     return false;
                 }
 
@@ -27,12 +27,12 @@ namespace MatrixSdk.Domain.Room
                 return true;
             }
 
-            public static bool TryCreateFrom(RoomStrippedState roomStrippedState, string roomId, out JoinRoomEvent? joinRoomEvent)
+            public static bool TryCreateFromStrippedState(RoomStrippedState roomStrippedState, string roomId, out JoinRoomEvent joinRoomEvent)
             {
                 var content = roomStrippedState.Content.ToObject<RoomMemberContent>();
                 if (content == null || content.UserMembershipState != UserMembershipState.Join)
                 {
-                    joinRoomEvent = null;
+                    joinRoomEvent = new JoinRoomEvent("", "");
                     return false;
                 }
 
