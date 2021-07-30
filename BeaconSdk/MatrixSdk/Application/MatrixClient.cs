@@ -6,7 +6,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Domain;
-    using Domain.Room;
     using Infrastructure.Services;
     using Microsoft.Extensions.Logging;
 
@@ -74,7 +73,7 @@
                 cancellationToken: cancellationToken);
 
             var syncBatch = SyncBatch.Factory.CreateFromSync(response.NextBatch, response.Rooms);
-            
+
             clientStateManager.OnSuccessSync(syncBatch, syncBatch.NextBatch);
             TextMessageNotifier.NotifyAll(syncBatch.MatrixRoomEvents);
 
@@ -95,7 +94,7 @@
 
             logger.LogInformation($"{nameof(MatrixClient)}: Stopped.");
         }
-        
+
 
         public async Task<MatrixRoom> CreateTrustedPrivateRoomAsync(string[]? invitedUserIds = null)
         {
