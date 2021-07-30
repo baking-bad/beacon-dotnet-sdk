@@ -11,7 +11,23 @@ namespace MatrixSdk.Application
         private const int FirstSyncTimout = 0;
         private const int LaterSyncTimout = 30000;
 
-        public readonly MatrixClientState state = new()
+        public string AccessToken => state.AccessToken!;
+        public ulong Timeout => state.Timeout;
+
+        public string UserId => state.UserId!;
+
+        public string NextBatch => state.NextBatch!;
+
+        public ConcurrentDictionary<string, MatrixRoom> MatrixRooms => state.MatrixRooms;
+
+        public ulong TransactionNumber
+        {
+            get => state.TransactionNumber;
+            set => state.TransactionNumber = value;
+        } 
+        
+        
+        private readonly MatrixClientState state = new()
         {
             Id = Guid.NewGuid(),
             MatrixRooms = new ConcurrentDictionary<string, MatrixRoom>(),
@@ -35,7 +51,7 @@ namespace MatrixSdk.Application
                 }
         }
 
-        public void OnSuccessSync(SyncBatch syncBatch, string nextBatch)
+        public void UpdateStateWith(SyncBatch syncBatch, string nextBatch)
         {
             state.Timeout = LaterSyncTimout;
             state.NextBatch = nextBatch;
@@ -46,6 +62,11 @@ namespace MatrixSdk.Application
         {
             state.UserId = userId;
             state.AccessToken = accessToken;
+        }
+
+        public void UpdateMatrixRoom(string roomId, MatrixRoom matrixRoom)
+        {
+            state.MatrixRooms[roomId] = matrixRoom;
         }
     }
 }
