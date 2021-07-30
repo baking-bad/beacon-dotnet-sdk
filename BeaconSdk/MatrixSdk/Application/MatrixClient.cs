@@ -76,7 +76,7 @@
             var syncBatch = SyncBatch.Factory.CreateFromSync(response.NextBatch, response.Rooms);
             
             clientStateManager.OnSuccessSync(syncBatch, syncBatch.NextBatch);
-            NotifyWithTextMessageEvents(syncBatch.MatrixRoomEvents);
+            TextMessageNotifier.NotifyAll(syncBatch.MatrixRoomEvents);
 
             if (seed == "77777")
             {
@@ -95,16 +95,7 @@
 
             logger.LogInformation($"{nameof(MatrixClient)}: Stopped.");
         }
-
-        private void NotifyWithTextMessageEvents(List<BaseRoomEvent> baseRoomEvents)
-        {
-            foreach (var matrixRoomEvent in baseRoomEvents)
-            {
-                var textMessageEvent = matrixRoomEvent as TextMessageEvent;
-                if (textMessageEvent != null)
-                    TextMessageNotifier.NotifyAll(textMessageEvent);
-            }
-        }
+        
 
         public async Task<MatrixRoom> CreateTrustedPrivateRoomAsync(string[]? invitedUserIds = null)
         {

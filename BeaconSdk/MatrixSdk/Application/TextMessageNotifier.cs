@@ -16,13 +16,13 @@ namespace MatrixSdk.Application
             return new Unsubscriber<TextMessageEvent>(Observers, observer);
         }
 
-        public void NotifyAll(TextMessageEvent messageEvent)
+        private void NotifyAll(TextMessageEvent messageEvent)
         {
             foreach (var eventObserver in Observers)
                 eventObserver.OnNext(messageEvent);
         }
         
-        private void NotifyAll(List<BaseRoomEvent> baseRoomEvents)
+        public void NotifyAll(List<BaseRoomEvent> baseRoomEvents)
         {
             foreach (var matrixRoomEvent in baseRoomEvents)
             {
