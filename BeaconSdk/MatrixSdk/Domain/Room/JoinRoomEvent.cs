@@ -3,21 +3,16 @@ namespace MatrixSdk.Domain.Room
     using Infrastructure.Dto.Sync.Event.Room;
     using Infrastructure.Dto.Sync.Event.Room.State;
 
-    public record JoinRoomEvent : BaseRoomEvent
+    public record JoinRoomEvent(string RoomId, string SenderUserId) : BaseRoomEvent(RoomId, SenderUserId)
     {
-        private JoinRoomEvent(string roomId, string senderUserId)
-            : base(roomId, senderUserId)
-        {
-        }
-
         public static class Factory
         {
-            public static bool TryCreateFrom(RoomEvent roomEvent, string roomId, out JoinRoomEvent? joinRoomEvent)
+            public static bool TryCreateFrom(RoomEvent roomEvent, string roomId, out JoinRoomEvent joinRoomEvent)
             {
                 var content = roomEvent.Content.ToObject<RoomMemberContent>();
                 if (content == null || content.UserMembershipState != UserMembershipState.Join)
                 {
-                    joinRoomEvent = new JoinRoomEvent("", "");
+                    joinRoomEvent = new JoinRoomEvent(string.Empty, string.Empty);
                     return false;
                 }
 
@@ -32,7 +27,7 @@ namespace MatrixSdk.Domain.Room
                 var content = roomStrippedState.Content.ToObject<RoomMemberContent>();
                 if (content == null || content.UserMembershipState != UserMembershipState.Join)
                 {
-                    joinRoomEvent = new JoinRoomEvent("", "");
+                    joinRoomEvent = new JoinRoomEvent(string.Empty, string.Empty);
                     return false;
                 }
 

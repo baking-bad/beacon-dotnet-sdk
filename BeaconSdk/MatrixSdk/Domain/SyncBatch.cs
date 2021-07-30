@@ -23,13 +23,13 @@ namespace MatrixSdk.Domain
         internal static class Factory
         {
             private static readonly MatrixRoomFactory MatrixRoomFactory = new();
-            private static readonly MatrixRoomEventFactory MatrixRoomEventFactory = new ();
-            
+            private static readonly MatrixRoomEventFactory MatrixRoomEventFactory = new();
+
             public static SyncBatch CreateFromSync(string nextBatch, Rooms rooms)
             {
                 var matrixRooms = GetMatrixRoomsFromSync(rooms);
                 var matrixRoomEvents = GetMatrixEventsFromSync(rooms);
-                
+
                 return new SyncBatch(nextBatch, matrixRooms, matrixRoomEvents);
             }
 
@@ -47,7 +47,7 @@ namespace MatrixSdk.Domain
                 var joinedMatrixRoomEvents = rooms.Join.SelectMany(pair => MatrixRoomEventFactory.CreateFromJoined(pair.Key, pair.Value)).ToList();
                 var invitedMatrixRoomEvents = rooms.Invite.SelectMany(pair => MatrixRoomEventFactory.CreateFromInvited(pair.Key, pair.Value)).ToList();
                 var leftMatrixRoomEvents = rooms.Leave.SelectMany(pair => MatrixRoomEventFactory.CreateFromLeft(pair.Key, pair.Value)).ToList();
-             
+
                 return joinedMatrixRoomEvents.Concat(invitedMatrixRoomEvents).Concat(leftMatrixRoomEvents).ToList();
             }
         }

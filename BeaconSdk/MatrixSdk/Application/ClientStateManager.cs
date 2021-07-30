@@ -8,15 +8,18 @@ namespace MatrixSdk.Application
 
     public class ClientStateManager
     {
+        private const int FirstSyncTimout = 0;
+        private const int LaterSyncTimout = 30000;
+
         public readonly MatrixClientState state = new()
         {
             Id = Guid.NewGuid(),
             MatrixRooms = new ConcurrentDictionary<string, MatrixRoom>(),
-            Timeout = 0,
+            Timeout = FirstSyncTimout,
             TransactionNumber = 0
         };
 
-        public void UpdateStateWith(List<MatrixRoom> matrixRooms)
+        private void UpdateStateWith(List<MatrixRoom> matrixRooms)
         {
             foreach (var room in matrixRooms)
                 if (!state.MatrixRooms.TryGetValue(room.Id, out var retrievedRoom))
@@ -30,6 +33,13 @@ namespace MatrixSdk.Application
 
                     state.MatrixRooms.TryUpdate(room.Id, updatedRoom, retrievedRoom);
                 }
+        }
+
+        public void OnSuccessSync(SyncBatch syncBatch, string nextBatch)
+        {
+            state.Timeout = LaterSyncTimout;
+            state.NextBatch = nextBatch;
+            UpdateStateWith(syncBatch.MatrixRooms);
         }
     }
 }

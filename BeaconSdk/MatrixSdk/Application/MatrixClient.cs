@@ -6,38 +6,12 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Domain;
-    using Infrastructure.Dto.Sync.Event;
+    using Domain.Room;
     using Infrastructure.Services;
     using Microsoft.Extensions.Logging;
 
-    public struct Message
-    {
-        public string SenderId { get; set; }
-
-        public string Text { get; set; }
-    }
-
-    public class MessageObserver : IObserver<BaseEvent>
-    {
-        public void OnCompleted()
-        {
-            throw new NotImplementedException();
-        }
-        public void OnError(Exception error)
-        {
-            throw new NotImplementedException();
-        }
-        public void OnNext(BaseEvent value)
-        {
-            if (value.EventType != EventType.Message) return;
-        }
-    }
-
     public class MatrixClient
     {
-        private const int FirstSyncTimout = 0;
-        private const int LaterSyncTimout = 30000;
-
         private readonly CancellationTokenSource cancellationTokenSource = new();
         private readonly ClientStateManager clientStateManager;
         private readonly EventService eventService;
@@ -45,33 +19,38 @@
         private readonly RoomService roomService;
         private readonly UserService userService;
 
-        private Timer pollingTimer;
-        
-        private string Seed;
+        private Timer pollingTimer = null!;
+
+        private string seed = "";
 
         public MatrixClient(
             ILogger<MatrixClient> logger,
             ClientStateManager clientStateManager,
-            MatrixRoomFactory matrixRoomFactory,
             UserService userService,
             RoomService roomService,
-            EventService eventService)
+            EventService eventService, TextMessageNotifier textMessageNotifier)
         {
             this.logger = logger;
             this.clientStateManager = clientStateManager;
             this.userService = userService;
             this.roomService = roomService;
             this.eventService = eventService;
+            TextMessageNotifier = textMessageNotifier;
         }
+        public TextMessageNotifier TextMessageNotifier { get; }
 
         public string UserId => clientStateManager.state.UserId!;
 
         //Todo: store on disk
         public MatrixRoom[] InvitedRooms => clientStateManager.state.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Invited).ToArray();
+
         public MatrixRoom[] JoinedRooms => clientStateManager.state.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Joined).ToArray();
+
+        public MatrixRoom[] LeftRooms => clientStateManager.state.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Left).ToArray();
+
         public async Task StartAsync(string seed)
         {
-            Seed = seed;
+            this.seed = seed;
             logger.LogInformation($"{nameof(MatrixClient)}: Starting...");
 
             var response = await userService!.LoginAsync(seed, cancellationTokenSource.Token);
@@ -80,14 +59,13 @@
             clientStateManager.state.AccessToken = response.AccessToken;
 
             pollingTimer = new Timer(async _ => await PollAsync(cancellationTokenSource.Token));
-            pollingTimer.Change(TimeSpan.FromSeconds(FirstSyncTimout), TimeSpan.FromMilliseconds(-1));
+            pollingTimer.Change(TimeSpan.FromSeconds(clientStateManager.state.Timeout), TimeSpan.FromMilliseconds(-1));
 
             logger.LogInformation($"{nameof(MatrixClient)}: Ready.");
         }
 
         private async Task PollAsync(CancellationToken cancellationToken)
         {
-            var seed = Seed;
             pollingTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
             ThrowIfAccessTokenIsEmpty();
@@ -96,12 +74,10 @@
                 nextBatch: clientStateManager.state.NextBatch!,
                 cancellationToken: cancellationToken);
 
-            clientStateManager.state.Timeout = LaterSyncTimout;
-            clientStateManager.state.NextBatch = response.NextBatch;
-
-            var syncBatch = SyncBatch.Factory.CreateFromSync(clientStateManager.state.NextBatch, response.Rooms);
-            // var matrixRooms = matrixRoomFactory.GetMatrixRoomsFromSync(response.Rooms);
-            clientStateManager.UpdateStateWith(syncBatch.MatrixRooms);
+            var syncBatch = SyncBatch.Factory.CreateFromSync(response.NextBatch, response.Rooms);
+            
+            clientStateManager.OnSuccessSync(syncBatch, syncBatch.NextBatch);
+            NotifyWithTextMessageEvents(syncBatch.MatrixRoomEvents);
 
             if (seed == "77777")
             {
@@ -119,6 +95,16 @@
             pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
 
             logger.LogInformation($"{nameof(MatrixClient)}: Stopped.");
+        }
+
+        private void NotifyWithTextMessageEvents(List<BaseRoomEvent> baseRoomEvents)
+        {
+            foreach (var matrixRoomEvent in baseRoomEvents)
+            {
+                var textMessageEvent = matrixRoomEvent as TextMessageEvent;
+                if (textMessageEvent != null)
+                    TextMessageNotifier.NotifyAll(textMessageEvent);
+            }
         }
 
         public async Task<MatrixRoom> CreateTrustedPrivateRoomAsync(string[]? invitedUserIds = null)

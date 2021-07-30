@@ -68,7 +68,7 @@
 
             await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
 
-            await firstClient.LeaveRoomAsync(firstClientMatrixRoom.Id);
+            // await firstClient.LeaveRoomAsync(firstClientMatrixRoom.Id);
 
             // var secondClientMatrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
 

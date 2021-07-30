@@ -17,10 +17,12 @@ namespace MatrixSdk.Application
                     roomEvents.Add(createRoomEvent!);
                 else if (InviteToRoomEvent.Factory.TryCreateFrom(timelineEvent, roomId, out var inviteToRoomEvent))
                     roomEvents.Add(inviteToRoomEvent!);
+                else if (TextMessageEvent.Factory.TryCreateFrom(timelineEvent, roomId, out var textMessageEvent))
+                    roomEvents.Add(textMessageEvent);
 
             return roomEvents;
         }
-        
+
         public List<BaseRoomEvent> CreateFromInvited(string roomId, InvitedRoom invitedRoom)
         {
             var roomEvents = new List<BaseRoomEvent>();
@@ -32,10 +34,12 @@ namespace MatrixSdk.Application
                     roomEvents.Add(createRoomEvent!);
                 else if (InviteToRoomEvent.Factory.TryCreateFromStrippedState(inviteStateEvent, roomId, out var inviteToRoomEvent))
                     roomEvents.Add(inviteToRoomEvent!);
+                else if (TextMessageEvent.Factory.TryCreateFromStrippedState(inviteStateEvent, roomId, out var textMessageEvent))
+                    roomEvents.Add(textMessageEvent);
 
             return roomEvents;
         }
-        
+
         public List<BaseRoomEvent> CreateFromLeft(string roomId, LeftRoom leftRoom)
         {
             var roomEvents = new List<BaseRoomEvent>();
@@ -47,6 +51,8 @@ namespace MatrixSdk.Application
                     roomEvents.Add(createRoomEvent!);
                 else if (InviteToRoomEvent.Factory.TryCreateFrom(timelineEvent, roomId, out var inviteToRoomEvent))
                     roomEvents.Add(inviteToRoomEvent!);
+                else if (TextMessageEvent.Factory.TryCreateFrom(timelineEvent, roomId, out var textMessageEvent))
+                    roomEvents.Add(textMessageEvent);
 
             return roomEvents;
         }

@@ -1,7 +1,6 @@
 namespace MatrixSdk.Application
 {
     using System.Collections.Generic;
-    using System.Linq;
     using Domain;
     using Domain.Room;
     using Infrastructure.Dto.Sync;
@@ -17,7 +16,7 @@ namespace MatrixSdk.Application
 
             return new MatrixRoom(roomId, MatrixRoomStatus.Joined, joinedUserIds);
         }
-        
+
         public MatrixRoom CreateInvite(string roomId, InvitedRoom invitedRoom)
         {
             var joinedUserIds = new List<string>();
@@ -27,7 +26,7 @@ namespace MatrixSdk.Application
 
             return new MatrixRoom(roomId, MatrixRoomStatus.Joined, joinedUserIds);
         }
-        
+
         public MatrixRoom CreateLeft(string roomId, LeftRoom leftRoom)
         {
             var joinedUserIds = new List<string>();
@@ -38,4 +37,4 @@ namespace MatrixSdk.Application
             return new MatrixRoom(roomId, MatrixRoomStatus.Left, joinedUserIds);
         }
     }
-} 
+}
