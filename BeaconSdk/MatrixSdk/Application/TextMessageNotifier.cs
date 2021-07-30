@@ -21,6 +21,16 @@ namespace MatrixSdk.Application
             foreach (var eventObserver in Observers)
                 eventObserver.OnNext(messageEvent);
         }
+        
+        private void NotifyAll(List<BaseRoomEvent> baseRoomEvents)
+        {
+            foreach (var matrixRoomEvent in baseRoomEvents)
+            {
+                var textMessageEvent = matrixRoomEvent as TextMessageEvent;
+                if (textMessageEvent != null)
+                    NotifyAll(textMessageEvent);
+            }
+        }
     }
 
 }

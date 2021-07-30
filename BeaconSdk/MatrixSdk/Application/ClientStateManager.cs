@@ -41,5 +41,11 @@ namespace MatrixSdk.Application
             state.NextBatch = nextBatch;
             UpdateStateWith(syncBatch.MatrixRooms);
         }
+
+        public void UpdateStateWith(string userId, string accessToken)
+        {
+            state.UserId = userId;
+            state.AccessToken = accessToken;
+        }
     }
 }

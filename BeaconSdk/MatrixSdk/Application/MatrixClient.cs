@@ -55,8 +55,7 @@
 
             var response = await userService!.LoginAsync(seed, cancellationTokenSource.Token);
 
-            clientStateManager.state.UserId = response.UserId;
-            clientStateManager.state.AccessToken = response.AccessToken;
+            clientStateManager.UpdateStateWith(response.UserId, response.AccessToken);
 
             pollingTimer = new Timer(async _ => await PollAsync(cancellationTokenSource.Token));
             pollingTimer.Change(TimeSpan.FromSeconds(clientStateManager.state.Timeout), TimeSpan.FromMilliseconds(-1));
