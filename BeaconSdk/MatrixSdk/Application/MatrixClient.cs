@@ -47,13 +47,12 @@
 
         public MatrixRoom[] LeftRooms => clientStateManager.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Left).ToArray();
 
-        public async Task StartAsync(string seed)
+        public async Task StartAsync(string seed) // seed need for debugging
         {
-            this.seed = seed;
             logger.LogInformation($"{nameof(MatrixClient)}: Starting...");
+            this.seed = seed;
 
             var response = await userService!.LoginAsync(seed, cancellationTokenSource.Token);
-
             clientStateManager.UpdateStateWith(response.UserId, response.AccessToken);
 
             pollingTimer = new Timer(async _ => await PollAsync(cancellationTokenSource.Token));
@@ -77,7 +76,7 @@
             clientStateManager.UpdateStateWith(syncBatch, syncBatch.NextBatch);
             TextMessageNotifier.NotifyAll(syncBatch.MatrixRoomEvents);
 
-            if (seed == "77777")
+            if (seed == "0008777")
             {
                 var t = clientStateManager.MatrixRooms;
             }
@@ -128,11 +127,11 @@
             var result = await eventService.SendMessageAsync(clientStateManager.AccessToken!, roomId, transactionId, message);
             var id = result.EventId;
         }
-        
+
         private string CreateTransactionId()
         {
             var timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            var counter = clientStateManager.TransactionNumber ;
+            var counter = clientStateManager.TransactionNumber;
 
             clientStateManager.TransactionNumber += 1;
 

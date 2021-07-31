@@ -5,13 +5,30 @@ namespace MatrixSdk.Application
     using System.Collections.Generic;
     using System.Linq;
     using Domain;
+    using Microsoft.Extensions.Logging;
 
     public class ClientStateManager
     {
         private const int FirstSyncTimout = 0;
         private const int LaterSyncTimout = 30000;
+        private readonly ILogger<ClientStateManager> logger;
+
+
+        private readonly MatrixClientState state = new()
+        {
+            Id = Guid.NewGuid(),
+            MatrixRooms = new ConcurrentDictionary<string, MatrixRoom>(),
+            Timeout = FirstSyncTimout,
+            TransactionNumber = 0
+        };
+
+        public ClientStateManager(ILogger<ClientStateManager> logger)
+        {
+            this.logger = logger;
+        }
 
         public string AccessToken => state.AccessToken!;
+
         public ulong Timeout => state.Timeout;
 
         public string UserId => state.UserId!;
@@ -24,16 +41,7 @@ namespace MatrixSdk.Application
         {
             get => state.TransactionNumber;
             set => state.TransactionNumber = value;
-        } 
-        
-        
-        private readonly MatrixClientState state = new()
-        {
-            Id = Guid.NewGuid(),
-            MatrixRooms = new ConcurrentDictionary<string, MatrixRoom>(),
-            Timeout = FirstSyncTimout,
-            TransactionNumber = 0
-        };
+        }
 
         private void UpdateStateWith(List<MatrixRoom> matrixRooms)
         {
@@ -66,7 +74,11 @@ namespace MatrixSdk.Application
 
         public void UpdateMatrixRoom(string roomId, MatrixRoom matrixRoom)
         {
-            state.MatrixRooms[roomId] = matrixRoom;
+            if (!state.MatrixRooms.TryGetValue(roomId, out var oldValue))
+                logger.LogInformation($"RoomId: {roomId}: could not get value");
+
+            if (!state.MatrixRooms.TryUpdate(roomId, matrixRoom, oldValue))
+                logger.LogInformation($"RoomId: {roomId}: could not update value");
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿namespace BeaconSdk.ConsoleApp
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using MatrixSdk;
     using MatrixSdk.Application;
@@ -51,36 +52,54 @@
             var firstClient = serviceProvider.GetRequiredService<MatrixClient>();
             var secondClient = serviceProvider.GetRequiredService<MatrixClient>();
 
-            // await firstClient!.StartAsync(Guid.NewGuid().ToString()); //Todo: generate once and then store seed?
-            // await secondClient!.StartAsync(Guid.NewGuid().ToString());
+            var textMessageObserver = new TextMessageObserver();
+            firstClient.TextMessageNotifier.Subscribe(textMessageObserver);
+            secondClient.TextMessageNotifier.Subscribe(textMessageObserver);
 
-            await firstClient!.StartAsync("77777"); //Todo: generate once and then store seed?
-            await secondClient!.StartAsync("8777");
+            await firstClient!.StartAsync(Guid.NewGuid().ToString()); //Todo: generate once and then store seed?
+            await secondClient!.StartAsync(Guid.NewGuid().ToString());
 
-            // var room = await firstClient.CreateTrustedPrivateRoomAsync();
-            // await firstClient.SendMessageAsync(room.Id, "Test");
-            // await firstClient.SendMessageAsync(room.Id, "Test2");
+            // await firstClient!.StartAsync("0077777"); 
+            // await secondClient!.StartAsync("0008777");
 
             var firstClientMatrixRoom = await firstClient.CreateTrustedPrivateRoomAsync(new[]
             {
                 secondClient.UserId
             });
 
-            await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
+            // var matrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
 
-            // await firstClient.LeaveRoomAsync(firstClientMatrixRoom.Id);
+            // var spin = new SpinWait();
+            // while (secondClient.JoinedRooms.Length == 0)
+            //     spin.SpinOnce();
 
-            // var secondClientMatrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
+            await firstClient.SendMessageAsync(firstClientMatrixRoom.Id, "Hello");
+            // await secondClient.SendMessageAsync(secondClient.JoinedRooms[0].Id, ", ");
 
-            // await secondClient.SendMessageAsync(secondClientMatrixRoom.Id, "Hello world!");
-            // await firstClient.SendMessageAsync(firstClientMatrixRoom)
+            await firstClient.SendMessageAsync(firstClientMatrixRoom.Id, "World");
+            // await secondClient.SendMessageAsync(secondClient.JoinedRooms[0].Id, "!");
+
             Console.ReadLine();
 
             firstClient.Stop();
-            // secondClient.Stop();
+            secondClient.Stop();
         }
     }
 }
+
+// await firstClient!.StartAsync("077777"); 
+// await secondClient!.StartAsync("08777");
+
+// var room = await firstClient.CreateTrustedPrivateRoomAsync();
+// await firstClient.SendMessageAsync(room.Id, "Test");
+// await firstClient.SendMessageAsync(room.Id, "Test2");
+
+// await firstClient.LeaveRoomAsync(firstClientMatrixRoom.Id);
+
+// var secondClientMatrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
+
+// await secondClient.SendMessageAsync(secondClientMatrixRoom.Id, "Hello world!");
+// await firstClient.SendMessageAsync(firstClientMatrixRoom)
 
 // var cts = new CancellationTokenSource();
 

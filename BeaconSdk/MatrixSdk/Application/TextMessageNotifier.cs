@@ -6,19 +6,19 @@ namespace MatrixSdk.Application
 
     public class TextMessageNotifier : IObservable<TextMessageEvent>
     {
-        private readonly List<IObserver<TextMessageEvent>> Observers = new();
+        private readonly List<IObserver<TextMessageEvent>> observers = new();
 
         public IDisposable Subscribe(IObserver<TextMessageEvent> observer)
         {
-            if (!Observers.Contains(observer))
-                Observers.Add(observer);
+            if (!observers.Contains(observer))
+                observers.Add(observer);
 
-            return new Unsubscriber<TextMessageEvent>(Observers, observer);
+            return new Unsubscriber<TextMessageEvent>(observers, observer);
         }
 
         private void NotifyAll(TextMessageEvent messageEvent)
         {
-            foreach (var eventObserver in Observers)
+            foreach (var eventObserver in observers)
                 eventObserver.OnNext(messageEvent);
         }
 
