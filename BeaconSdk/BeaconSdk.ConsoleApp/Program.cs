@@ -49,40 +49,44 @@
 
         private static async Task RunAsync(IServiceProvider serviceProvider)
         {
-            var firstClient = serviceProvider.GetRequiredService<MatrixClient>();
-            var secondClient = serviceProvider.GetRequiredService<MatrixClient>();
-
-            var textMessageObserver = new TextMessageObserver();
-            firstClient.TextMessageNotifier.Subscribe(textMessageObserver);
-            secondClient.TextMessageNotifier.Subscribe(textMessageObserver);
-
-            await firstClient!.StartAsync(Guid.NewGuid().ToString()); //Todo: generate once and then store seed?
-            await secondClient!.StartAsync(Guid.NewGuid().ToString());
-
-            // await firstClient!.StartAsync("0077777"); 
-            // await secondClient!.StartAsync("0008777");
+            var (firstClient, firstListener) = await SetupClientWithTextListener(serviceProvider);
+            var (secondClient, secondListener) = await SetupClientWithTextListener(serviceProvider);
 
             var firstClientMatrixRoom = await firstClient.CreateTrustedPrivateRoomAsync(new[]
             {
                 secondClient.UserId
             });
 
-            // var matrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
+            var matrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
 
-            // var spin = new SpinWait();
-            // while (secondClient.JoinedRooms.Length == 0)
-            //     spin.SpinOnce();
+            var spin = new SpinWait();
+            while (secondClient.JoinedRooms.Length == 0)
+                spin.SpinOnce();
 
             await firstClient.SendMessageAsync(firstClientMatrixRoom.Id, "Hello");
-            // await secondClient.SendMessageAsync(secondClient.JoinedRooms[0].Id, ", ");
+            await secondClient.SendMessageAsync(secondClient.JoinedRooms[0].Id, ", ");
 
             await firstClient.SendMessageAsync(firstClientMatrixRoom.Id, "World");
-            // await secondClient.SendMessageAsync(secondClient.JoinedRooms[0].Id, "!");
+            await secondClient.SendMessageAsync(secondClient.JoinedRooms[0].Id, "!");
 
             Console.ReadLine();
 
             firstClient.Stop();
             secondClient.Stop();
+
+            firstListener.Unsubscribe();
+            secondListener.Unsubscribe();
+        }
+
+        private static async Task<(MatrixClient, TextMessageListener)> SetupClientWithTextListener(IServiceProvider serviceProvider)
+        {
+            var matrixClient = serviceProvider.GetRequiredService<MatrixClient>();
+            await matrixClient.StartAsync(Guid.NewGuid().ToString()); //Todo: generate once and then store seed?
+
+            var textMessageListener = new TextMessageListener(matrixClient.UserId);
+            textMessageListener.ListenTo(matrixClient.TextMessageNotifier);
+
+            return (matrixClient, textMessageListener);
         }
     }
 }

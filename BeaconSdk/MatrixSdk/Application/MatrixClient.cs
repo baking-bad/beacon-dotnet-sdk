@@ -20,7 +20,7 @@
 
         private Timer pollingTimer = null!;
 
-        private string seed = "";
+        // private string seed = "";
 
         public MatrixClient(
             ILogger<MatrixClient> logger,
@@ -47,10 +47,9 @@
 
         public MatrixRoom[] LeftRooms => clientStateManager.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Left).ToArray();
 
-        public async Task StartAsync(string seed) // seed need for debugging
+        public async Task StartAsync(string seed)
         {
             logger.LogInformation($"{nameof(MatrixClient)}: Starting...");
-            this.seed = seed;
 
             var response = await userService!.LoginAsync(seed, cancellationTokenSource.Token);
             clientStateManager.UpdateStateWith(response.UserId, response.AccessToken);
@@ -75,11 +74,6 @@
 
             clientStateManager.UpdateStateWith(syncBatch, syncBatch.NextBatch);
             TextMessageNotifier.NotifyAll(syncBatch.MatrixRoomEvents);
-
-            if (seed == "0008777")
-            {
-                var t = clientStateManager.MatrixRooms;
-            }
 
             pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
         }
@@ -161,3 +155,8 @@
         }
     }
 }
+
+// if (seed == "0008777")
+// {
+//     var t = clientStateManager.MatrixRooms;
+// }

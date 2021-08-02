@@ -1,5 +1,6 @@
 namespace MatrixSdk.Domain.Room
 {
+    using Infrastructure.Dto.Sync.Event;
     using Infrastructure.Dto.Sync.Event.Room;
     using Infrastructure.Dto.Sync.Event.Room.State;
 
@@ -10,27 +11,27 @@ namespace MatrixSdk.Domain.Room
             public static bool TryCreateFrom(RoomEvent roomEvent, string roomId, out CreateRoomEvent createRoomEvent)
             {
                 var content = roomEvent.Content.ToObject<RoomCreateContent>();
-                if (content == null)
+                if (roomEvent.EventType == EventType.Create && content != null)
                 {
-                    createRoomEvent = new CreateRoomEvent(string.Empty, string.Empty, string.Empty);
-                    return false;
+                    createRoomEvent = new CreateRoomEvent(roomId, roomEvent.SenderUserId, content.RoomCreatorUserId);
+                    return true;
                 }
 
-                createRoomEvent = new CreateRoomEvent(roomId, roomEvent.SenderUserId, content.RoomCreatorUserId);
-                return true;
+                createRoomEvent = new CreateRoomEvent(string.Empty, string.Empty, string.Empty);
+                return false;
             }
 
             public static bool TryCreateFromStrippedState(RoomStrippedState roomStrippedState, string roomId, out CreateRoomEvent createRoomEvent)
             {
                 var content = roomStrippedState.Content.ToObject<RoomCreateContent>();
-                if (content == null)
+                if (roomStrippedState.EventType == EventType.Create && content != null)
                 {
-                    createRoomEvent = new CreateRoomEvent(string.Empty, string.Empty, string.Empty);
-                    return false;
+                    createRoomEvent = new CreateRoomEvent(roomId, roomStrippedState.SenderUserId, content.RoomCreatorUserId);
+                    return true;
                 }
 
-                createRoomEvent = new CreateRoomEvent(roomId, roomStrippedState.SenderUserId, content.RoomCreatorUserId);
-                return true;
+                createRoomEvent = new CreateRoomEvent(string.Empty, string.Empty, string.Empty);
+                return false;
             }
         }
     }
