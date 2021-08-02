@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MatrixSdk\MatrixSdk.csproj" />
+      <ProjectReference Include="..\BeaconSdk\BeaconSdk.csproj" />
     </ItemGroup>
 
     <ItemGroup>
