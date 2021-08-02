@@ -20,7 +20,7 @@ namespace MatrixSdk.Application
         public void OnNext(TextMessageEvent value)
         {
             if (userId != value.SenderUserId)
-                Console.WriteLine($"RoomId: {value.RoomId} received message from {value.SenderUserId}: {value.Message} to: {userId}");
+                Console.WriteLine($"RoomId: {value.RoomId} received message from {value.SenderUserId}: {value.Message}.");
         }
 
         public void ListenTo(TextMessageNotifier notifier) => cancellation = notifier.Subscribe(this);
