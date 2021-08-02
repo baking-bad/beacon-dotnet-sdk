@@ -1,6 +1,7 @@
 ﻿namespace BeaconSdk.ConsoleApp
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using MatrixSdk;
     using MatrixSdk.Application;
@@ -48,39 +49,61 @@
 
         private static async Task RunAsync(IServiceProvider serviceProvider)
         {
-            var firstClient = serviceProvider.GetRequiredService<MatrixClient>();
-            var secondClient = serviceProvider.GetRequiredService<MatrixClient>();
-
-            // await firstClient!.StartAsync(Guid.NewGuid().ToString()); //Todo: generate once and then store seed?
-            // await secondClient!.StartAsync(Guid.NewGuid().ToString());
-
-            await firstClient!.StartAsync("7777"); //Todo: generate once and then store seed?
-            await secondClient!.StartAsync("877");
-
-            // var room = await firstClient.CreateTrustedPrivateRoomAsync();
-            // await firstClient.SendMessageAsync(room.Id, "Test");
-            // await firstClient.SendMessageAsync(room.Id, "Test2");
+            var (firstClient, firstListener) = await SetupClientWithTextListener(serviceProvider);
+            var (secondClient, secondListener) = await SetupClientWithTextListener(serviceProvider);
 
             var firstClientMatrixRoom = await firstClient.CreateTrustedPrivateRoomAsync(new[]
             {
                 secondClient.UserId
             });
 
-            await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
+            var matrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
 
-            // await firstClient.LeaveRoomAsync(firstClientMatrixRoom.Id);
+            var spin = new SpinWait();
+            while (secondClient.JoinedRooms.Length == 0)
+                spin.SpinOnce();
 
-            // var secondClientMatrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
+            await firstClient.SendMessageAsync(firstClientMatrixRoom.Id, "Hello");
+            await secondClient.SendMessageAsync(secondClient.JoinedRooms[0].Id, ", ");
 
-            // await secondClient.SendMessageAsync(secondClientMatrixRoom.Id, "Hello world!");
-            // await firstClient.SendMessageAsync(firstClientMatrixRoom)
+            await firstClient.SendMessageAsync(firstClientMatrixRoom.Id, "World");
+            await secondClient.SendMessageAsync(secondClient.JoinedRooms[0].Id, "!");
+
             Console.ReadLine();
 
             firstClient.Stop();
-            // secondClient.Stop();
+            secondClient.Stop();
+
+            firstListener.Unsubscribe();
+            secondListener.Unsubscribe();
+        }
+
+        private static async Task<(MatrixClient, TextMessageListener)> SetupClientWithTextListener(IServiceProvider serviceProvider)
+        {
+            var matrixClient = serviceProvider.GetRequiredService<MatrixClient>();
+            await matrixClient.StartAsync(Guid.NewGuid().ToString()); //Todo: generate once and then store seed?
+
+            var textMessageListener = new TextMessageListener(matrixClient.UserId);
+            textMessageListener.ListenTo(matrixClient.TextMessageNotifier);
+
+            return (matrixClient, textMessageListener);
         }
     }
 }
+
+// await firstClient!.StartAsync("077777"); 
+// await secondClient!.StartAsync("08777");
+
+// var room = await firstClient.CreateTrustedPrivateRoomAsync();
+// await firstClient.SendMessageAsync(room.Id, "Test");
+// await firstClient.SendMessageAsync(room.Id, "Test2");
+
+// await firstClient.LeaveRoomAsync(firstClientMatrixRoom.Id);
+
+// var secondClientMatrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
+
+// await secondClient.SendMessageAsync(secondClientMatrixRoom.Id, "Hello world!");
+// await firstClient.SendMessageAsync(firstClientMatrixRoom)
 
 // var cts = new CancellationTokenSource();
 

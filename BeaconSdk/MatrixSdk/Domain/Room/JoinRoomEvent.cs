@@ -1,45 +1,37 @@
 namespace MatrixSdk.Domain.Room
 {
+    using Infrastructure.Dto.Sync.Event;
     using Infrastructure.Dto.Sync.Event.Room;
     using Infrastructure.Dto.Sync.Event.Room.State;
 
-    public record JoinRoomEvent : BaseRoomEvent
+    public record JoinRoomEvent(string RoomId, string SenderUserId) : BaseRoomEvent(RoomId, SenderUserId)
     {
-        private JoinRoomEvent(string roomId, string senderUserId)
-            : base(roomId, senderUserId)
-        {
-        }
-
         public static class Factory
         {
-            public static bool TryCreateFrom(RoomEvent roomEvent, string roomId, out JoinRoomEvent? joinRoomEvent)
+            public static bool TryCreateFrom(RoomEvent roomEvent, string roomId, out JoinRoomEvent joinRoomEvent)
             {
                 var content = roomEvent.Content.ToObject<RoomMemberContent>();
-                if (content == null || content.UserMembershipState != UserMembershipState.Join)
+                if (roomEvent.EventType == EventType.Member && content?.UserMembershipState == UserMembershipState.Join)
                 {
-                    joinRoomEvent = null;
-                    return false;
+                    joinRoomEvent = new JoinRoomEvent(roomId, roomEvent.SenderUserId);
+                    return true;
                 }
 
-                joinRoomEvent = new JoinRoomEvent(roomId,
-                    roomEvent.SenderUserId);
-
-                return true;
+                joinRoomEvent = new JoinRoomEvent(string.Empty, string.Empty);
+                return false;
             }
 
-            public static bool TryCreateFrom(RoomStrippedState roomStrippedState, string roomId, out JoinRoomEvent? joinRoomEvent)
+            public static bool TryCreateFromStrippedState(RoomStrippedState roomStrippedState, string roomId, out JoinRoomEvent joinRoomEvent)
             {
                 var content = roomStrippedState.Content.ToObject<RoomMemberContent>();
-                if (content == null || content.UserMembershipState != UserMembershipState.Join)
+                if (roomStrippedState.EventType == EventType.Member && content?.UserMembershipState == UserMembershipState.Join)
                 {
-                    joinRoomEvent = null;
-                    return false;
+                    joinRoomEvent = new JoinRoomEvent(roomId, roomStrippedState.SenderUserId);
+                    return true;
                 }
 
-                joinRoomEvent = new JoinRoomEvent(roomId,
-                    roomStrippedState.SenderUserId);
-
-                return true;
+                joinRoomEvent = new JoinRoomEvent(string.Empty, string.Empty);
+                return false;
             }
         }
     }

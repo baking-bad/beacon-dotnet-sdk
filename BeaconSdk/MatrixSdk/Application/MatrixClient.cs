@@ -6,106 +6,74 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Domain;
-    using Infrastructure.Dto.Sync.Event;
     using Infrastructure.Services;
     using Microsoft.Extensions.Logging;
-
-    public struct Message
-    {
-        public string SenderId { get; set; }
-
-        public string Text { get; set; }
-    }
-
-    public class MessageObserver : IObserver<BaseEvent>
-    {
-        public void OnCompleted()
-        {
-            throw new NotImplementedException();
-        }
-        public void OnError(Exception error)
-        {
-            throw new NotImplementedException();
-        }
-        public void OnNext(BaseEvent value)
-        {
-            if (value.EventType != EventType.Message) return;
-        }
-    }
 
     public class MatrixClient
     {
         private readonly CancellationTokenSource cancellationTokenSource = new();
         private readonly ClientStateManager clientStateManager;
-        private readonly RoomSyncService roomSyncService;
         private readonly EventService eventService;
         private readonly ILogger<MatrixClient> logger;
         private readonly RoomService roomService;
         private readonly UserService userService;
 
-        private Timer pollingTimer;
+        private Timer pollingTimer = null!;
 
-        // public MatrixRoom[] InvitedRooms => state.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Invited).ToArray();
-
-        private string Seed;
+        // private string seed = "";
 
         public MatrixClient(
             ILogger<MatrixClient> logger,
-            ClientStateManager clientStateManager, 
-            RoomSyncService roomSyncService,
-            UserService userService, 
+            ClientStateManager clientStateManager,
+            UserService userService,
             RoomService roomService,
-            EventService eventService)
+            EventService eventService, TextMessageNotifier textMessageNotifier)
         {
             this.logger = logger;
             this.clientStateManager = clientStateManager;
-            this.roomSyncService = roomSyncService;
             this.userService = userService;
             this.roomService = roomService;
             this.eventService = eventService;
+            TextMessageNotifier = textMessageNotifier;
         }
+        public TextMessageNotifier TextMessageNotifier { get; }
 
-        public string UserId => clientStateManager.state.UserId!;
+        public string UserId => clientStateManager.UserId!;
 
         //Todo: store on disk
-        public MatrixRoom[] InvitedRooms => clientStateManager.state.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Invited).ToArray();
-        public MatrixRoom[] JoinedRooms => clientStateManager.state.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Joined).ToArray();
+        public MatrixRoom[] InvitedRooms => clientStateManager.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Invited).ToArray();
+
+        public MatrixRoom[] JoinedRooms => clientStateManager.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Joined).ToArray();
+
+        public MatrixRoom[] LeftRooms => clientStateManager.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Left).ToArray();
+
         public async Task StartAsync(string seed)
         {
-            Seed = seed;
             logger.LogInformation($"{nameof(MatrixClient)}: Starting...");
 
             var response = await userService!.LoginAsync(seed, cancellationTokenSource.Token);
-            clientStateManager.state.UserId = response.UserId;
-            clientStateManager.state.AccessToken = response.AccessToken;
+            clientStateManager.UpdateStateWith(response.UserId, response.AccessToken);
 
             pollingTimer = new Timer(async _ => await PollAsync(cancellationTokenSource.Token));
-            pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+            pollingTimer.Change(TimeSpan.FromSeconds(clientStateManager.Timeout), TimeSpan.FromMilliseconds(-1));
 
             logger.LogInformation($"{nameof(MatrixClient)}: Ready.");
         }
 
         private async Task PollAsync(CancellationToken cancellationToken)
         {
-            var seed = Seed;
             pollingTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
             ThrowIfAccessTokenIsEmpty();
 
-            var response = await eventService.SyncAsync(clientStateManager.state.AccessToken!, timeout: clientStateManager.state.Timeout,
-                nextBatch: clientStateManager.state.NextBatch!,
+            var response = await eventService.SyncAsync(clientStateManager.AccessToken, timeout: clientStateManager.Timeout,
+                nextBatch: clientStateManager.NextBatch,
                 cancellationToken: cancellationToken);
 
-            clientStateManager.state.Timeout = 30000;
-            clientStateManager.state.NextBatch = response.NextBatch;
+            var syncBatch = SyncBatch.Factory.CreateFromSync(response.NextBatch, response.Rooms);
 
-            var matrixRooms = roomSyncService.GetMatrixRoomsFromSync(response.Rooms);
-            clientStateManager.UpdateStateWith(matrixRooms);
-
-            if (seed == "7777")
-            {
-                var t = clientStateManager.state.MatrixRooms;
-            }
+            clientStateManager.UpdateStateWith(syncBatch, syncBatch.NextBatch);
+            TextMessageNotifier.NotifyAll(syncBatch.MatrixRoomEvents);
 
             pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
         }
@@ -124,23 +92,23 @@
         {
             ThrowIfAccessTokenIsEmpty();
 
-            var response = await roomService.CreateRoomAsync(clientStateManager.state.AccessToken!, invitedUserIds, cancellationTokenSource.Token);
+            var response = await roomService.CreateRoomAsync(clientStateManager.AccessToken!, invitedUserIds, cancellationTokenSource.Token);
             var matrixRoom = new MatrixRoom(response.RoomId, MatrixRoomStatus.Unknown);
-            clientStateManager.state.MatrixRooms[response.RoomId] = matrixRoom;
+            clientStateManager.UpdateMatrixRoom(response.RoomId, matrixRoom);
 
             return matrixRoom;
         }
 
         public async Task<MatrixRoom> JoinTrustedPrivateRoomAsync(string roomId)
         {
-            if (clientStateManager.state.MatrixRooms.TryGetValue(roomId, out var matrixRoom))
+            if (clientStateManager.MatrixRooms.TryGetValue(roomId, out var matrixRoom))
                 return matrixRoom;
 
             ThrowIfAccessTokenIsEmpty();
 
-            var response = await roomService.JoinRoomAsync(clientStateManager.state.AccessToken!, roomId, CancellationToken.None);
+            var response = await roomService.JoinRoomAsync(clientStateManager.AccessToken!, roomId, CancellationToken.None);
             matrixRoom = new MatrixRoom(response.RoomId, MatrixRoomStatus.Unknown);
-            clientStateManager.state.MatrixRooms[response.RoomId] = matrixRoom;
+            clientStateManager.UpdateMatrixRoom(response.RoomId, matrixRoom);
 
             return matrixRoom;
         }
@@ -150,15 +118,25 @@
             ThrowIfAccessTokenIsEmpty();
 
             var transactionId = CreateTransactionId();
-            var result = await eventService.SendMessageAsync(clientStateManager.state.AccessToken!, roomId, transactionId, message);
+            var result = await eventService.SendMessageAsync(clientStateManager.AccessToken!, roomId, transactionId, message);
             var id = result.EventId;
+        }
+
+        private string CreateTransactionId()
+        {
+            var timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            var counter = clientStateManager.TransactionNumber;
+
+            clientStateManager.TransactionNumber += 1;
+
+            return $"m{timestamp}.{counter}";
         }
 
         public async Task<List<string>> GetJoinedRoomsIdsAsync()
         {
             ThrowIfAccessTokenIsEmpty();
 
-            var response = await roomService.GetJoinedRoomsAsync(clientStateManager.state.AccessToken!, cancellationTokenSource.Token);
+            var response = await roomService.GetJoinedRoomsAsync(clientStateManager.AccessToken!, cancellationTokenSource.Token);
 
             return response.JoinedRoomIds;
         }
@@ -167,69 +145,18 @@
         {
             ThrowIfAccessTokenIsEmpty();
 
-            await roomService.LeaveRoomAsync(clientStateManager.state.AccessToken!, roomId, cancellationTokenSource.Token);
+            await roomService.LeaveRoomAsync(clientStateManager.AccessToken!, roomId, cancellationTokenSource.Token);
         }
 
         private void ThrowIfAccessTokenIsEmpty()
         {
-            if (clientStateManager.state.AccessToken == null)
+            if (clientStateManager.AccessToken == null)
                 throw new InvalidOperationException("No access token has been provided.");
-        }
-
-        /*
-         * Create a transaction ID
-         */
-        private string CreateTransactionId()
-        {
-            var timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            var counter = clientStateManager.state.TransactionNumber;
-
-            clientStateManager.state.TransactionNumber += 1;
-
-            return $"m{timestamp}.{counter}";
         }
     }
 }
 
-// logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Invite: {response.Rooms.Invite.Count}");
-// logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Join: {response.Rooms.Join.Count}");
-// logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, Leave: {response.Rooms.Leave.Count}");
-
-// if (response.Rooms.Join.Count > 0)
+// if (seed == "0008777")
 // {
-//     var joinRooms = response.Rooms.Join;
-//     if (joinRooms.Count > 0)
-//         foreach (var (roomId, joinedRoom) in joinRooms)
-//         {
-//             logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, State.Events.Count: {joinedRoom.State.Events.Count}");
-//             logger.LogInformation($"Id: {UserId.TruncateLongString(5)}, joinedRoom.Timeline.Events.Count: {joinedRoom.Timeline.Events.Count}");
-//         }
-// }
-
-// if (response.Rooms.Invite.Count > 0)
-// {
-//     var joined = response.Rooms.Invite;
-//
-//     foreach (var (roomId, joinedRoom) in joined)
-//     {
-//         var joinedRoomEvents = joinedRoom.InviteState.Events;
-//         foreach (var joinedRoomEvent in joinedRoomEvents)
-//         {
-//             var type = joinedRoomEvent.RoomEventType;
-//             switch (type)
-//             {
-//                 case RoomEventType.Create:
-//                     var roomCreateContent = joinedRoomEvent.Content.ToObject<RoomCreateContent>();
-//                     break;
-//                 case RoomEventType.JoinRules:
-//                     var roomJoinRulesContent = joinedRoomEvent.Content.ToObject<RoomJoinRulesContent>();
-//                     break;
-//                 case RoomEventType.Member:
-//                     var roomMemberContent = joinedRoomEvent.Content.ToObject<RoomMemberContent>();
-//                     break;
-//                 default:
-//                     throw new ArgumentOutOfRangeException();
-//             }
-//         }
-//     }
+//     var t = clientStateManager.MatrixRooms;
 // }

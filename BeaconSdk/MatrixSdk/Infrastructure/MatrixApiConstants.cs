@@ -15,5 +15,11 @@
 
             public const string Message = "m.room.message";
         }
+
+        public class MessageType
+        {
+            // public const string Text = "m.text";
+            public const string Text = "Text";
+        }
     }
 }
