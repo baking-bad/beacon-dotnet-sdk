@@ -2,6 +2,7 @@ namespace MatrixSdk
 {
     using System;
     using Application;
+    using Domain;
     using Infrastructure;
     using Infrastructure.Providers;
     using Infrastructure.Repositories;

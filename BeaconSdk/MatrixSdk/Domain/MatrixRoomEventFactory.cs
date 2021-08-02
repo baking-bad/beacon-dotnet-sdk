@@ -1,8 +1,8 @@
-namespace MatrixSdk.Application
+namespace MatrixSdk.Domain
 {
     using System.Collections.Generic;
-    using Domain.Room;
     using Infrastructure.Dto.Sync;
+    using Room;
 
     public class MatrixRoomEventFactory
     {
