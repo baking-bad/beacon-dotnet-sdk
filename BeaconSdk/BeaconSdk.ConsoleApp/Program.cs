@@ -3,7 +3,6 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using MatrixSdk;
     using MatrixSdk.Application;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -15,7 +14,7 @@
         private static IHostBuilder CreateHostBuilder() => new HostBuilder()
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddMatrixSdk();
+                services.AddBeaconSdk();
                 services.AddConsoleApp();
             }).UseConsoleLifetime();
 
