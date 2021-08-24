@@ -4,6 +4,8 @@
     using System.Threading;
     using System.Threading.Tasks;
     using MatrixSdk.Application;
+    using MatrixSdk.Application.Listener;
+    using MatrixSdk.Infrastructure.Services;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -80,13 +82,31 @@
         private static async Task<(MatrixClient, TextMessageListener)> SetupClientWithTextListener(IServiceProvider serviceProvider)
         {
             var matrixClient = serviceProvider.GetRequiredService<MatrixClient>();
-            await matrixClient.StartAsync(Guid.NewGuid().ToString()); //Todo: generate once and then store seed?
+            var cryptoService = serviceProvider.GetRequiredService<CryptoService>();
 
-            var textMessageListener = new TextMessageListener(matrixClient.UserId);
-            textMessageListener.ListenTo(matrixClient.TextMessageNotifier);
+            var seed = Guid.NewGuid().ToString();
+            var keyPair = cryptoService.GenerateKeyPairFromSeed(seed);
+
+            await matrixClient.StartAsync(keyPair); //Todo: generate once and then store seed?
+            
+            var textMessageListener = new TextMessageListener(matrixClient.UserId, (listenerId, textMessageEvent) =>
+            {
+                var (roomId, senderUserId, message) = textMessageEvent;
+                if (listenerId != senderUserId)
+                    Console.WriteLine($"RoomId: {roomId} received message from {senderUserId}: {message}.");
+            });
+            
+            textMessageListener.ListenTo(matrixClient.MatrixEventNotifier);
 
             return (matrixClient, textMessageListener);
         }
+        
+        // public override void OnNext(TextMessageEvent value)
+        // {
+        //     var (roomId, senderUserId, message) = value;
+        //     if (Id != senderUserId)
+        //         Console.WriteLine($"RoomId: {roomId} received message from {senderUserId}: {message}.");
+        // }
     }
 }
 
