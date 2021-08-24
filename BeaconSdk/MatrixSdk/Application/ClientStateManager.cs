@@ -9,16 +9,13 @@ namespace MatrixSdk.Application
 
     public class ClientStateManager
     {
-        private const int FirstSyncTimout = 0;
-        private const int LaterSyncTimout = 30000;
         private readonly ILogger<ClientStateManager> logger;
-
 
         private readonly MatrixClientState state = new()
         {
             Id = Guid.NewGuid(),
             MatrixRooms = new ConcurrentDictionary<string, MatrixRoom>(),
-            Timeout = FirstSyncTimout,
+            Timeout = 0,
             TransactionNumber = 0
         };
 
@@ -59,17 +56,20 @@ namespace MatrixSdk.Application
                 }
         }
 
-        public void UpdateStateWith(SyncBatch syncBatch, string nextBatch)
+        public void UpdateStateWith(SyncBatch syncBatch, string nextBatch, ulong timeout)
         {
-            state.Timeout = LaterSyncTimout;
             state.NextBatch = nextBatch;
             UpdateStateWith(syncBatch.MatrixRooms);
+
+            state.Timeout = timeout;
         }
 
-        public void UpdateStateWith(string userId, string accessToken)
+        public void UpdateStateWith(string userId, string accessToken, ulong timeout)
         {
             state.UserId = userId;
             state.AccessToken = accessToken;
+
+            state.Timeout = timeout;
         }
 
         public void UpdateMatrixRoom(string roomId, MatrixRoom matrixRoom)
