@@ -14,7 +14,7 @@ namespace MatrixSdk.Infrastructure.Services
             this.cryptoAlgorithmsProvider = cryptoAlgorithmsProvider;
         }
 
-        public string ToHexString(byte[] input)
+        public static string ToHexString(byte[] input)
         {
             var hexString = BitConverter.ToString(input);
 
