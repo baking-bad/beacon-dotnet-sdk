@@ -7,6 +7,7 @@ namespace MatrixSdk.Infrastructure.Services
     using System.Threading.Tasks;
     using Dto.Login;
     using Extensions;
+    using Sodium;
 
     public class UserService
     {
@@ -23,13 +24,11 @@ namespace MatrixSdk.Infrastructure.Services
         }
         private HttpClient CreateHttpClient() => httpClientFactory.CreateClient(MatrixApiConstants.Matrix);
 
-        public async Task<LoginResponse> LoginAsync(string seed, CancellationToken cancellationToken)
+        public async Task<LoginResponse> LoginAsync(KeyPair keyPair, CancellationToken cancellationToken)
         {
             var loginDigest = cryptoService!.GenerateLoginDigest();
-            var keyPair = cryptoService.GenerateKeyPairFromSeed(seed);
-
             var hexSignature = cryptoService.GenerateHexSignature(loginDigest, keyPair.PrivateKey);
-            var hexPublicKey = cryptoService.ToHexString(keyPair.PublicKey);
+            var hexPublicKey = CryptoService.ToHexString(keyPair.PublicKey);
             var hexId = cryptoService.GenerateHexId(keyPair.PublicKey);
 
             var password = $"ed:{hexSignature}:{hexPublicKey}";
