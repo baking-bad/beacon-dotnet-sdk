@@ -1,8 +1,12 @@
 namespace MatrixSdk
 {
     using System;
+    using System.Collections.Generic;
     using Application;
+    using Application.Network;
+    using Application.Notifier;
     using Domain;
+    using Domain.Room;
     using Infrastructure;
     using Infrastructure.Providers;
     using Infrastructure.Repositories;
@@ -21,11 +25,12 @@ namespace MatrixSdk
             services.AddSingleton<UserService>();
 
             services.AddTransient<MatrixClient>();
+            services.AddTransient<INetworkService, MatrixClientNetworkService>();
+
             services.AddTransient<ClientStateManager>();
             services.AddTransient<MatrixRoomFactory>();
-            services.AddTransient<TextMessageNotifier>();
+            services.AddTransient<MatrixEventNotifier<List<BaseRoomEvent>>>();
 
-            services.AddSingleton<AccessTokenProvider>();
             services.AddSingleton<ICryptoAlgorithmsProvider, LibsodiumAlgorithmsProvider>();
 
             services.AddSingleton<ISeedRepository, MemorySeedRepository>();
