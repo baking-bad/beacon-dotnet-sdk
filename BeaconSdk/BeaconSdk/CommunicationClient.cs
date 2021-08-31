@@ -2,20 +2,29 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Threading.Tasks;
+    using MatrixSdk;
     using MatrixSdk.Application;
     using MatrixSdk.Application.Listener;
     using MatrixSdk.Domain.Room;
+    using MatrixSdk.Infrastructure.Services;
+    using MatrixSdk.Utils;
     using Sodium;
 
     public class CommunicationClient
     {
+        // private BetterHexString t;
+        private readonly CryptoService cryptoService;
         private readonly List<MatrixClient> matrixClients;
-        private readonly Dictionary<string, TextMessageListener> textMessageListeners;
-        public CommunicationClient(List<MatrixClient> matrixClients, Dictionary<string, TextMessageListener> textMessageListeners)
+        private readonly Dictionary<HexString, MatrixEventListener<List<BaseRoomEvent>>> encryptedMessageListeners;
+       
+        public CommunicationClient(List<MatrixClient> matrixClients, 
+            Dictionary<HexString, MatrixEventListener<List<BaseRoomEvent>>> encryptedMessageListeners, CryptoService cryptoService)
         {
             this.matrixClients = matrixClients;
-            this.textMessageListeners = textMessageListeners;
+            this.encryptedMessageListeners = encryptedMessageListeners;
+            this.cryptoService = cryptoService;
         }
 
         // var seed = Guid.NewGuid().ToString();
@@ -34,36 +43,43 @@
             }
         }
 
-        public void ListenToPublicKeyHex(string publicKeyHex)
+        public void ListenToPublicKeyHex(HexString publicKey)
         {
-            if (textMessageListeners.TryGetValue(publicKeyHex, out _))
+            if (encryptedMessageListeners.TryGetValue(publicKey, out _))
                 return;
 
-            // var id = Guid.NewGuid().ToString();
-            // //listenerId -> listenToId
-            // var listener = new TextMessageListener(id, publicKeyHex, OnNewEncryptedMessage);
-            //
-            // if (!textMessageListeners.TryAdd(publicKeyHex, listener))
-            //     return;
-            //
-            // foreach (var client in matrixClients)
-            //     listener.ListenTo(client.TextMessageNotifier);
+            // ReSharper disable once ArgumentsStyleNamedExpression
+            var listener = new EncryptedMessageListener(publicKey, OnNewEncryptedMessage, cryptoService);
+
+            encryptedMessageListeners[publicKey] = listener;
+
+            foreach (var client in matrixClients)
+                listener.ListenTo(client.MatrixEventNotifier);
         }
 
-        private void OnNewEncryptedMessage(string listenerId, TextMessageEvent textMessageEvent)
+        private void OnNewEncryptedMessage(TextMessageEvent textMessageEvent)
         {
+            // Todo: validate
             var (roomId, senderUserId, message) = textMessageEvent;
             
-            if (listenerId != senderUserId)
-                Console.WriteLine($"RoomId: {roomId} received message from {senderUserId}: {message}.");
+            // if (listenerId.Value != senderUserId)
+            //     Console.WriteLine($"RoomId: {roomId} received message from {senderUserId}: {message}.");
         }
+
+        // bool IsMessageFromPublicKey(TextMessageEvent textMessageEvent, HexString publicKeyHex)
+        // {
+        //     // var hexId = cryptoService.GenerateHexId(publicKeyHex);
+        //     // return textMessageEvent.SenderUserId.StartsWith($"@{hexId}");
+        // }
         
 
-        public void RemoveListenerForPublicKeyHex(string publicKeyHex)
+        public void RemoveListenerForPublicKey(HexString publicKey)
         {
-            if (textMessageListeners.TryGetValue(publicKeyHex, out var listener))
+            if (encryptedMessageListeners.TryGetValue(publicKey, out var listener))
                 listener.Unsubscribe();
         }
+
+        private static string CreateChannelOpeningMessage(string recipient, string payload) => $"@channel-open:{recipient}:{payload}";
 
         public void SendPairingResponse()
         {

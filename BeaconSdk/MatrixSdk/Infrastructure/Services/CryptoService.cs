@@ -1,9 +1,10 @@
 namespace MatrixSdk.Infrastructure.Services
 {
     using System;
+    using NSec.Cryptography;
     using Providers;
     using Sodium;
-
+    
     public class CryptoService
     {
         // Todo: maybe use https://nsec.rocks/ ?
@@ -14,6 +15,8 @@ namespace MatrixSdk.Infrastructure.Services
             this.cryptoAlgorithmsProvider = cryptoAlgorithmsProvider;
         }
 
+        public bool Validate(string input) => cryptoAlgorithmsProvider.Validate(input);
+        
         public static string ToHexString(byte[] input)
         {
             var hexString = BitConverter.ToString(input);
@@ -51,5 +54,28 @@ namespace MatrixSdk.Infrastructure.Services
 
             return ToHexString(hash);
         }
-    }
+
+        public byte[] Hash(byte[] input) => cryptoAlgorithmsProvider.Hash(input, input.Length);
+
+        public void GenerateServerSessionKeyPair(Span<byte> publicKey, Span<byte> secretKey)
+        {
+            
+        }
+    } 
 }
+
+// public class NSecCryptoService
+// {
+//     public void GenerateKeyPairFromSeed(string seed)
+//     {
+//         var algorithm = SignatureAlgorithm.Ed25519;
+//         using var key = Key.Create(algorithm);
+//         // key.PublicKey;
+//         // algorithm.si
+//         // key.PublicKey
+//         // algorithm.Sign(key, seed);
+//
+//         // t.PrivateKeySize
+//         // var t = new SignatureAlgorithm.Ed25519()
+//     }
+// }

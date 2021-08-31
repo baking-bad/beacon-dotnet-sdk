@@ -1,11 +1,16 @@
 ﻿namespace BeaconSdk.ConsoleApp
 {
     using System;
+    using System.IO;
+    using System.Reflection.Metadata;
     using System.Threading;
     using System.Threading.Tasks;
+    using MatrixSdk;
     using MatrixSdk.Application;
     using MatrixSdk.Application.Listener;
+    using MatrixSdk.Infrastructure.Providers;
     using MatrixSdk.Infrastructure.Services;
+    using MatrixSdk.Utils;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -23,25 +28,25 @@
         private static async Task<int> Main(string[] args)
         {
             var host = CreateHostBuilder().Build();
-
+            
             var theme = LoggerSetup.SetupTheme();
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .WriteTo.Console(theme: theme)
                 .CreateLogger();
-
+            
             try
             {
                 var logger = host.Services.GetRequiredService<ILogger<Program>>();
-
+            
                 logger.LogInformation("START");
-
+            
                 await RunAsync(host.Services);
             }
             catch (Exception ex)
             {
                 var logger = host.Services.GetRequiredService<ILogger<Program>>();
-
+            
                 logger.LogError(ex, "An error occurred.");
             }
 
@@ -50,34 +55,72 @@
 
         private static async Task RunAsync(IServiceProvider serviceProvider)
         {
-            var (firstClient, firstListener) = await SetupClientWithTextListener(serviceProvider);
-            var (secondClient, secondListener) = await SetupClientWithTextListener(serviceProvider);
+            // var a1 = "0xFAFA";
+            // if (HexString.TryParse(a1, out var r1)) 
+            //     Console.WriteLine(r1);
+            //
+            // var a2 = "0xFAFA";
+            // if (HexString.TryParse(a2, out var r2)) 
+            //     Console.WriteLine(r2);
+            //
+            // Console.WriteLine(r1 == r2);
+            //
+            //
+            // var a3 = "0x38";
+            // HexString.TryParse(a3, out var r3);
+            // Console.WriteLine(r3.ToASCII());
+            //
+            // var b3 = r3.ToByteArray();
+            // Console.WriteLine(r3.ToASCII());
+            
+           
 
-            var firstClientMatrixRoom = await firstClient.CreateTrustedPrivateRoomAsync(new[]
-            {
-                secondClient.UserId
-            });
+            // var a3 = "48656c6c6f20576f726c6421";
+            // if (HexString.TryParse(a3, out var r3)) 
+            //     Console.WriteLine(r3.ToASCII());
 
-            var matrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
+            // var t = new HexString();
+            // Console.WriteLine(t.ToASCII());нну
 
-            var spin = new SpinWait();
-            while (secondClient.JoinedRooms.Length == 0)
-                spin.SpinOnce();
+            // const string a3 = "0xFAF";
+            // _ = HexString.TryParse(a3, out var r3);
+            // Assert.AreEqual(r3.Value,string.Empty);
 
-            await firstClient.SendMessageAsync(firstClientMatrixRoom.Id, "Hello");
-            await secondClient.SendMessageAsync(secondClient.JoinedRooms[0].Id, ", ");
+            // Object a = new Object();
+            // var t = (HexString)a;
 
-            await firstClient.SendMessageAsync(firstClientMatrixRoom.Id, "World");
-            await secondClient.SendMessageAsync(secondClient.JoinedRooms[0].Id, "!");
-
-            Console.ReadLine();
-
-            firstClient.Stop();
-            secondClient.Stop();
-
-            firstListener.Unsubscribe();
-            secondListener.Unsubscribe();
         }
+        
+        // private static async Task RunAsync(IServiceProvider serviceProvider)
+        // {
+        //     var (firstClient, firstListener) = await SetupClientWithTextListener(serviceProvider);
+        //     var (secondClient, secondListener) = await SetupClientWithTextListener(serviceProvider);
+        //
+        //     var firstClientMatrixRoom = await firstClient.CreateTrustedPrivateRoomAsync(new[]
+        //     {
+        //         secondClient.UserId
+        //     });
+        //
+        //     var matrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
+        //
+        //     var spin = new SpinWait();
+        //     while (secondClient.JoinedRooms.Length == 0)
+        //         spin.SpinOnce();
+        //
+        //     await firstClient.SendMessageAsync(firstClientMatrixRoom.Id, "Hello");
+        //     await secondClient.SendMessageAsync(secondClient.JoinedRooms[0].Id, ", ");
+        //
+        //     await firstClient.SendMessageAsync(firstClientMatrixRoom.Id, "World");
+        //     await secondClient.SendMessageAsync(secondClient.JoinedRooms[0].Id, "!");
+        //
+        //     Console.ReadLine();
+        //
+        //     firstClient.Stop();
+        //     secondClient.Stop();
+        //
+        //     firstListener.Unsubscribe();
+        //     secondListener.Unsubscribe();
+        // }
 
         private static async Task<(MatrixClient, TextMessageListener)> SetupClientWithTextListener(IServiceProvider serviceProvider)
         {
@@ -152,3 +195,43 @@
 // var joinedRooms = await firstClient.GetJoinedRoomsAsync();
 // foreach (var room in joinedRooms)
 //     Console.WriteLine($"Room: {room}");
+// var cryptoService = new CryptoService(new LibsodiumAlgorithmsProvider());
+// var input = new byte[]
+// {
+//     104,
+//     101,
+//     108,
+//     108,
+//     111,
+//     104,
+//     101,
+//     108,
+//     108,
+//     111,
+//     104,
+//     101,
+//     108,
+//     108,
+//     111,
+//     104,
+//     101,
+//     108,
+//     108,
+//     111,
+//     104,
+//     101,
+//     108,
+//     108,
+//     111,
+// };
+// foreach (var b in input)
+//     Console.Write((char)b);
+// Console.WriteLine();
+//
+// var hash = cryptoService.Hash(input);
+// foreach (var b in hash)
+//     Console.Write((char)b);
+// Console.WriteLine();
+//
+// int.TryParse("null", out  int res);
+// Console.WriteLine(res);

@@ -4,6 +4,8 @@ namespace MatrixSdk.Infrastructure.Providers
 
     public interface ICryptoAlgorithmsProvider
     {
+        bool Validate(string input);
+        
         byte[] GenerateRandomBytes(int count);
 
         byte[] Hash(string message, int size);
