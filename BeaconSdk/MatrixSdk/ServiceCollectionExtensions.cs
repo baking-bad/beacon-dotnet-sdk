@@ -8,7 +8,6 @@ namespace MatrixSdk
     using Domain;
     using Domain.Room;
     using Infrastructure;
-    using Infrastructure.Providers;
     using Infrastructure.Repositories;
     using Infrastructure.Services;
     using Microsoft.Extensions.DependencyInjection;
@@ -30,8 +29,6 @@ namespace MatrixSdk
             services.AddTransient<ClientStateManager>();
             services.AddTransient<MatrixRoomFactory>();
             services.AddTransient<MatrixEventNotifier<List<BaseRoomEvent>>>();
-
-            services.AddSingleton<ICryptoAlgorithmsProvider, LibsodiumAlgorithmsProvider>();
 
             services.AddSingleton<ISeedRepository, MemorySeedRepository>();
 
