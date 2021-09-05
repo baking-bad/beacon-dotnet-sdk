@@ -18,7 +18,7 @@ namespace MatrixSdk
         {
             services.AddHttpClient(MatrixApiConstants.Matrix, c => { c.BaseAddress = new Uri(MatrixApiConstants.BaseAddress); });
 
-            services.AddSingleton<CryptoService>();
+            services.AddSingleton<SignatureCryptoService>();
             services.AddSingleton<EventService>();
             services.AddSingleton<RoomService>();
             services.AddSingleton<UserService>();
