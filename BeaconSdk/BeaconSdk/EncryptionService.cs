@@ -1,5 +1,6 @@
 namespace BeaconSdk
 {
+    using System.Linq;
     using Libsodium;
     using MatrixSdk.Utils;
     using Sodium;
@@ -36,9 +37,17 @@ namespace BeaconSdk
         public static byte[] Decrypt(byte[] encryptedBytes, byte[] sharedKey)
         {
             var nonce = encryptedBytes[..NonceBytes];
-            var cypherText = encryptedBytes[NonceBytes..];
+            var cipher = encryptedBytes[NonceBytes..];
 
-            return SecretBox.Open(cypherText, nonce, sharedKey);
+            return SecretBox.Open(cipher, nonce, sharedKey);
+        }
+
+        public static byte[] Encrypt(byte[] message, byte[] sharedKey)
+        {
+            var nonce = Sodium.SodiumCore.GetRandomBytes(NonceBytes)!;
+            var result = SecretBox.Create(message, nonce, sharedKey)!;
+
+            return nonce.Concat(result).ToArray();
         }
         
         // public static byte[] EncryptWithSharedKey(byte[] sharedKey, byte[] message)

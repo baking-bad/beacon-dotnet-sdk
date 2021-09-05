@@ -2,29 +2,26 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Threading.Tasks;
-    using MatrixSdk;
+    using Domain.Beacon;
     using MatrixSdk.Application;
     using MatrixSdk.Application.Listener;
     using MatrixSdk.Domain.Room;
-    using MatrixSdk.Infrastructure.Services;
     using MatrixSdk.Utils;
     using Sodium;
 
     public class CommunicationClient
     {
-        // private BetterHexString t;
-        private readonly CryptoService cryptoService;
+        private KeyPair? keyPair;
         private readonly List<MatrixClient> matrixClients;
-        private readonly Dictionary<HexString, MatrixEventListener<List<BaseRoomEvent>>> encryptedMessageListeners;
+        private static readonly Dictionary<HexString, MatrixEventListener<List<BaseRoomEvent>>> EncryptedMessageListeners = new ();
        
-        public CommunicationClient(List<MatrixClient> matrixClients, 
-            Dictionary<HexString, MatrixEventListener<List<BaseRoomEvent>>> encryptedMessageListeners, CryptoService cryptoService)
+        public CommunicationClient(List<MatrixClient> matrixClients)
         {
             this.matrixClients = matrixClients;
-            this.encryptedMessageListeners = encryptedMessageListeners;
-            this.cryptoService = cryptoService;
+
+            //Todo: refactor
+            SodiumCore.Init();
         }
 
         // var seed = Guid.NewGuid().ToString();
@@ -35,6 +32,8 @@
             {
                 foreach (var client in matrixClients)
                     await client.StartAsync(keyPair);
+
+                this.keyPair = keyPair;
             }
             catch (Exception e)
             {
@@ -45,47 +44,38 @@
 
         public void ListenToPublicKeyHex(HexString publicKey)
         {
-            if (encryptedMessageListeners.TryGetValue(publicKey, out _))
+            if (EncryptedMessageListeners.TryGetValue(publicKey, out _))
                 return;
 
             // ReSharper disable once ArgumentsStyleNamedExpression
-            var listener = new EncryptedMessageListener(publicKey, OnNewEncryptedMessage, cryptoService);
+            var listener = new EncryptedMessageListener(keyPair!, publicKey, (e) =>
+            {
+                
+            });
 
-            encryptedMessageListeners[publicKey] = listener;
+            EncryptedMessageListeners[publicKey] = listener;
 
             foreach (var client in matrixClients)
                 listener.ListenTo(client.MatrixEventNotifier);
         }
-
-        private void OnNewEncryptedMessage(TextMessageEvent textMessageEvent)
-        {
-            // Todo: validate
-            var (roomId, senderUserId, message) = textMessageEvent;
-            
-            // if (listenerId.Value != senderUserId)
-            //     Console.WriteLine($"RoomId: {roomId} received message from {senderUserId}: {message}.");
-        }
-
-        // bool IsMessageFromPublicKey(TextMessageEvent textMessageEvent, HexString publicKeyHex)
-        // {
-        //     // var hexId = cryptoService.GenerateHexId(publicKeyHex);
-        //     // return textMessageEvent.SenderUserId.StartsWith($"@{hexId}");
-        // }
         
-
         public void RemoveListenerForPublicKey(HexString publicKey)
         {
-            if (encryptedMessageListeners.TryGetValue(publicKey, out var listener))
+            if (EncryptedMessageListeners.TryGetValue(publicKey, out var listener))
                 listener.Unsubscribe();
         }
-
-        private static string CreateChannelOpeningMessage(string recipient, string payload) => $"@channel-open:{recipient}:{payload}";
-
-        public void SendPairingResponse()
+        
+        public void SendPairingResponse(BeaconPeer peer)
         {
             try
             {
-                
+                if (HexString.TryParse(peer.PublicKey, out var publicKeyHex))
+                {
+                    var recipientId = CommunicationClientUtils.CreateRecipientId(peer.RelayServer, publicKeyHex);
+                    
+                }
+
+                throw new InvalidOperationException("Can not parse peer.Public");
             }
             catch (Exception ex)
             {
@@ -93,5 +83,39 @@
                 throw;
             }
         }
-    } 
+    }
+
+    public static class CommunicationClientUtils
+    {
+        public static string CreateChannelOpeningMessage(string recipient, string payload) => $"@channel-open:{recipient}:{payload}";
+
+        public static string CreateRecipientId(string relayServer, HexString publicKey)
+        {
+            var hash = Hash(publicKey);
+            if (HexString.TryParse(hash, out var hexHash))
+                return $"{hexHash}:{relayServer}";
+
+            throw new InvalidOperationException("Can not parse hash");
+        }
+
+        private static byte[] Hash(HexString hexString)
+        {
+            var bytesArray = hexString.ToByteArray();
+
+            return GenericHash.Hash(bytesArray, null, bytesArray.Length)!;
+        }
+        
+        
+        public static string CreatePairingPayload(BeaconPeer peer, byte[] publicKey)
+        {
+            
+        }
+        
+    }
 }
+
+// var (roomId, senderUserId, message) = textMessageEvent;
+// // Todo: valida
+            
+// if (listenerId.Value != senderUserId)
+//     Console.WriteLine($"RoomId: {roomId} received message from {senderUserId}: {message}.");
