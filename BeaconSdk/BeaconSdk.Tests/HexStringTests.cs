@@ -20,7 +20,7 @@ namespace BeaconSdk.Tests
             
             const string a3 = "0xFAF";
             _ = HexString.TryParse(a3, out var r3);
-            Assert.AreEqual(r3.Value,string.Empty);
+            Assert.AreEqual(r3.ToString(),string.Empty);
         }
 
         [TestMethod]
