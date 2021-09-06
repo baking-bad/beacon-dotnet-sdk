@@ -1,25 +1,23 @@
-﻿namespace BeaconSdk.Communication
+﻿namespace BeaconSdk.Infrastructure.Transport.Communication
 {
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Domain.Beacon;
     using Domain.Beacon.P2P;
-    using Infrastructure.Cryptography;
     using MatrixSdk.Application;
     using MatrixSdk.Application.Listener;
     using MatrixSdk.Domain.Room;
     using MatrixSdk.Utils;
     using Sodium;
 
-    public class CommunicationClient
+    public class Client
     {
         private readonly string appName;
         private KeyPair? keyPair;
         private readonly List<MatrixClient> matrixClients;
         private static readonly Dictionary<HexString, MatrixEventListener<List<BaseRoomEvent>>> EncryptedMessageListeners = new ();
        
-        public CommunicationClient(List<MatrixClient> matrixClients, string appName)
+        public Client(List<MatrixClient> matrixClients, string appName)
         {
             this.matrixClients = matrixClients;
             this.appName = appName;
@@ -69,22 +67,14 @@
                 listener.Unsubscribe();
         }
         
-        public void SendPairingResponse(BeaconPeer peer)
+        public async Task SendPairingResponse(BeaconPeer peer)
         {
             try
             {
-                if (!HexString.TryParse(peer.PublicKey, out var publicKeyHex))
-                    throw new InvalidOperationException("Can not parse peer.PublicKey");
+                var pairingResponseAggregate = ClientMessageFactory.CreatePairingResponse(peer, keyPair!, appName);
 
-                var recipientId = CommunicationClientUtils.CreateRecipientId(peer.RelayServer, publicKeyHex);
-                var relayServer = string.Empty;
-                var pairingPayloadMessage = CommunicationClientUtils.CreatePairingPayload(peer, keyPair!.PublicKey, relayServer, appName);
-
-                var encryptedMessage = EncryptionServiceHelper.EncryptAsHex(pairingPayloadMessage, publicKeyHex.ToByteArray()).ToString();
-                
-                if (HexString.TryParse())
-                
-                throw new InvalidOperationException("Can not parse peer.Public");
+                foreach (var matrixClient in matrixClients)
+                    _ = await matrixClient.SendMessageAsync(pairingResponseAggregate.RecipientId, pairingResponseAggregate.ChannelOpeningMessage);
             }
             catch (Exception ex)
             {
@@ -93,8 +83,8 @@
             }
         }
     }
-
 }
+
 
 // var (roomId, senderUserId, message) = textMessageEvent;
 // // Todo: valida
