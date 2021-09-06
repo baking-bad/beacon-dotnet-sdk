@@ -1,4 +1,4 @@
-namespace BeaconSdk
+namespace BeaconSdk.Infrastructure.Cryptography
 {
     using System.Linq;
     using Libsodium;
@@ -11,17 +11,7 @@ namespace BeaconSdk
         private static readonly int MacBytes = SodiumLibrary.crypto_box_macbytes();
         private static readonly int NonceBytes = SodiumLibrary.crypto_box_noncebytes();
 
-        // ToDo: implement 
-        /*
-         * func validate(encrypted: String) -> Bool {
-                do {
-                    return try HexString(from: encrypted).count() >= crypto_box_noncebytes() + crypto_box_macbytes() // 
-                } catch {
-                    return false
-                }
-            }
-         */
-        public static bool Validate(string input) => HexString.TryParse(input, out var hexString) && hexString.ToString().Length >= MacBytes + NonceBytes;
+        public static bool Validate(string input) => HexString.TryParse(input, out var hexString) && hexString.ToString().Length >= NonceBytes + MacBytes;
 
         public static SessionKeyPair CreateServerSessionKeyPair(byte[] clientPublicKey, byte[] serverSecretKey)
         {
@@ -41,7 +31,8 @@ namespace BeaconSdk
 
             return SecretBox.Open(cipher, nonce, sharedKey);
         }
-
+        
+        
         public static byte[] Encrypt(byte[] message, byte[] sharedKey)
         {
             var nonce = Sodium.SodiumCore.GetRandomBytes(NonceBytes)!;
@@ -50,13 +41,10 @@ namespace BeaconSdk
             return nonce.Concat(result).ToArray();
         }
         
-        // public static byte[] EncryptWithSharedKey(byte[] sharedKey, byte[] message)
-        // {
-        //     
-        // }
 
         // public byte[] Hash(byte[] message, int size) => GenericHash.Hash(message, null, size);
 
         // public byte[] GenerateRandomBytes(int count) => SodiumCore.GetRandomBytes(count);
     }
+
 }
