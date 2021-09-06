@@ -1,10 +1,8 @@
 // ReSharper disable InconsistentNaming
-namespace BeaconSdk.Libsodium
+namespace BeaconSdk.Infrastructure.Cryptography.Libsodium
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.Runtime.InteropServices;
-    using Sodium;
 
     public static class SodiumLibrary 
     {

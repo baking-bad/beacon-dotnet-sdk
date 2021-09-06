@@ -1,6 +1,5 @@
-namespace BeaconSdk.Libsodium
+namespace BeaconSdk.Infrastructure.Cryptography.Libsodium
 {
-    using System;
 
     public struct SessionKeyPair
     {

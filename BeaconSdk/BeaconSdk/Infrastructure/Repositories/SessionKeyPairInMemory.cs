@@ -1,7 +1,8 @@
 namespace BeaconSdk.Repositories
 {
     using System.Collections.Generic;
-    using Libsodium;
+    using Infrastructure.Cryptography;
+    using Infrastructure.Cryptography.Libsodium;
     using MatrixSdk.Utils;
     using Sodium;
 
