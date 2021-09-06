@@ -14,12 +14,12 @@ namespace MatrixSdk.Infrastructure.Services
         private const string RequestUri = "_matrix/client/r0";
 
         private readonly IHttpClientFactory httpClientFactory;
-        
+
         public UserService(IHttpClientFactory httpClientFactory)
         {
             this.httpClientFactory = httpClientFactory;
         }
-        
+
         private HttpClient CreateHttpClient() => httpClientFactory.CreateClient(MatrixApiConstants.Matrix);
 
         public async Task<LoginResponse> LoginAsync(KeyPair keyPair, CancellationToken cancellationToken)

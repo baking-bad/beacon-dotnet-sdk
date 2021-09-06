@@ -12,11 +12,11 @@
 
     public class Client
     {
+        private static readonly Dictionary<HexString, MatrixEventListener<List<BaseRoomEvent>>> EncryptedMessageListeners = new();
         private readonly string appName;
-        private KeyPair? keyPair;
         private readonly List<MatrixClient> matrixClients;
-        private static readonly Dictionary<HexString, MatrixEventListener<List<BaseRoomEvent>>> EncryptedMessageListeners = new ();
-       
+        private KeyPair? keyPair;
+
         public Client(List<MatrixClient> matrixClients, string appName)
         {
             this.matrixClients = matrixClients;
@@ -50,24 +50,21 @@
                 return;
 
             // ReSharper disable once ArgumentsStyleNamedExpression
-            var listener = new EncryptedMessageListener(keyPair!, publicKey, (e) =>
-            {
-                
-            });
+            var listener = new EncryptedMessageListener(keyPair!, publicKey, e => { });
 
             EncryptedMessageListeners[publicKey] = listener;
 
             foreach (var client in matrixClients)
                 listener.ListenTo(client.MatrixEventNotifier);
         }
-        
+
         public void RemoveListenerForPublicKey(HexString publicKey)
         {
             if (EncryptedMessageListeners.TryGetValue(publicKey, out var listener))
                 listener.Unsubscribe();
         }
-        
-        public async Task SendPairingResponse(BeaconPeer peer)
+
+        public async Task SendPairingResponseAsync(BeaconPeer peer)
         {
             try
             {
@@ -88,6 +85,6 @@
 
 // var (roomId, senderUserId, message) = textMessageEvent;
 // // Todo: valida
-            
+
 // if (listenerId.Value != senderUserId)
 //     Console.WriteLine($"RoomId: {roomId} received message from {senderUserId}: {message}.");

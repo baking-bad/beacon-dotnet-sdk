@@ -14,9 +14,9 @@ namespace BeaconSdk.Infrastructure.Cryptography.Libsodium
                 return;
 
             SodiumLibrary.sodium_init();
-            if (SodiumLibrary.sodium_init()<0)
+            if (SodiumLibrary.sodium_init() < 0)
                 throw new Exception("SodiumLibrary couldn't be initialized, it is not safe to use");
-            
+
             isInit = true;
         }
     }

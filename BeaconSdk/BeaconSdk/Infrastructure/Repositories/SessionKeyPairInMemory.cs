@@ -15,7 +15,7 @@ namespace BeaconSdk.Infrastructure.Repositories
             ServerSessionKeyPairs.TryGetValue(clientPublicKey, out var sessionKeyPair)
                 ? sessionKeyPair
                 : CreateServerSessionKeyPair(clientPublicKey, serverKeyPair);
-        
+
         private static SessionKeyPair CreateServerSessionKeyPair(HexString clientPublicKey, KeyPair serverKeyPair)
         {
             var sessionKeyPair = EncryptionService.CreateServerSessionKeyPair(clientPublicKey.ToByteArray(), serverKeyPair.PrivateKey);

@@ -28,18 +28,18 @@
         public MatrixClient(
             ClientStateManager stateManager,
             INetworkService networkService,
-            ILogger<MatrixClient> logger, 
+            ILogger<MatrixClient> logger,
             MatrixEventNotifier<List<BaseRoomEvent>> matrixEventNotifier)
         {
             this.stateManager = stateManager;
             this.networkService = networkService;
             this.logger = logger;
-            
+
             MatrixEventNotifier = matrixEventNotifier;
         }
 
         public MatrixEventNotifier<List<BaseRoomEvent>> MatrixEventNotifier { get; }
-        
+
         public string UserId => stateManager.UserId!;
 
         //Todo: store on disk
@@ -51,7 +51,7 @@
 
         public async Task StartAsync(KeyPair keyPair)
         {
-            logger.LogInformation($"{nameof(MatrixClient)}: Starting...");
+            logger.LogInformation("MatrixClient: Starting...");
 
             var response = await networkService.LoginAsync(cts.Token, keyPair);
             stateManager.UpdateStateWith(response.UserId, response.AccessToken, FirstSyncTimout);
@@ -59,7 +59,7 @@
             pollingTimer = new Timer(async _ => await PollAsync(cts.Token));
             pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
 
-            logger.LogInformation($"{nameof(MatrixClient)}: Ready.");
+            logger.LogInformation("MatrixClient: Ready");
         }
 
         private async Task PollAsync(CancellationToken cancellationToken)
@@ -72,7 +72,7 @@
 
             var syncBatch = SyncBatch.Factory.CreateFromSync(response.NextBatch, response.Rooms);
             stateManager.UpdateStateWith(syncBatch, syncBatch.NextBatch, LaterSyncTimout);
-            
+
             MatrixEventNotifier.NotifyAll(syncBatch.MatrixRoomEvents);
 
             pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
@@ -80,12 +80,12 @@
 
         public void Stop()
         {
-            logger.LogInformation($"{nameof(MatrixClient)}: Stopping...");
+            logger.LogInformation("MatrixClient: Stopping...");
 
             cts.Cancel();
             pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
 
-            logger.LogInformation($"{nameof(MatrixClient)}: Stopped.");
+            logger.LogInformation("MatrixClient: Stopped");
         }
 
         public async Task<MatrixRoom> CreateTrustedPrivateRoomAsync(string[]? invitedUserIds = null) =>

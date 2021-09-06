@@ -10,7 +10,6 @@ namespace BeaconSdk.Infrastructure.Transport.Communication
 
     public static class ClientMessageFactory
     {
-        
         public static PairingResponseAggregate CreatePairingResponse(BeaconPeer peer, KeyPair keyPair, string appName)
         {
             if (!HexString.TryParse(peer.PublicKey, out var publicKeyHex))
@@ -26,25 +25,13 @@ namespace BeaconSdk.Infrastructure.Transport.Communication
             return new PairingResponseAggregate(channelOpeningMessage, recipientId);
         }
 
-        public readonly struct PairingResponseAggregate
-        {
-            public readonly string ChannelOpeningMessage;
-            public readonly string RecipientId;
-            
-            public PairingResponseAggregate(string channelOpeningMessage, string recipientId)
-            {
-                ChannelOpeningMessage = channelOpeningMessage;
-                RecipientId = recipientId;
-            }
-        }
-        
         private static string GetChannelOpeningMessage(string recipient, string payload) => $"@channel-open:{recipient}:{payload}";
-        
+
         private static string CreateRecipientId(string relayServer, HexString publicKey)
         {
             var bytesArray = publicKey.ToByteArray();
             var hash = GenericHash.Hash(bytesArray, null, bytesArray.Length)!;
-            
+
             if (HexString.TryParse(hash, out var hexHash))
                 return $"{hexHash}:{relayServer}";
 
@@ -56,7 +43,7 @@ namespace BeaconSdk.Infrastructure.Transport.Communication
             if (!int.TryParse(peer.Version, out var version))
                 throw new InvalidOperationException("Invalid peer version");
 
-            if (!HexString.TryParse(publicKey, out var hexPublicKey)) 
+            if (!HexString.TryParse(publicKey, out var hexPublicKey))
                 throw new ArgumentException("Invalid publicKey");
 
             return version switch
@@ -75,14 +62,26 @@ namespace BeaconSdk.Infrastructure.Transport.Communication
                 throw new ArgumentNullException(nameof(peer.Id));
 
             var pairingResponse = new PairingResponse(
-                peer.Id, 
+                peer.Id,
                 "p2p-pairing-response",
                 appName,
                 peer.Version,
-                publicKey.ToString(), 
+                publicKey.ToString(),
                 relayServer);
 
             return JsonConvert.SerializeObject(pairingResponse);
+        }
+
+        public readonly struct PairingResponseAggregate
+        {
+            public readonly string ChannelOpeningMessage;
+            public readonly string RecipientId;
+
+            public PairingResponseAggregate(string channelOpeningMessage, string recipientId)
+            {
+                ChannelOpeningMessage = channelOpeningMessage;
+                RecipientId = recipientId;
+            }
         }
     }
 }

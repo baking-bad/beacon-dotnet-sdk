@@ -6,25 +6,25 @@ namespace BeaconSdk.Infrastructure.Cryptography.Libsodium
     {
         // crypto_kx_PUBLICKEYBYTES
         private const int PublicKeyBytes = 32;
-        
+
         // crypto_kx_SECRETKEYBYTES
         private const int SecretKeyBytes = 32;
-        
+
         // crypto_kx_SESSIONKEYBYTES
         private const int SessionKeyBytes = 32;
-        
+
         public static SessionKeyPair CreateServerSessionKeyPair(byte[] serverPublicKey, byte[] serverSecretKey, byte[] clientPublicKey)
         {
             var rx = new byte[SessionKeyBytes];
             var tx = new byte[SessionKeyBytes];
 
-            if (serverPublicKey == null || serverPublicKey.Length != PublicKeyBytes) 
+            if (serverPublicKey == null || serverPublicKey.Length != PublicKeyBytes)
                 throw new ArgumentException($"{nameof(serverPublicKey)} size must be {PublicKeyBytes} bytes in length.");
-            
-            if (serverSecretKey == null || serverSecretKey.Length != SecretKeyBytes) 
+
+            if (serverSecretKey == null || serverSecretKey.Length != SecretKeyBytes)
                 throw new ArgumentException($"{nameof(serverSecretKey)} size must be {SecretKeyBytes} bytes in length.");
-            
-            if (clientPublicKey == null || clientPublicKey.Length != PublicKeyBytes) 
+
+            if (clientPublicKey == null || clientPublicKey.Length != PublicKeyBytes)
                 throw new ArgumentException($"{nameof(clientPublicKey)} size must be {PublicKeyBytes} bytes in length.");
 
             if (SodiumLibrary.crypto_kx_server_session_keys(rx, tx, serverPublicKey, serverSecretKey, clientPublicKey) != 0)
@@ -32,13 +32,13 @@ namespace BeaconSdk.Infrastructure.Cryptography.Libsodium
 
             return new SessionKeyPair(rx, tx);
         }
-        
+
         // // A client <-> B server
         // public static void GenerateServerSessionKeyPair(byte[]clientPublicKey, KeyPair serverKeyPair)
         // {
         //     
         // }
-        
+
         // private static SessionKeyPair CreateClientSessionKeyPair(byte[] clientPublicKey, byte[] clientSecretKey, byte[] clientPublicKey1)
         // {
         //     var rx = new byte[SESSION_KEY_BYTES];

@@ -1,26 +1,26 @@
 // ReSharper disable InconsistentNaming
+
 namespace BeaconSdk.Infrastructure.Cryptography.Libsodium
 {
-    using System;
     using System.Runtime.InteropServices;
 
-    public static class SodiumLibrary 
+    public static class SodiumLibrary
     {
 #if IOS
         const string DllName = "__Internal";
 #else
-        const string DllName = "libsodium";
+        private const string DllName = "libsodium";
 #endif
 
         //sodium_init
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern Int32 sodium_init();
-        
+        internal static extern int sodium_init();
+
         //crypto_kx_client_session_keys
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int crypto_kx_client_session_keys(byte[] rx, byte[] tx, byte[] client_pk, byte[] client_sk, 
+        internal static extern int crypto_kx_client_session_keys(byte[] rx, byte[] tx, byte[] client_pk, byte[] client_sk,
             byte[] server_pk);
-        
+
         // //crypto_kx_client_session_keys
         // [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         // internal static extern int crypto_kx_client_session_keys(Span<byte> rx, Span<byte> tx, 
@@ -31,10 +31,10 @@ namespace BeaconSdk.Infrastructure.Cryptography.Libsodium
         // const unsigned char client_pk[crypto_kx_PUBLICKEYBYTES],
         // const unsigned char client_sk[crypto_kx_SECRETKEYBYTES],
         // const unsigned char server_pk[crypto_kx_PUBLICKEYBYTES]);
-        
+
         // crypto_kx_server_session_keys
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int crypto_kx_server_session_keys(byte[] rx, byte[] tx, byte[] server_pk, byte[] server_sk, 
+        internal static extern int crypto_kx_server_session_keys(byte[] rx, byte[] tx, byte[] server_pk, byte[] server_sk,
             byte[] client_pk);
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]

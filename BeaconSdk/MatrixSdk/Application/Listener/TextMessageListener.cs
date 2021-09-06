@@ -3,9 +3,11 @@ namespace MatrixSdk.Application.Listener
     using System;
     using System.Collections.Generic;
     using Domain.Room;
-    
+
     public class TextMessageListener : MatrixEventListener<List<BaseRoomEvent>>
     {
+
+        private readonly string listenerId;
         private readonly Action<string, TextMessageEvent> onNewTextMessage;
 
         public TextMessageListener(string listenerId, Action<string, TextMessageEvent> onNewTextMessage)
@@ -14,12 +16,10 @@ namespace MatrixSdk.Application.Listener
             this.listenerId = listenerId;
         }
 
-        private readonly string listenerId;
-        
         public override void OnCompleted() => throw new NotImplementedException();
 
         public override void OnError(Exception error) => throw new NotImplementedException();
-        
+
         public override void OnNext(List<BaseRoomEvent> value)
         {
             foreach (var matrixRoomEvent in value)

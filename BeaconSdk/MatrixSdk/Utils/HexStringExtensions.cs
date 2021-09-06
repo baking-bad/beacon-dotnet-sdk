@@ -1,7 +1,6 @@
 namespace MatrixSdk.Utils
 {
     using System;
-    using System.Linq;
     using System.Text;
 
     public static class HexStringExtensions
@@ -33,14 +32,14 @@ namespace MatrixSdk.Utils
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (hexString.Value == null)
                 throw new ArgumentNullException(nameof(hexString));
-        
+
             var bytes = new byte[hexString.Value.Length / 2];
-        
-            for (var i = 0; i < hexString.Value.Length; i+=2)
+
+            for (var i = 0; i < hexString.Value.Length; i += 2)
             {
                 var hexChar = hexString.Value.Substring(i, 2);
                 var @byte = Convert.ToByte(hexChar, 16);
-                
+
                 bytes[i / 2] = @byte;
             }
 

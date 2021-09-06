@@ -2,7 +2,7 @@ namespace MatrixSdk.Infrastructure.Services
 {
     using System;
     using Sodium;
-    
+
     public class SignatureCryptoService
     {
         public static string ToHexString(byte[] input)
@@ -38,11 +38,11 @@ namespace MatrixSdk.Infrastructure.Services
 
         public static string GenerateHexId(byte[] publicKey)
         {
-            var hash = GenericHash.Hash(publicKey, null, publicKey.Length); 
+            var hash = GenericHash.Hash(publicKey, null, publicKey.Length);
 
             return ToHexString(hash);
         }
-    } 
+    }
 }
 
 // Todo: maybe use https://nsec.rocks/ ?

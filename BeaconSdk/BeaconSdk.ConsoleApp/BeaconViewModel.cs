@@ -8,14 +8,13 @@ namespace BeaconSdk.ConsoleApp
         {
             // On success start
             ListenForRequests();
-            
+
             // On failure 
             // Log error
         }
-        
+
         private void ListenForRequests()
         {
-            
         }
     }
 }

@@ -3,7 +3,7 @@ namespace MatrixSdk.Application.Notifier
     using System;
     using System.Collections.Generic;
 
-    public class MatrixEventNotifier<T> : IObservable<T> 
+    public class MatrixEventNotifier<T> : IObservable<T>
     {
         private readonly List<IObserver<T>> observers = new();
 

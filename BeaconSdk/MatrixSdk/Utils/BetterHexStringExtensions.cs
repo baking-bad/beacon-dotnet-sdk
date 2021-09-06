@@ -1,7 +1,5 @@
 namespace MatrixSdk.Utils
 {
-    using System;
-    using System.Text;
 
     // public static class BetterHexStringExtensions
     // {

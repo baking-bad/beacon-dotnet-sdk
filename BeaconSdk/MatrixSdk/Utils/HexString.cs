@@ -26,7 +26,7 @@ namespace MatrixSdk.Utils
             result = new HexString(value);
             return true;
         }
-        
+
         public static bool TryParse(string? input, out HexString result)
         {
             if (input == null)
@@ -47,13 +47,13 @@ namespace MatrixSdk.Utils
             result = new HexString(string.Empty);
             return false;
         }
-        
+
         public override string ToString() => Value;
 
         public string ToString(bool withPrefix) => withPrefix ? Prefix + Value : Value;
 
         private static bool IsHex(IReadOnlyCollection<char> characters) =>
-            characters.Count % 2 == 0 && 
+            characters.Count % 2 == 0 &&
             characters.Select(c => c is >= '0' and <= '9' or >= 'a' and <= 'f' or >= 'A' and <= 'F')
                 .All(isHex => isHex);
     }
