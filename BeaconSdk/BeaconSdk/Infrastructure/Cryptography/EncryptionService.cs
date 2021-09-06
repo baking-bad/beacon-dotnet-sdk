@@ -4,6 +4,7 @@ namespace BeaconSdk.Infrastructure.Cryptography
     using Libsodium;
     using MatrixSdk.Utils;
     using Sodium;
+    using SodiumCore = Sodium.SodiumCore;
     using SodiumLibrary = Libsodium.SodiumLibrary;
 
     public static class EncryptionService
@@ -31,11 +32,11 @@ namespace BeaconSdk.Infrastructure.Cryptography
 
             return SecretBox.Open(cipher, nonce, sharedKey);
         }
-        
-        
+
+
         public static byte[] Encrypt(byte[] message, byte[] sharedKey)
         {
-            var nonce = Sodium.SodiumCore.GetRandomBytes(NonceBytes)!;
+            var nonce = SodiumCore.GetRandomBytes(NonceBytes)!;
             var result = SecretBox.Create(message, nonce, sharedKey)!;
 
             return nonce.Concat(result).ToArray();

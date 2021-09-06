@@ -16,10 +16,10 @@ namespace BeaconSdk.Infrastructure.Cryptography
 
             if (!HexString.TryParse(encryptedBytes, out var result))
                 throw new InvalidOperationException("Can not parse encryptedBytes");
-            
+
             return result;
         }
-        
+
         public static string DecryptAsString(string encryptedMessage, byte[] sharedKey)
         {
             var encryptedBytes = HexString.TryParse(encryptedMessage, out var hexString)
