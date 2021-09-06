@@ -1,9 +1,13 @@
 namespace MatrixSdk
 {
     using System;
+    using System.Collections.Generic;
     using Application;
+    using Application.Network;
+    using Application.Notifier;
+    using Domain;
+    using Domain.Room;
     using Infrastructure;
-    using Infrastructure.Providers;
     using Infrastructure.Repositories;
     using Infrastructure.Services;
     using Microsoft.Extensions.DependencyInjection;
@@ -14,18 +18,17 @@ namespace MatrixSdk
         {
             services.AddHttpClient(MatrixApiConstants.Matrix, c => { c.BaseAddress = new Uri(MatrixApiConstants.BaseAddress); });
 
-            services.AddSingleton<CryptoService>();
+            services.AddSingleton<SignatureCryptoService>();
             services.AddSingleton<EventService>();
             services.AddSingleton<RoomService>();
             services.AddSingleton<UserService>();
 
             services.AddTransient<MatrixClient>();
+            services.AddTransient<INetworkService, MatrixClientNetworkService>();
+
             services.AddTransient<ClientStateManager>();
             services.AddTransient<MatrixRoomFactory>();
-            services.AddTransient<TextMessageNotifier>();
-
-            services.AddSingleton<AccessTokenProvider>();
-            services.AddSingleton<ICryptoAlgorithmsProvider, LibsodiumAlgorithmsProvider>();
+            services.AddTransient<MatrixEventNotifier<List<BaseRoomEvent>>>();
 
             services.AddSingleton<ISeedRepository, MemorySeedRepository>();
 

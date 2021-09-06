@@ -2,7 +2,6 @@ namespace MatrixSdk.Domain
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Application;
     using Infrastructure.Dto.Sync;
     using Room;
 

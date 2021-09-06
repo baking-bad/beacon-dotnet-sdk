@@ -39,14 +39,15 @@
             return await CreateHttpClient(accessToken).GetAsJsonAsync<SyncResponse>(uri.ToString(), cancellationToken);
         }
 
-        public async Task<EventResponse> SendMessageAsync(string accessToken, string roomId, string transactionId, string message)
+        public async Task<EventResponse> SendMessageAsync(string accessToken, CancellationToken cancellationToken, string roomId, string transactionId,
+            string message)
         {
             // var eventType = InstantMessagingEventType.Message.ToString();
             var eventType = "m.room.message";
             var model = new MessageEvent(MessageType.Text, message);
 
             return await CreateHttpClient(accessToken)
-                .PutAsJsonAsync<EventResponse>($"{RequestUri}/rooms/{roomId}/send/{eventType}/{transactionId}", model);
+                .PutAsJsonAsync<EventResponse>($"{RequestUri}/rooms/{roomId}/send/{eventType}/{transactionId}", model, cancellationToken);
         }
     }
 }

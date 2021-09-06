@@ -4,6 +4,7 @@ namespace MatrixSdk.Domain.Room
     using Infrastructure.Dto.Sync.Event.Room;
     using Infrastructure.Dto.Sync.Event.Room.Messaging;
 
+
     public record TextMessageEvent(string RoomId, string SenderUserId, string Message) : BaseRoomEvent(RoomId, SenderUserId)
     {
         public static class Factory

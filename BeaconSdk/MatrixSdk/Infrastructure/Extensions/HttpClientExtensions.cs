@@ -63,14 +63,14 @@ namespace MatrixSdk.Infrastructure.Extensions
         // Todo: Refactor
         // See: https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-how-to?pivots=dotnet-5-0#httpclient-and-httpcontent-extension-methods
         public static async Task<TResponse> PutAsJsonAsync<TResponse>(this HttpClient httpClient,
-            string requestUri, object model)
+            string requestUri, object model, CancellationToken cancellationToken)
         {
             var settings = GetJsonSettings();
 
             var json = JsonConvert.SerializeObject(model, settings);
             var content = new StringContent(json, Encoding.Default, "application/json");
 
-            var response = await httpClient.PutAsync(requestUri, content);
+            var response = await httpClient.PutAsync(requestUri, content, cancellationToken);
             var result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
