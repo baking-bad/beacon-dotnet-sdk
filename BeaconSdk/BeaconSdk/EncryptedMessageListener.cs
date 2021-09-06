@@ -3,6 +3,7 @@ namespace BeaconSdk
     using System;
     using System.Collections.Generic;
     using System.Text;
+    using Infrastructure.Cryptography;
     using MatrixSdk.Application.Listener;
     using MatrixSdk.Domain.Room;
     using MatrixSdk.Infrastructure.Services;
@@ -34,7 +35,9 @@ namespace BeaconSdk
                     if (SenderIdMatchesPublicKeyToListen(textMessageEvent.SenderUserId, publicKeyToListen) && 
                         EncryptionService.Validate(textMessageEvent.Message)) // Todo: implement validate
                     {
-                        var message = Decrypt(textMessageEvent.Message, publicKeyToListen);
+                        var serverSessionKeyPair = SessionKeyPairInMemory.CreateOrReadServer(publicKeyToListen, keyPair);
+                        var message = EncryptionServiceHelper.DecryptAsString(textMessageEvent.Message, serverSessionKeyPair.Rx);
+                        
                         onNewTextMessage(textMessageEvent);
                     }
         }
@@ -47,17 +50,17 @@ namespace BeaconSdk
                    senderUserId.StartsWith($"@{hexHash}");
         }
         
-        private string Decrypt(string encryptedMessage, HexString publicKey)
-        {
-            var encryptedBytes = HexString.TryParse(encryptedMessage, out var hexString)
-                ? hexString.ToByteArray()
-                : Encoding.UTF8.GetBytes(encryptedMessage);
-
-            var serverSessionKeyPair = SessionKeyPairInMemory.CreateOrReadServer(publicKey, keyPair);
-            
-            var decryptedBytes = EncryptionService.Decrypt(encryptedBytes, serverSessionKeyPair.Rx);
-
-            return Encoding.UTF8.GetString(decryptedBytes);
-        }
+        // private string Decrypt(string encryptedMessage, HexString publicKey)
+        // {
+        //     var encryptedBytes = HexString.TryParse(encryptedMessage, out var hexString)
+        //         ? hexString.ToByteArray()
+        //         : Encoding.UTF8.GetBytes(encryptedMessage);
+        //
+        //     var serverSessionKeyPair = SessionKeyPairInMemory.CreateOrReadServer(publicKey, keyPair);
+        //     
+        //     var decryptedBytes = EncryptionService.Decrypt(encryptedBytes, serverSessionKeyPair.Rx);
+        //
+        //     return Encoding.UTF8.GetString(decryptedBytes);
+        // }
     }
 }
