@@ -40,11 +40,5 @@ namespace BeaconSdk.Infrastructure.Cryptography
 
             return nonce.Concat(result).ToArray();
         }
-        
-
-        // public byte[] Hash(byte[] message, int size) => GenericHash.Hash(message, null, size);
-
-        // public byte[] GenerateRandomBytes(int count) => SodiumCore.GetRandomBytes(count);
     }
-
 }

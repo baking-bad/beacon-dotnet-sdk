@@ -4,11 +4,11 @@ namespace BeaconSdk
     using System.Collections.Generic;
     using System.Text;
     using Infrastructure.Cryptography;
+    using Infrastructure.Repositories;
     using MatrixSdk.Application.Listener;
     using MatrixSdk.Domain.Room;
     using MatrixSdk.Infrastructure.Services;
     using MatrixSdk.Utils;
-    using Repositories;
     using Sodium;
 
     public class EncryptedMessageListener : MatrixEventListener<List<BaseRoomEvent>>
