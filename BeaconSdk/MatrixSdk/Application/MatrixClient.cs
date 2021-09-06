@@ -94,7 +94,7 @@
         public async Task<MatrixRoom> JoinTrustedPrivateRoomAsync(string roomId) =>
             await networkService.JoinTrustedPrivateRoomAsync(stateManager, cts.Token, roomId);
 
-        public async Task SendMessageAsync(string roomId, string message) =>
+        public async Task<string?> SendMessageAsync(string roomId, string message) =>
             await networkService.SendMessageAsync(stateManager, cts.Token, roomId, message);
 
         public async Task<List<string>> GetJoinedRoomsIdsAsync() =>

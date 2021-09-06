@@ -61,13 +61,15 @@ namespace MatrixSdk.Application.Network
             return matrixRoom;
         }
 
-        public async Task SendMessageAsync(ClientStateManager stateManager, CancellationToken cancellationToken, string roomId, string message)
+        public async Task<string?> SendMessageAsync(ClientStateManager stateManager, CancellationToken cancellationToken, string roomId, string message)
         {
             ThrowIfAccessTokenIsEmpty(stateManager.AccessToken);
 
             var transactionId = CreateTransactionId(stateManager);
             var result = await eventService.SendMessageAsync(stateManager.AccessToken!, cancellationToken, roomId, transactionId, message);
-            var id = result.EventId;
+            // var id = result.EventId;
+
+            return result.EventId;
         }
 
         public async Task<List<string>> GetJoinedRoomsIdsAsync(string accessToken, CancellationToken cancellationToken)

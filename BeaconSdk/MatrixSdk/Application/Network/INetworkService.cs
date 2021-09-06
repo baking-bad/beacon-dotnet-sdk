@@ -20,7 +20,7 @@ namespace MatrixSdk.Application.Network
 
         Task<MatrixRoom> JoinTrustedPrivateRoomAsync(ClientStateManager stateManager, CancellationToken cancellationToken, string roomId);
 
-        Task SendMessageAsync(ClientStateManager stateManager, CancellationToken cancellationToken, string roomId, string message);
+        Task<string?> SendMessageAsync(ClientStateManager stateManager, CancellationToken cancellationToken, string roomId, string message);
 
         Task<List<string>> GetJoinedRoomsIdsAsync(string accessToken, CancellationToken cancellationToken);
 
