@@ -17,11 +17,11 @@
         private const int FirstSyncTimout = 0;
         private const int LaterSyncTimout = 30000;
 
-        private readonly CancellationTokenSource cts = new();
-        private readonly ILogger<MatrixClient> logger;
-        private readonly INetworkService networkService;
-        private readonly ClientStateManager stateManager;
-        private Timer pollingTimer = null!;
+        private readonly CancellationTokenSource _cts = new();
+        private readonly ILogger<MatrixClient> _logger;
+        private readonly INetworkService _networkService;
+        private readonly ClientStateManager _stateManager;
+        private Timer _pollingTimer = null!;
 
         // private string seed = "";
 
@@ -31,81 +31,76 @@
             ILogger<MatrixClient> logger,
             MatrixEventNotifier<List<BaseRoomEvent>> matrixEventNotifier)
         {
-            this.stateManager = stateManager;
-            this.networkService = networkService;
-            this.logger = logger;
+            _stateManager = stateManager;
+            _networkService = networkService;
+            _logger = logger;
 
             MatrixEventNotifier = matrixEventNotifier;
         }
 
         public MatrixEventNotifier<List<BaseRoomEvent>> MatrixEventNotifier { get; }
 
-        public string UserId => stateManager.UserId!;
+        public string UserId => _stateManager.UserId!;
 
         //Todo: store on disk
-        public MatrixRoom[] InvitedRooms => stateManager.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Invited).ToArray();
+        public MatrixRoom[] InvitedRooms => _stateManager.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Invited).ToArray();
 
-        public MatrixRoom[] JoinedRooms => stateManager.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Joined).ToArray();
+        public MatrixRoom[] JoinedRooms => _stateManager.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Joined).ToArray();
 
-        public MatrixRoom[] LeftRooms => stateManager.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Left).ToArray();
+        public MatrixRoom[] LeftRooms => _stateManager.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Left).ToArray();
 
         public async Task StartAsync(KeyPair keyPair)
         {
-            logger.LogInformation("MatrixClient: Starting...");
+            _logger.LogInformation("MatrixClient: Starting...");
 
-            var response = await networkService.LoginAsync(cts.Token, keyPair);
-            stateManager.UpdateStateWith(response.UserId, response.AccessToken, FirstSyncTimout);
+            var response = await _networkService.LoginAsync(_cts.Token, keyPair);
+            _stateManager.UpdateStateWith(response.UserId, response.AccessToken, FirstSyncTimout);
 
-            pollingTimer = new Timer(async _ => await PollAsync(cts.Token));
-            pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+            _pollingTimer = new Timer(async _ => await PollAsync(_cts.Token));
+            _pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
 
-            logger.LogInformation("MatrixClient: Ready");
+            _logger.LogInformation("MatrixClient: Ready");
         }
 
         private async Task PollAsync(CancellationToken cancellationToken)
         {
-            pollingTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            _pollingTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
-            var response = await networkService.SyncAsync(stateManager.AccessToken, timeout: stateManager.Timeout,
-                nextBatch: stateManager.NextBatch,
+            var response = await _networkService.SyncAsync(_stateManager.AccessToken, timeout: _stateManager.Timeout,
+                nextBatch: _stateManager.NextBatch,
                 cancellationToken: cancellationToken);
 
             var syncBatch = SyncBatch.Factory.CreateFromSync(response.NextBatch, response.Rooms);
-            stateManager.UpdateStateWith(syncBatch, syncBatch.NextBatch, LaterSyncTimout);
+            _stateManager.UpdateStateWith(syncBatch, syncBatch.NextBatch, LaterSyncTimout);
 
             MatrixEventNotifier.NotifyAll(syncBatch.MatrixRoomEvents);
 
-            pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+            _pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
         }
 
         public void Stop()
         {
-            logger.LogInformation("MatrixClient: Stopping...");
+            _logger.LogInformation("MatrixClient: Stopping...");
 
-            cts.Cancel();
-            pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+            _cts.Cancel();
+            _pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
 
-            logger.LogInformation("MatrixClient: Stopped");
+            _logger.LogInformation("MatrixClient: Stopped");
         }
 
         public async Task<MatrixRoom> CreateTrustedPrivateRoomAsync(string[]? invitedUserIds = null) =>
-            await networkService.CreateTrustedPrivateRoomAsync(stateManager, cts.Token, invitedUserIds);
+            await _networkService.CreateTrustedPrivateRoomAsync(_stateManager, _cts.Token, invitedUserIds);
 
         public async Task<MatrixRoom> JoinTrustedPrivateRoomAsync(string roomId) =>
-            await networkService.JoinTrustedPrivateRoomAsync(stateManager, cts.Token, roomId);
+            await _networkService.JoinTrustedPrivateRoomAsync(_stateManager, _cts.Token, roomId);
 
         public async Task<string?> SendMessageAsync(string roomId, string message) =>
-            await networkService.SendMessageAsync(stateManager, cts.Token, roomId, message);
+            await _networkService.SendMessageAsync(_stateManager, _cts.Token, roomId, message);
 
         public async Task<List<string>> GetJoinedRoomsIdsAsync() =>
-            await networkService.GetJoinedRoomsIdsAsync(stateManager.AccessToken, cts.Token);
+            await _networkService.GetJoinedRoomsIdsAsync(_stateManager.AccessToken, _cts.Token);
 
         public async Task LeaveRoomAsync(string roomId) =>
-            await networkService.LeaveRoomAsync(stateManager.AccessToken, cts.Token, roomId);
+            await _networkService.LeaveRoomAsync(_stateManager.AccessToken, _cts.Token, roomId);
     }
 }
-
-// if (seed == "0008777")
-// {
-//     var t = clientStateManager.MatrixRooms;
-// }
