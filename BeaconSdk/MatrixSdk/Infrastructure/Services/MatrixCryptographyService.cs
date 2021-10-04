@@ -3,7 +3,7 @@ namespace MatrixSdk.Infrastructure.Services
     using System;
     using Sodium;
 
-    public class SignatureCryptoService
+    public class MatrixCryptographyService
     {
         public static string ToHexString(byte[] input)
         {

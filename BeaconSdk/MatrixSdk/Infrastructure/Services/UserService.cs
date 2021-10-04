@@ -13,21 +13,21 @@ namespace MatrixSdk.Infrastructure.Services
     {
         private const string RequestUri = "_matrix/client/r0";
 
-        private readonly IHttpClientFactory httpClientFactory;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         public UserService(IHttpClientFactory httpClientFactory)
         {
-            this.httpClientFactory = httpClientFactory;
+            _httpClientFactory = httpClientFactory;
         }
 
-        private HttpClient CreateHttpClient() => httpClientFactory.CreateClient(MatrixApiConstants.Matrix);
+        private HttpClient CreateHttpClient() => _httpClientFactory.CreateClient(MatrixApiConstants.Matrix);
 
         public async Task<LoginResponse> LoginAsync(KeyPair keyPair, CancellationToken cancellationToken)
         {
-            var loginDigest = SignatureCryptoService.GenerateLoginDigest();
-            var hexSignature = SignatureCryptoService.GenerateHexSignature(loginDigest, keyPair.PrivateKey);
-            var hexPublicKey = SignatureCryptoService.ToHexString(keyPair.PublicKey);
-            var hexId = SignatureCryptoService.GenerateHexId(keyPair.PublicKey);
+            var loginDigest = MatrixCryptographyService.GenerateLoginDigest();
+            var hexSignature = MatrixCryptographyService.GenerateHexSignature(loginDigest, keyPair.PrivateKey);
+            var hexPublicKey = MatrixCryptographyService.ToHexString(keyPair.PublicKey);
+            var hexId = MatrixCryptographyService.GenerateHexId(keyPair.PublicKey);
 
             var password = $"ed:{hexSignature}:{hexPublicKey}";
             var deviceId = hexPublicKey;

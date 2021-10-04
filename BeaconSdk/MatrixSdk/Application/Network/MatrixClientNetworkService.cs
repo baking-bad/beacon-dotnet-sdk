@@ -12,27 +12,27 @@ namespace MatrixSdk.Application.Network
 
     public class MatrixClientNetworkService : INetworkService
     {
-        private readonly EventService eventService;
-        private readonly RoomService roomService;
+        private readonly EventService _eventService;
+        private readonly RoomService _roomService;
 
-        private readonly UserService userService;
+        private readonly UserService _userService;
 
         public MatrixClientNetworkService(UserService userService, EventService eventService, RoomService roomService)
         {
-            this.userService = userService;
-            this.eventService = eventService;
-            this.roomService = roomService;
+            _userService = userService;
+            _eventService = eventService;
+            _roomService = roomService;
         }
 
         public async Task<LoginResponse> LoginAsync(CancellationToken cancellationToken, KeyPair keyPair) =>
-            await userService.LoginAsync(keyPair, cancellationToken);
+            await _userService.LoginAsync(keyPair, cancellationToken);
 
         public async Task<SyncResponse> SyncAsync(string accessToken, CancellationToken cancellationToken, ulong? timeout = null,
             string? nextBatch = null)
         {
             ThrowIfAccessTokenIsEmpty(accessToken);
 
-            return await eventService.SyncAsync(accessToken, cancellationToken, timeout, nextBatch);
+            return await _eventService.SyncAsync(accessToken, cancellationToken, timeout, nextBatch);
         }
 
         public async Task<MatrixRoom> CreateTrustedPrivateRoomAsync(ClientStateManager stateManager, CancellationToken cancellationToken,
@@ -40,7 +40,7 @@ namespace MatrixSdk.Application.Network
         {
             ThrowIfAccessTokenIsEmpty(stateManager.AccessToken);
 
-            var response = await roomService.CreateRoomAsync(stateManager.AccessToken!, invitedUserIds, cancellationToken);
+            var response = await _roomService.CreateRoomAsync(stateManager.AccessToken!, invitedUserIds, cancellationToken);
             var matrixRoom = new MatrixRoom(response.RoomId, MatrixRoomStatus.Unknown);
             stateManager.UpdateMatrixRoom(response.RoomId, matrixRoom);
 
@@ -54,7 +54,7 @@ namespace MatrixSdk.Application.Network
 
             ThrowIfAccessTokenIsEmpty(stateManager.AccessToken);
 
-            var response = await roomService.JoinRoomAsync(stateManager.AccessToken!, roomId, cancellationToken);
+            var response = await _roomService.JoinRoomAsync(stateManager.AccessToken!, roomId, cancellationToken);
             matrixRoom = new MatrixRoom(response.RoomId, MatrixRoomStatus.Unknown);
             stateManager.UpdateMatrixRoom(response.RoomId, matrixRoom);
 
@@ -66,7 +66,7 @@ namespace MatrixSdk.Application.Network
             ThrowIfAccessTokenIsEmpty(stateManager.AccessToken);
 
             var transactionId = CreateTransactionId(stateManager);
-            var result = await eventService.SendMessageAsync(stateManager.AccessToken!, cancellationToken, roomId, transactionId, message);
+            var result = await _eventService.SendMessageAsync(stateManager.AccessToken!, cancellationToken, roomId, transactionId, message);
             // var id = result.EventId;
 
             return result.EventId;
@@ -76,7 +76,7 @@ namespace MatrixSdk.Application.Network
         {
             ThrowIfAccessTokenIsEmpty(accessToken);
 
-            var response = await roomService.GetJoinedRoomsAsync(accessToken!, cancellationToken);
+            var response = await _roomService.GetJoinedRoomsAsync(accessToken!, cancellationToken);
 
             return response.JoinedRoomIds;
         }
@@ -85,7 +85,7 @@ namespace MatrixSdk.Application.Network
         {
             ThrowIfAccessTokenIsEmpty(accessToken);
 
-            await roomService.LeaveRoomAsync(accessToken!, roomId, cancellationToken);
+            await _roomService.LeaveRoomAsync(accessToken!, roomId, cancellationToken);
         }
 
         private string CreateTransactionId(ClientStateManager clientStateManager)

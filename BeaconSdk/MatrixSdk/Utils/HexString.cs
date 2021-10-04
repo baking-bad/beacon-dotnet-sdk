@@ -22,7 +22,10 @@ namespace MatrixSdk.Utils
                 return false;
             }
 
-            var value = BitConverter.ToString(input);
+            var value = BitConverter.ToString(input)
+                .Replace("-", string.Empty)
+                .ToLower();
+
             result = new HexString(value);
             return true;
         }
@@ -38,7 +41,7 @@ namespace MatrixSdk.Utils
             if (input.StartsWith(Prefix))
                 input = input[2..];
 
-            if (!IsHex(input.ToCharArray()))
+            if (IsHex(input.ToCharArray()))
             {
                 result = new HexString(input);
                 return true;

@@ -1,8 +1,12 @@
-﻿namespace BeaconSdk.Infrastructure.Transport.Communication
+﻿// ReSharper disable SuggestVarOrType_BuiltInTypes
+
+namespace BeaconSdk.Infrastructure.Transport.Communication
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Cryptography;
     using Domain.Beacon.P2P;
     using MatrixSdk.Application;
     using MatrixSdk.Application.Listener;
@@ -13,14 +17,14 @@
     public class Client
     {
         private static readonly Dictionary<HexString, MatrixEventListener<List<BaseRoomEvent>>> EncryptedMessageListeners = new();
-        private readonly string appName;
-        private readonly List<MatrixClient> matrixClients;
-        private KeyPair? keyPair;
+        private readonly string _appName;
+        private readonly MatrixClient _matrixClient;
+        private KeyPair? _keyPair;
 
-        public Client(List<MatrixClient> matrixClients, string appName)
+        public Client(MatrixClient matrixClient, string appName)
         {
-            this.matrixClients = matrixClients;
-            this.appName = appName;
+            _matrixClient = matrixClient;
+            _appName = appName;
 
             //Todo: refactor
             SodiumCore.Init();
@@ -32,10 +36,9 @@
         {
             try
             {
-                foreach (var client in matrixClients)
-                    await client.StartAsync(keyPair);
+                await _matrixClient.StartAsync(keyPair);
 
-                this.keyPair = keyPair;
+                _keyPair = keyPair;
             }
             catch (Exception e)
             {
@@ -50,12 +53,11 @@
                 return;
 
             // ReSharper disable once ArgumentsStyleNamedExpression
-            var listener = new EncryptedMessageListener(keyPair!, publicKey, e => { });
+            var listener = new EncryptedMessageListener(_keyPair!, publicKey, e => { });
 
             EncryptedMessageListeners[publicKey] = listener;
 
-            foreach (var client in matrixClients)
-                listener.ListenTo(client.MatrixEventNotifier);
+            listener.ListenTo(_matrixClient.MatrixEventNotifier);
         }
 
         public void RemoveListenerForPublicKey(HexString publicKey)
@@ -68,10 +70,35 @@
         {
             try
             {
-                var pairingResponseAggregate = ClientMessageFactory.CreatePairingResponse(peer, keyPair!, appName);
+                if (!HexString.TryParse(peer.PublicKey, out var publicKeyHex))
+                    throw new InvalidOperationException("Can not parse peer.PublicKey");
 
-                foreach (var matrixClient in matrixClients)
-                    _ = await matrixClient.SendMessageAsync(pairingResponseAggregate.RecipientId, pairingResponseAggregate.ChannelOpeningMessage);
+                var recipientId = ClientHelper.CreateRecipientId(peer.RelayServer, publicKeyHex);
+
+                // We force room creation here because if we "re-pair", we need to make sure that we don't send it to an old room.
+                var matrixRoom = await _matrixClient.CreateTrustedPrivateRoomAsync(new[]
+                {
+                    recipientId
+                });
+
+                // await this.updatePeerRoom(recipient, roomId)
+
+                // Before we send the message, we have to wait for the join to be accepted.
+                var spin = new SpinWait();
+                while (_matrixClient.JoinedRooms.Length == 0)
+                    spin.SpinOnce();
+
+                var pairingPayloadMessage = ClientHelper.CreatePairingPayload(peer, _keyPair!.PublicKey, peer.RelayServer, _appName);
+
+                var payload = BeaconCryptographyService.EncryptAsHex(pairingPayloadMessage, publicKeyHex.ToByteArray()).ToString();
+
+                var t = recipientId.Substring(1, recipientId.Length-1);
+                var channelOpeningMessage = ClientHelper.GetChannelOpeningMessage(recipientId, payload);
+
+                // var pairingResponseAggregate = ClientMessageFactory.CreatePairingResponse(peer, _keyPair!, _appName);
+                //
+
+                var eventId = await _matrixClient.SendMessageAsync(matrixRoom.Id, channelOpeningMessage);
             }
             catch (Exception ex)
             {
@@ -81,10 +108,3 @@
         }
     }
 }
-
-
-// var (roomId, senderUserId, message) = textMessageEvent;
-// // Todo: valida
-
-// if (listenerId.Value != senderUserId)
-//     Console.WriteLine($"RoomId: {roomId} received message from {senderUserId}: {message}.");

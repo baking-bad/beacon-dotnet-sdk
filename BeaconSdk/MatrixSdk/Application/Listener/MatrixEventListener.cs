@@ -7,7 +7,7 @@ namespace MatrixSdk.Application.Listener
     {
         // ReSharper disable once MemberCanBePrivate.Global
         public readonly string Id;
-        private IDisposable? cancellation;
+        private IDisposable? _cancellation;
 
         protected MatrixEventListener()
         {
@@ -20,8 +20,8 @@ namespace MatrixSdk.Application.Listener
 
         public abstract void OnNext(T value);
 
-        public void ListenTo(MatrixEventNotifier<T> notifier) => cancellation = notifier.Subscribe(this);
+        public void ListenTo(MatrixEventNotifier<T> notifier) => _cancellation = notifier.Subscribe(this);
 
-        public void Unsubscribe() => cancellation?.Dispose();
+        public void Unsubscribe() => _cancellation?.Dispose();
     }
 }
