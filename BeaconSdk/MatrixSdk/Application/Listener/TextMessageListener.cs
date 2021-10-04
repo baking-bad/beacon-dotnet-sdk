@@ -7,13 +7,13 @@ namespace MatrixSdk.Application.Listener
     public class TextMessageListener : MatrixEventListener<List<BaseRoomEvent>>
     {
 
-        private readonly string listenerId;
-        private readonly Action<string, TextMessageEvent> onNewTextMessage;
+        private readonly string _listenerId;
+        private readonly Action<string, TextMessageEvent> _onNewTextMessage;
 
         public TextMessageListener(string listenerId, Action<string, TextMessageEvent> onNewTextMessage)
         {
-            this.onNewTextMessage = onNewTextMessage;
-            this.listenerId = listenerId;
+            _onNewTextMessage = onNewTextMessage;
+            _listenerId = listenerId;
         }
 
         public override void OnCompleted() => throw new NotImplementedException();
@@ -24,7 +24,7 @@ namespace MatrixSdk.Application.Listener
         {
             foreach (var matrixRoomEvent in value)
                 if (matrixRoomEvent is TextMessageEvent textMessageEvent)
-                    onNewTextMessage(listenerId, textMessageEvent);
+                    _onNewTextMessage(_listenerId, textMessageEvent);
         }
     }
 }
