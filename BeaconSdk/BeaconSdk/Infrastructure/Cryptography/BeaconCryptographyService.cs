@@ -1,13 +1,15 @@
 namespace BeaconSdk.Infrastructure.Cryptography
 {
+    using System;
     using System.Linq;
+    using System.Text;
     using Libsodium;
     using MatrixSdk.Utils;
     using Sodium;
     using SodiumCore = Sodium.SodiumCore;
     using SodiumLibrary = Libsodium.SodiumLibrary;
 
-    public static class EncryptionService
+    public static class BeaconCryptographyService
     {
         private static readonly int MacBytes = SodiumLibrary.crypto_box_macbytes();
         private static readonly int NonceBytes = SodiumLibrary.crypto_box_noncebytes();
@@ -40,6 +42,38 @@ namespace BeaconSdk.Infrastructure.Cryptography
             var result = SecretBox.Create(message, nonce, sharedKey)!;
 
             return nonce.Concat(result).ToArray();
+        }
+
+        public static KeyPair GenerateEd25519KeyPair(string seed)
+        {
+            var hash = GenericHash.Hash(seed, (byte[]?)null, 32);
+
+            return PublicKeyAuth.GenerateKeyPair(hash);
+        }
+
+        public static HexString EncryptAsHex(string message, byte[] sharedKey)
+        {
+            var bytes = HexString.TryParse(message, out var hexString)
+                ? hexString.ToByteArray()
+                : Encoding.UTF8.GetBytes(message);
+
+            var encryptedBytes = Encrypt(bytes, sharedKey);
+
+            if (!HexString.TryParse(encryptedBytes, out var result))
+                throw new InvalidOperationException("Can not parse encryptedBytes");
+
+            return result;
+        }
+
+        public static string DecryptAsString(string encryptedMessage, byte[] sharedKey)
+        {
+            var encryptedBytes = HexString.TryParse(encryptedMessage, out var hexString)
+                ? hexString.ToByteArray()
+                : Encoding.UTF8.GetBytes(encryptedMessage);
+
+            var decryptedBytes = Decrypt(encryptedBytes, sharedKey);
+
+            return Encoding.UTF8.GetString(decryptedBytes);
         }
     }
 }
