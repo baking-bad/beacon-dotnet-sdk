@@ -11,16 +11,16 @@
     public class EventService
     {
         private const string RequestUri = "_matrix/client/r0";
-        private readonly IHttpClientFactory httpClientFactory;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         public EventService(IHttpClientFactory httpClientFactory)
         {
-            this.httpClientFactory = httpClientFactory;
+            _httpClientFactory = httpClientFactory;
         }
 
         private HttpClient CreateHttpClient(string accessToken)
         {
-            var httpClient = httpClientFactory.CreateClient(MatrixApiConstants.Matrix);
+            var httpClient = _httpClientFactory.CreateClient(MatrixApiConstants.Matrix);
             httpClient.AddBearerToken(accessToken);
 
             return httpClient;
@@ -45,6 +45,7 @@
             // var eventType = InstantMessagingEventType.Message.ToString();
             var eventType = "m.room.message";
             var model = new MessageEvent(MessageType.Text, message);
+            // var model = new MessageEvent2("m.text", message);
 
             return await CreateHttpClient(accessToken)
                 .PutAsJsonAsync<EventResponse>($"{RequestUri}/rooms/{roomId}/send/{eventType}/{transactionId}", model, cancellationToken);
