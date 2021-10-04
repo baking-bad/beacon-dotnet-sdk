@@ -11,16 +11,16 @@
     public class RoomService
     {
         private const string RequestUri = "_matrix/client/r0";
-        private readonly IHttpClientFactory httpClientFactory;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         public RoomService(IHttpClientFactory httpClientFactory)
         {
-            this.httpClientFactory = httpClientFactory;
+            _httpClientFactory = httpClientFactory;
         }
 
         private HttpClient CreateHttpClient(string accessToken)
         {
-            var httpClient = httpClientFactory.CreateClient(MatrixApiConstants.Matrix);
+            var httpClient = _httpClientFactory.CreateClient(MatrixApiConstants.Matrix);
             httpClient.AddBearerToken(accessToken);
 
             return httpClient;
