@@ -5,19 +5,19 @@ namespace MatrixSdk.Application.Notifier
 
     public class MatrixEventNotifier<T> : IObservable<T>
     {
-        private readonly List<IObserver<T>> observers = new();
+        private readonly List<IObserver<T>> _observers = new();
 
         public IDisposable? Subscribe(IObserver<T> observer)
         {
-            if (!observers.Contains(observer))
-                observers.Add(observer);
+            if (!_observers.Contains(observer))
+                _observers.Add(observer);
 
-            return new Unsubscriber<T>(observers, observer);
+            return new Unsubscriber<T>(_observers, observer);
         }
 
         public void NotifyAll(T matrixEvent)
         {
-            foreach (var eventObserver in observers)
+            foreach (var eventObserver in _observers)
                 eventObserver.OnNext(matrixEvent);
         }
     }
