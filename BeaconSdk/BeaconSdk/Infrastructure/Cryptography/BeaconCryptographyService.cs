@@ -36,10 +36,10 @@ namespace BeaconSdk.Infrastructure.Cryptography
         }
 
 
-        public static byte[] Encrypt(byte[] message, byte[] sharedKey)
+        public static byte[] Encrypt(byte[] message, byte[] recipientPublicKey)
         {
             var nonce = SodiumCore.GetRandomBytes(NonceBytes)!;
-            var result = SecretBox.Create(message, nonce, sharedKey)!;
+            var result = SealedPublicKeyBox.Create(message, recipientPublicKey);
 
             return nonce.Concat(result).ToArray();
         }
@@ -51,13 +51,13 @@ namespace BeaconSdk.Infrastructure.Cryptography
             return PublicKeyAuth.GenerateKeyPair(hash);
         }
 
-        public static HexString EncryptAsHex(string message, byte[] sharedKey)
+        public static HexString EncryptAsHex(string message, byte[] recipientPublicKey)
         {
             var bytes = HexString.TryParse(message, out var hexString)
                 ? hexString.ToByteArray()
                 : Encoding.UTF8.GetBytes(message);
 
-            var encryptedBytes = Encrypt(bytes, sharedKey);
+            var encryptedBytes = Encrypt(bytes, recipientPublicKey);
 
             if (!HexString.TryParse(encryptedBytes, out var result))
                 throw new InvalidOperationException("Can not parse encryptedBytes");
@@ -74,6 +74,15 @@ namespace BeaconSdk.Infrastructure.Cryptography
             var decryptedBytes = Decrypt(encryptedBytes, sharedKey);
 
             return Encoding.UTF8.GetString(decryptedBytes);
+        }
+        
+        public static string ToHexString(byte[] input)
+        {
+            var hexString = BitConverter.ToString(input);
+
+            var result = hexString.Replace("-", "");
+
+            return result.ToLower();
         }
     }
 }

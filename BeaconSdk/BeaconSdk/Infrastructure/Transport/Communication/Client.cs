@@ -88,12 +88,18 @@ namespace BeaconSdk.Infrastructure.Transport.Communication
                 while (_matrixClient.JoinedRooms.Length == 0)
                     spin.SpinOnce();
 
-                var pairingPayloadMessage = ClientHelper.CreatePairingPayload(peer, _keyPair!.PublicKey, peer.RelayServer, _appName);
+                var pairingPayloadMessage = ClientHelper.CreatePairingPayload(peer, _keyPair!.PublicKey, "beacon-node-0.papers.tech:8448", _appName);
 
-                var payload = BeaconCryptographyService.EncryptAsHex(pairingPayloadMessage, publicKeyHex.ToByteArray()).ToString();
+                
+                var t = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(publicKeyHex.ToByteArray());
+                // var payload = BeaconCryptographyService.EncryptAsHex(pairingPayloadMessage, t).ToString();
 
-                var t = recipientId.Substring(1, recipientId.Length-1);
-                var channelOpeningMessage = ClientHelper.GetChannelOpeningMessage(recipientId, payload);
+                var payload = SealedPublicKeyBox.Create(pairingPayloadMessage, recipientPublicKey: t);
+
+                if (!HexString.TryParse(payload, out var result))
+                    throw new Exception("");
+                
+                var channelOpeningMessage = ClientHelper.GetChannelOpeningMessage(recipientId, result.Value);
 
                 // var pairingResponseAggregate = ClientMessageFactory.CreatePairingResponse(peer, _keyPair!, _appName);
                 //
