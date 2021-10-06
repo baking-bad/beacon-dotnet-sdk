@@ -2,7 +2,7 @@ namespace BeaconSdk.ConsoleApp
 {
     public class BeaconViewModel
     {
-        private BeaconClient beaconClient;
+        private BaseClient _baseClient;
 
         private void StartBeacon()
         {
