@@ -4,7 +4,7 @@ namespace BeaconSdk.Domain.Beacon.P2P
 
     public enum BeaconConnectionKind
     {
-        p2p
+        P2P
     }
 
     public record BeaconPeer(string? Id, string Name, string PublicKey, string RelayServer, string Version, string? Icon, Uri? AppUri);
