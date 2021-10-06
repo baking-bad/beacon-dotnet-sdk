@@ -8,7 +8,7 @@ namespace BeaconSdk.Infrastructure.Repositories
 
     public class SessionKeyPairInMemory
     {
-        private static readonly Dictionary<HexString, KeyPair> clientSessionKeyPairs = new();
+        private static readonly Dictionary<HexString, KeyPair> ClientSessionKeyPairs = new();
         private static readonly Dictionary<HexString, SessionKeyPair> ServerSessionKeyPairs = new();
 
         public static SessionKeyPair CreateOrReadServer(HexString clientPublicKey, KeyPair serverKeyPair) =>
@@ -18,7 +18,7 @@ namespace BeaconSdk.Infrastructure.Repositories
 
         private static SessionKeyPair CreateServerSessionKeyPair(HexString clientPublicKey, KeyPair serverKeyPair)
         {
-            var sessionKeyPair = EncryptionService.CreateServerSessionKeyPair(clientPublicKey.ToByteArray(), serverKeyPair.PrivateKey);
+            var sessionKeyPair = BeaconCryptographyService.CreateServerSessionKeyPair(clientPublicKey.ToByteArray(), serverKeyPair.PrivateKey);
 
             ServerSessionKeyPairs[clientPublicKey] = sessionKeyPair;
 
