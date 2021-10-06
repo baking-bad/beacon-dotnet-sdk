@@ -12,14 +12,14 @@ namespace BeaconSdk
     public class EncryptedMessageListener : MatrixEventListener<List<BaseRoomEvent>>
     {
 
-        private readonly KeyPair keyPair;
-        private readonly Action<TextMessageEvent> onNewTextMessage;
-        private readonly HexString publicKeyToListen;
+        private readonly KeyPair _keyPair;
+        private readonly Action<TextMessageEvent> _onNewTextMessage;
+        private readonly HexString _publicKeyToListen;
         public EncryptedMessageListener(KeyPair keyPair, HexString publicKeyToListen, Action<TextMessageEvent> onNewTextMessage)
         {
-            this.keyPair = keyPair;
-            this.publicKeyToListen = publicKeyToListen;
-            this.onNewTextMessage = onNewTextMessage;
+            _keyPair = keyPair;
+            _publicKeyToListen = publicKeyToListen;
+            _onNewTextMessage = onNewTextMessage;
         }
 
         public override void OnCompleted() => throw new NotImplementedException();
@@ -30,19 +30,19 @@ namespace BeaconSdk
         {
             foreach (var matrixRoomEvent in value)
                 if (matrixRoomEvent is TextMessageEvent textMessageEvent)
-                    if (SenderIdMatchesPublicKeyToListen(textMessageEvent.SenderUserId, publicKeyToListen) &&
-                        EncryptionService.Validate(textMessageEvent.Message)) // Todo: implement validate
+                    if (SenderIdMatchesPublicKeyToListen(textMessageEvent.SenderUserId, _publicKeyToListen) &&
+                        BeaconCryptographyService.Validate(textMessageEvent.Message)) // Todo: implement validate
                     {
-                        var serverSessionKeyPair = SessionKeyPairInMemory.CreateOrReadServer(publicKeyToListen, keyPair);
-                        var message = EncryptionServiceHelper.DecryptAsString(textMessageEvent.Message, serverSessionKeyPair.Rx);
+                        var serverSessionKeyPair = SessionKeyPairInMemory.CreateOrReadServer(_publicKeyToListen, _keyPair);
+                        var message = BeaconCryptographyService.DecryptAsString(textMessageEvent.Message, serverSessionKeyPair.Rx);
 
-                        onNewTextMessage(textMessageEvent);
+                        _onNewTextMessage(textMessageEvent);
                     }
         }
 
         private bool SenderIdMatchesPublicKeyToListen(string senderUserId, HexString publicKey)
         {
-            var hash = EncryptionService.Hash(publicKey.ToByteArray());
+            var hash = BeaconCryptographyService.Hash(publicKey.ToByteArray());
 
             return HexString.TryParse(hash, out var hexHash) &&
                    senderUserId.StartsWith($"@{hexHash}");

@@ -34,7 +34,7 @@ namespace BeaconSdk.Infrastructure.Cryptography.Libsodium
         }
 
         // // A client <-> B server
-        // public static void GenerateServerSessionKeyPair(byte[]clientPublicKey, KeyPair serverKeyPair)
+        // public static void GenerateServerSessionKeyPair(byte []clientPublicKey, KeyPair serverKeyPair)
         // {
         //     
         // }
