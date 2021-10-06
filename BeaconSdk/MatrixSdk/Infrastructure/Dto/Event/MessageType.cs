@@ -1,7 +1,6 @@
 namespace MatrixSdk.Infrastructure.Dto.Event
 {
     using System.Runtime.Serialization;
-    using Newtonsoft.Json;
 
     public enum MessageType
     {

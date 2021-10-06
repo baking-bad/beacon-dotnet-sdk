@@ -9,9 +9,9 @@ namespace MatrixSdk.Application
 
     public class ClientStateManager
     {
-        private readonly ILogger<ClientStateManager> logger;
+        private readonly ILogger<ClientStateManager> _logger;
 
-        private readonly MatrixClientState state = new()
+        private readonly MatrixClientState _state = new()
         {
             Id = Guid.NewGuid(),
             MatrixRooms = new ConcurrentDictionary<string, MatrixRoom>(),
@@ -21,64 +21,64 @@ namespace MatrixSdk.Application
 
         public ClientStateManager(ILogger<ClientStateManager> logger)
         {
-            this.logger = logger;
+            _logger = logger;
         }
 
-        public string AccessToken => state.AccessToken!;
+        public string AccessToken => _state.AccessToken!;
 
-        public ulong Timeout => state.Timeout;
+        public ulong Timeout => _state.Timeout;
 
-        public string UserId => state.UserId!;
+        public string UserId => _state.UserId!;
 
-        public string NextBatch => state.NextBatch!;
+        public string NextBatch => _state.NextBatch!;
 
-        public ConcurrentDictionary<string, MatrixRoom> MatrixRooms => state.MatrixRooms;
+        public ConcurrentDictionary<string, MatrixRoom> MatrixRooms => _state.MatrixRooms;
 
         public ulong TransactionNumber
         {
-            get => state.TransactionNumber;
-            set => state.TransactionNumber = value;
+            get => _state.TransactionNumber;
+            set => _state.TransactionNumber = value;
         }
 
         private void UpdateStateWith(List<MatrixRoom> matrixRooms)
         {
             foreach (var room in matrixRooms)
-                if (!state.MatrixRooms.TryGetValue(room.Id, out var retrievedRoom))
+                if (!_state.MatrixRooms.TryGetValue(room.Id, out var retrievedRoom))
                 {
-                    state.MatrixRooms.TryAdd(room.Id, room);
+                    _state.MatrixRooms.TryAdd(room.Id, room);
                 }
                 else
                 {
                     var updatedUserIds = retrievedRoom.JoinedUserIds.Concat(room.JoinedUserIds).ToList();
                     var updatedRoom = new MatrixRoom(retrievedRoom.Id, room.Status, updatedUserIds);
 
-                    state.MatrixRooms.TryUpdate(room.Id, updatedRoom, retrievedRoom);
+                    _state.MatrixRooms.TryUpdate(room.Id, updatedRoom, retrievedRoom);
                 }
         }
 
         public void UpdateStateWith(SyncBatch syncBatch, string nextBatch, ulong timeout)
         {
-            state.NextBatch = nextBatch;
+            _state.NextBatch = nextBatch;
             UpdateStateWith(syncBatch.MatrixRooms);
 
-            state.Timeout = timeout;
+            _state.Timeout = timeout;
         }
 
         public void UpdateStateWith(string userId, string accessToken, ulong timeout)
         {
-            state.UserId = userId;
-            state.AccessToken = accessToken;
+            _state.UserId = userId;
+            _state.AccessToken = accessToken;
 
-            state.Timeout = timeout;
+            _state.Timeout = timeout;
         }
 
         public void UpdateMatrixRoom(string roomId, MatrixRoom matrixRoom)
         {
-            if (!state.MatrixRooms.TryGetValue(roomId, out var oldValue))
-                logger.LogInformation($"RoomId: {roomId}: could not get value");
+            if (!_state.MatrixRooms.TryGetValue(roomId, out var oldValue))
+                _logger.LogInformation($"RoomId: {roomId}: could not get value");
 
-            if (!state.MatrixRooms.TryUpdate(roomId, matrixRoom, oldValue))
-                logger.LogInformation($"RoomId: {roomId}: could not update value");
+            if (!_state.MatrixRooms.TryUpdate(roomId, matrixRoom, oldValue))
+                _logger.LogInformation($"RoomId: {roomId}: could not update value");
         }
     }
 }

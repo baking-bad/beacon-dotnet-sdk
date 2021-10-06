@@ -8,7 +8,7 @@
 
         [JsonProperty("body")] public string Message { get; } = Message;
     }
-    
+
     public record MessageEvent2(string msgtype, string body)
     {
         public string msgtype { get; } = msgtype;

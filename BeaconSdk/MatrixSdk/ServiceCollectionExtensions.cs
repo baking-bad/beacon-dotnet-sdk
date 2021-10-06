@@ -17,11 +17,13 @@ namespace MatrixSdk
         public static IServiceCollection AddMatrixSdk(this IServiceCollection services)
         {
             services.AddHttpClient(MatrixApiConstants.Matrix, c => { c.BaseAddress = new Uri(MatrixApiConstants.BaseAddress); });
+            // services.AddHttpClient();
 
-            services.AddSingleton<SignatureCryptoService>();
+            services.AddSingleton<MatrixCryptographyService>();
             services.AddSingleton<EventService>();
             services.AddSingleton<RoomService>();
             services.AddSingleton<UserService>();
+            services.AddSingleton<MatrixServerService>();
 
             services.AddTransient<MatrixClient>();
             services.AddTransient<INetworkService, MatrixClientNetworkService>();
