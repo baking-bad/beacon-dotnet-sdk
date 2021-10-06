@@ -1,6 +1,6 @@
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace MatrixSdk.Infrastructure
+namespace MatrixSdk
 {
     using System;
     using System.Net;

@@ -1,4 +1,4 @@
-﻿namespace MatrixSdk.Infrastructure
+﻿namespace MatrixSdk
 {
     public static class MatrixApiConstants
     {
