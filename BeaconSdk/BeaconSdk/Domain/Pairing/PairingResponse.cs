@@ -7,4 +7,12 @@ namespace BeaconSdk.Domain.Pairing
         string Version,
         string PublicKey,
         string RelayServer);
+    
+    // public record PairingResponse(
+    //     string id,
+    //     string type,
+    //     string name,
+    //     string version,
+    //     string publicKey,
+    //     string relayServer);
 }

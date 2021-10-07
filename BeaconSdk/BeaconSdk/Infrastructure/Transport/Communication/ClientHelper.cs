@@ -38,15 +38,15 @@ namespace BeaconSdk.Infrastructure.Transport.Communication
             throw new InvalidOperationException("Can not parse hash");
         }
 
-        public static string CreatePairingPayload(BeaconPeer peer, byte[] publicKey, string relayServer, string appName)
+        public static string CreatePairingPayload(BeaconPeer peer, string publicKey, string relayServer, string appName)
         {
             if (!int.TryParse(peer.Version, out var version))
                 throw new InvalidOperationException("Invalid peer version");
 
-            if (!HexString.TryParse(publicKey, out var hexPublicKey))
-                throw new ArgumentException("Invalid publicKey");
+            // if (!HexString.TryParse(publicKey, out var hexPublicKey))
+            //     throw new ArgumentException("Invalid publicKey");
 
-            return CreatePairingPayloadV2(peer, hexPublicKey, relayServer, appName);
+            return CreatePairingPayloadV2(peer, publicKey, relayServer, appName);
             
             // return version switch
             // {
@@ -58,7 +58,7 @@ namespace BeaconSdk.Infrastructure.Transport.Communication
 
         private static string CreatePairingPayloadV1(HexString publicKey) => publicKey.ToString();
 
-        private static string CreatePairingPayloadV2(BeaconPeer peer, HexString publicKey, string relayServer, string appName)
+        private static string CreatePairingPayloadV2(BeaconPeer peer, string publicKey, string relayServer, string appName)
         {
             if (peer.Id == null)
                 throw new ArgumentNullException(nameof(peer.Id));
@@ -68,22 +68,10 @@ namespace BeaconSdk.Infrastructure.Transport.Communication
                 "p2p-pairing-response",
                 appName,
                 "2",
-                publicKey.ToString(),
+                publicKey,
                 relayServer);
 
             return JsonConvert.SerializeObject(pairingResponse);
         }
-
-        // public readonly struct PairingResponseAggregate
-        // {
-        //     public readonly string ChannelOpeningMessage;
-        //     public readonly string RecipientId;
-        //
-        //     public PairingResponseAggregate(string channelOpeningMessage, string recipientId)
-        //     {
-        //         ChannelOpeningMessage = channelOpeningMessage;
-        //         RecipientId = recipientId;
-        //     }
-        // }
     }
 }

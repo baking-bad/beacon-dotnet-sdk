@@ -8,23 +8,35 @@ namespace BeaconSdk.Infrastructure.Transport.Communication
     using System.Threading.Tasks;
     using Cryptography;
     using Domain.Beacon.P2P;
+    using Domain.Pairing;
     using MatrixSdk.Application;
     using MatrixSdk.Application.Listener;
     using MatrixSdk.Domain.Room;
     using MatrixSdk.Utils;
+    using Newtonsoft.Json;
+    using Serialization;
     using Sodium;
+
+    public record ClientOptions(string AppName);
 
     public class Client
     {
-        private static readonly Dictionary<HexString, MatrixEventListener<List<BaseRoomEvent>>> EncryptedMessageListeners = new();
+        private static readonly Dictionary<HexString, MatrixEventListener<List<BaseRoomEvent>>>
+            EncryptedMessageListeners = new();
+
         private readonly string _appName;
+
+        private readonly JsonSerializerService _jsonSerializerService;
         private readonly MatrixClient _matrixClient;
         private KeyPair? _keyPair;
 
-        public Client(MatrixClient matrixClient, string appName)
+        public Client(ClientOptions clientOptions, MatrixClient matrixClient,
+            JsonSerializerService jsonSerializerService)
         {
             _matrixClient = matrixClient;
-            _appName = appName;
+            _jsonSerializerService = jsonSerializerService;
+
+            _appName = clientOptions.AppName;
 
             //Todo: refactor
             SodiumCore.Init();
@@ -70,10 +82,10 @@ namespace BeaconSdk.Infrastructure.Transport.Communication
         {
             try
             {
-                if (!HexString.TryParse(peer.PublicKey, out var publicKeyHex))
+                if (!HexString.TryParse(peer.PublicKey, out var recipientHexPublicKey))
                     throw new InvalidOperationException("Can not parse peer.PublicKey");
 
-                var recipientId = ClientHelper.CreateRecipientId(peer.RelayServer, publicKeyHex);
+                var recipientId = ClientHelper.CreateRecipientId(peer.RelayServer, recipientHexPublicKey);
 
                 // We force room creation here because if we "re-pair", we need to make sure that we don't send it to an old room.
                 var matrixRoom = await _matrixClient.CreateTrustedPrivateRoomAsync(new[]
@@ -88,21 +100,19 @@ namespace BeaconSdk.Infrastructure.Transport.Communication
                 while (_matrixClient.JoinedRooms.Length == 0)
                     spin.SpinOnce();
 
-                var pairingPayloadMessage = ClientHelper.CreatePairingPayload(peer, _keyPair!.PublicKey, "beacon-node-0.papers.tech:8448", _appName);
-
+                if (!HexString.TryParse(_keyPair!.PublicKey, out var hexPublicKey))
+                    throw new InvalidOperationException("Can not parse publicKey");
                 
-                var t = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(publicKeyHex.ToByteArray());
-                // var payload = BeaconCryptographyService.EncryptAsHex(pairingPayloadMessage, t).ToString();
+                var relayServer = "beacon-node-0.papers.tech:8448";
+                var pairingPayloadMessage = CreatePairingPayloadV2(peer, hexPublicKey, relayServer, _appName);
 
-                var payload = SealedPublicKeyBox.Create(pairingPayloadMessage, recipientPublicKey: t);
-
-                if (!HexString.TryParse(payload, out var result))
-                    throw new Exception("");
+                var recipientPublicKey = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(recipientHexPublicKey.ToByteArray());
+                var payload = SealedPublicKeyBox.Create(pairingPayloadMessage, recipientPublicKey);
+            
+                if (!HexString.TryParse(payload, out var hexPayload))
+                    throw new InvalidOperationException("Can not parse payload");
                 
-                var channelOpeningMessage = ClientHelper.GetChannelOpeningMessage(recipientId, result.Value);
-
-                // var pairingResponseAggregate = ClientMessageFactory.CreatePairingResponse(peer, _keyPair!, _appName);
-                //
+                var channelOpeningMessage = ClientHelper.GetChannelOpeningMessage(recipientId, hexPayload.Value);
 
                 var eventId = await _matrixClient.SendMessageAsync(matrixRoom.Id, channelOpeningMessage);
             }
@@ -112,5 +122,24 @@ namespace BeaconSdk.Infrastructure.Transport.Communication
                 throw;
             }
         }
+        
+        private string CreatePairingPayloadV2(BeaconPeer peer, HexString hexPublicKey, string relayServer, string appName)
+        {
+            if (peer.Id == null)
+                throw new ArgumentNullException(nameof(peer.Id));
+
+            var pairingResponse = new PairingResponse(
+                peer.Id,
+                "p2p-pairing-response",
+                appName,
+                "2",
+                hexPublicKey.Value,
+                relayServer);
+
+            return _jsonSerializerService.Serialize(pairingResponse);
+        }
     }
 }
+
+// var publicKey = BeaconCryptographyService.ToHexString(_keyPair.PublicKey);
+// var m = publicKey == d.Value;

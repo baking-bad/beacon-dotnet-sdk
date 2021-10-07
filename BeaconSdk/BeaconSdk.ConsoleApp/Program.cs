@@ -38,8 +38,7 @@
 
         private static async Task RunAsync(IServiceProvider serviceProvider)
         {
-            var matrixClient = serviceProvider.GetRequiredService<MatrixClient>();
-            await BeaconClientScenarios.Setup(matrixClient);
+            await BeaconClientScenarios.Setup(serviceProvider);
         }
     }
 }

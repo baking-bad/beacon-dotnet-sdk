@@ -1,6 +1,7 @@
 namespace BeaconSdk
 {
     using Infrastructure.Repositories;
+    using Infrastructure.Serialization;
     using Infrastructure.Transport.Communication;
     using MatrixSdk;
     using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +13,7 @@ namespace BeaconSdk
             services.AddMatrixSdk();
             services.AddSingleton<ISdkStorage, SdkStorage>();
             services.AddSingleton<RelayServerService>();
+            services.AddSingleton<JsonSerializerService>();
 
             return services;
         }

@@ -79,7 +79,6 @@ namespace BeaconSdk.Infrastructure.Cryptography
         public static string ToHexString(byte[] input)
         {
             var hexString = BitConverter.ToString(input);
-
             var result = hexString.Replace("-", "");
 
             return result.ToLower();

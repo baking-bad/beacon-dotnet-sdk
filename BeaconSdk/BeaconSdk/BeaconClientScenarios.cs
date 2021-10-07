@@ -1,3 +1,5 @@
+using MatrixSdk.Utils;
+
 namespace BeaconSdk
 {
     using System;
@@ -7,6 +9,7 @@ namespace BeaconSdk
     using Domain.Beacon.P2P;
     using Domain.Pairing;
     using Infrastructure.Cryptography;
+    using Infrastructure.Serialization;
     using Infrastructure.Transport.Communication;
     using MatrixSdk.Application;
     using MatrixSdk.Application.Listener;
@@ -17,11 +20,10 @@ namespace BeaconSdk
     public static class BeaconClientScenarios
     {
         // ReSharper disable once InconsistentNaming
-        public static async Task Setup(MatrixClient matrixClient)
+        public static async Task Setup(IServiceProvider serviceProvider)
         {
             var QRCode =
-                "BSdNU2tFbvqMLsJrysLuQPwY2ujnWVR47HviiJciUBzykFchn6LFSfWGRmXGEDVgMGjuWf8S4m3jUhf9Wnx88u7ja6NHyCwSRdyBxPb5izcp3JP8e8h8bYoxYt5ZRffERhkpPjaRSt8iDw6BiSJvzm2qVdaTL5jdARyx4cGBnxYPLtpCFWGHcKSYhbbaXmdbs1pZ9uKUoLx5WGR7y7gfdstC4kd3v9wP7S2nYkcTfb6BVBShRjdCNVNAEnvmyttEH5fwER3uAJX2GkWBifKmDqdinWis8fp4Vx2hdWmqReW4MkQWKKx9ChKHgAPjkwZXrmwposxq";
-                
+                "3NDKTWt2x3L4HZ5aUay1Krdah1g1g2i4NJdy59zK6RASXQ2XquyAJTVavtqYPeHzysyZgv2h3xA43Xu7i2kEbmc3jGjp5k5KoZEG84peABdh2smnUKcxVzhFFmTc4PE22L2eHBMNtGkcXzES1pkWgn1PZuvRZf1jwT6yBStjYhMJFd7FjvGSV1P8FGd8ht3D37VWfikkXpBni5jANdG8PcW6uSunNq4vGYnYZwXqLYEaFGJ36fTSeA52sWCNE9nB6NkHcH3cgcXiRt6PvAUmV5Hn73PegFipDAo7TUU7WqLKpX7gMD3p4DFiWLKKzNQ1q4uJAt5";
             var decodedBytes = Base58CheckEncoding.Decode(QRCode);
             var message = Encoding.Default.GetString(decodedBytes);
 
@@ -36,12 +38,22 @@ namespace BeaconSdk
                 null,
                 null);
 
-            var seed = Guid.NewGuid().ToString();
+            // var seed = Guid.NewGuid().ToString();
+            var seed = "44cf34fa-b4d4-ec89-cb5c-22e14f6156c6";
+            // var public = BeaconCryptographyService.ToHexString(Encoding.Default.GetBytes(seed));
+            
+            // BeaconCryptographyService.ToHexString(seed);
             var keyPair = BeaconCryptographyService.GenerateEd25519KeyPair(seed);
-            var client = new Client(matrixClient, "Test App Name");
+
+            var clientOptions = new ClientOptions("Test App Name");
+            var matrixClient = serviceProvider.GetRequiredService<MatrixClient>();
+            var jsonSerializerService = serviceProvider.GetRequiredService<JsonSerializerService>();
+            
+            var client = new Client(clientOptions, matrixClient, jsonSerializerService);
 
             await client.StartAsync(keyPair);
             await client.SendPairingResponseAsync(beaconPeer);
+            
             Console.ReadLine();
         }
 
@@ -66,3 +78,5 @@ namespace BeaconSdk
         }
     }
 }
+
+// var publicKey = BeaconCryptographyService.ToHexString(keyPair.PublicKey);
