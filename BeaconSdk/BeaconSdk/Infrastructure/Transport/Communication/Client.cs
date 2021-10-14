@@ -6,14 +6,12 @@ namespace BeaconSdk.Infrastructure.Transport.Communication
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Cryptography;
     using Domain.Beacon.P2P;
     using Domain.Pairing;
     using MatrixSdk.Application;
     using MatrixSdk.Application.Listener;
     using MatrixSdk.Domain.Room;
     using MatrixSdk.Utils;
-    using Newtonsoft.Json;
     using Serialization;
     using Sodium;
 
