@@ -10,7 +10,8 @@ namespace BeaconSdk
     using Domain.Pairing;
     using Infrastructure.Cryptography;
     using Infrastructure.Serialization;
-    using Infrastructure.Transport.Communication;
+    using Infrastructure.Transport.P2P;
+    using Infrastructure.Transport.P2P.ChannelOpening;
     using MatrixSdk.Application;
     using MatrixSdk.Application.Listener;
     using MatrixSdk.Infrastructure.Services;
@@ -27,7 +28,7 @@ namespace BeaconSdk
             var decodedBytes = Base58CheckEncoding.Decode(QRCode);
             var message = Encoding.Default.GetString(decodedBytes);
 
-            var pairingResponse = JsonConvert.DeserializeObject<PairingResponse>(message);
+            var pairingResponse = JsonConvert.DeserializeObject<P2PPairingResponse>(message);
 
             var beaconPeer = new BeaconPeer(
                 pairingResponse!.Id,
@@ -45,11 +46,11 @@ namespace BeaconSdk
             // BeaconCryptographyService.ToHexString(seed);
             var keyPair = BeaconCryptographyService.GenerateEd25519KeyPair(seed);
 
-            var clientOptions = new ClientOptions("Test App Name");
             var matrixClient = serviceProvider.GetRequiredService<MatrixClient>();
-            var jsonSerializerService = serviceProvider.GetRequiredService<JsonSerializerService>();
+            var channelOpeningMessageBuilder = serviceProvider.GetRequiredService<IChannelOpeningMessageBuilder>();
+            var clientOptions = new ClientOptions("Test App Name","beacon-node-0.papers.tech:8448");
             
-            var client = new Client(clientOptions, matrixClient, jsonSerializerService);
+            var client = new P2PClient(matrixClient, channelOpeningMessageBuilder, clientOptions);
 
             await client.StartAsync(keyPair);
             await client.SendPairingResponseAsync(beaconPeer);

@@ -1,4 +1,4 @@
-namespace BeaconSdk.Infrastructure.Transport.Communication
+namespace BeaconSdk.Infrastructure.Transport.P2P
 {
     using System;
     using System.Linq;
@@ -33,13 +33,13 @@ namespace BeaconSdk.Infrastructure.Transport.Communication
             if (_sdkStorage.MatrixSelectedNode is { Length: > 0 })
                 return _sdkStorage.MatrixSelectedNode;
 
-            var startIndex = PublicKeyToInt(publicKey, BeaconConstants.KnownRelayServers.Length);
+            var startIndex = PublicKeyToInt(publicKey, BeaconSdkConstants.KnownRelayServers.Length);
             var offset = 0;
 
-            while (offset < BeaconConstants.KnownRelayServers.Length)
+            while (offset < BeaconSdkConstants.KnownRelayServers.Length)
             {
-                var index = (startIndex + offset) % BeaconConstants.KnownRelayServers.Length;
-                var relayServer = BeaconConstants.KnownRelayServers[index];
+                var index = (startIndex + offset) % BeaconSdkConstants.KnownRelayServers.Length;
+                var relayServer = BeaconSdkConstants.KnownRelayServers[index];
 
                 try
                 {
