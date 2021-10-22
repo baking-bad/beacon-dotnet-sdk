@@ -14,7 +14,7 @@ namespace Matrix.Sdk
     ///     Extensions methods to configure an <see cref="IServiceCollection" /> for <see cref="IHttpClientFactory" /> with
     ///     Matrix Sdk.
     /// </summary>
-    public static class MatrixClientServiceExtensions
+    public static class MatrixSdkServiceExtensions
     {
         public static IServiceCollection AddMatrixSdk(this IServiceCollection services)
         {
