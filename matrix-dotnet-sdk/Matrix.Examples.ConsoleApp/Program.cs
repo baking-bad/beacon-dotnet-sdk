@@ -55,7 +55,7 @@
         {
             (MatrixClient firstClient, TextMessageListener firstListener) =
                 await SetupClientWithTextListener(serviceProvider);
-            
+
             (MatrixClient secondClient, TextMessageListener secondListener) =
                 await SetupClientWithTextListener(serviceProvider);
 

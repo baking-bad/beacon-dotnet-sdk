@@ -93,10 +93,8 @@ namespace Matrix.Sdk.Core.Infrastructure.Extensions
             return JsonConvert.DeserializeObject<TResponse>(result, GetJsonSettings())!;
         }
 
-        public static void AddBearerToken(this HttpClient httpClient, string bearer)
-        {
+        public static void AddBearerToken(this HttpClient httpClient, string bearer) =>
             httpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", bearer);
-        }
     }
 }
