@@ -45,6 +45,8 @@
             _userClient = userClient;
         }
 
+        public string UserId => _stateManager.UserId;
+
         public MatrixEventNotifier<List<BaseRoomEvent>> MatrixEventNotifier { get; }
 
         //Todo: store on disk

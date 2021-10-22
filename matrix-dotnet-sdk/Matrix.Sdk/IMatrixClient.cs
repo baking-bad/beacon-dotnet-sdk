@@ -10,7 +10,7 @@ namespace Matrix.Sdk
     public interface IMatrixClient
     {
         MatrixEventNotifier<List<BaseRoomEvent>> MatrixEventNotifier { get; }
-        
+
         MatrixRoom[] InvitedRooms { get; }
 
         MatrixRoom[] JoinedRooms { get; }

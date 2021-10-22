@@ -44,20 +44,3 @@ namespace Matrix.Sdk.Core.Infrastructure.Services
         }
     }
 }
-
-// Todo: maybe use https://nsec.rocks/ ?
-// public class NSecCryptoService
-// {
-//     public void GenerateKeyPairFromSeed(string seed)
-//     {
-//         var algorithm = SignatureAlgorithm.Ed25519;
-//         using var key = Key.Create(algorithm);
-//         // key.PublicKey;
-//         // algorithm.si
-//         // key.PublicKey
-//         // algorithm.Sign(key, seed);
-//
-//         // t.PrivateKeySize
-//         // var t = new SignatureAlgorithm.Ed25519()
-//     }
-// }

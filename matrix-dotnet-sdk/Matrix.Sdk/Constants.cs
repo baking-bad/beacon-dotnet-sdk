@@ -8,6 +8,9 @@
         // public const string BaseAddress = "https://beacon-node-1.sky.papers.tech/";
         public const string BaseAddress = "https://beacon-node-0.papers.tech:8448/";
 
+        public const int FirstSyncTimout = 0;
+        public const int LaterSyncTimout = 30000;
+
         public class EventType
         {
             public const string Create = "m.room.create";
@@ -22,8 +25,5 @@
             public const string Text = "m.text";
             // public const string Text = "Text";
         }
-        
-        public const int FirstSyncTimout = 0;
-        public const int LaterSyncTimout = 30000;
     }
 }

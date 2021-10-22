@@ -29,7 +29,7 @@ namespace Matrix.Sdk.Core
 
         public ulong Timeout => _state.Timeout;
 
-        // public string UserId => _state.UserId!;
+        public string UserId => _state.UserId!;
 
         public string NextBatch => _state.NextBatch!;
 

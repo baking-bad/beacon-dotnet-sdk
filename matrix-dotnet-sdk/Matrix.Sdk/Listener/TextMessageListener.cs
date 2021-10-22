@@ -1,8 +1,8 @@
-namespace Matrix.Sdk.Core.Listener
+namespace Matrix.Sdk.Listener
 {
     using System;
     using System.Collections.Generic;
-    using Domain.Room;
+    using Core.Domain.Room;
 
     public class TextMessageListener : MatrixEventListener<List<BaseRoomEvent>>
     {
