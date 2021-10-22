@@ -25,7 +25,7 @@ namespace Matrix.Sdk.Core.Infrastructure.Dto.Sync.Event.Room.Messaging
         {
             set => MessageType = value switch
             {
-                MatrixApiConstants.MessageType.Text => MessageType.Text,
+                Constants.MessageType.Text => MessageType.Text,
                 _ => MessageType.Unknown
             };
         }

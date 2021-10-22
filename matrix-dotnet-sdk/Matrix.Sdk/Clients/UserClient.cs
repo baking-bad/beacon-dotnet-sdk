@@ -1,26 +1,22 @@
 // ReSharper disable ArgumentsStyleNamedExpression
 
-namespace Matrix.Sdk.Core.Infrastructure.Services
+namespace Matrix.Sdk.Clients
 {
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
-    using Dto.Login;
-    using Extensions;
+    using Core.Infrastructure.Dto.Login;
+    using Core.Infrastructure.Extensions;
+    using Core.Infrastructure.Services;
     using Sodium;
 
-    public class UserService
+    public class UserClient : BaseApiClient
     {
-        private const string RequestUri = "_matrix/client/r0";
-
-        private readonly IHttpClientFactory _httpClientFactory;
-
-        public UserService(IHttpClientFactory httpClientFactory)
+        public UserClient(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
         {
-            _httpClientFactory = httpClientFactory;
         }
 
-        private HttpClient CreateHttpClient() => _httpClientFactory.CreateClient(MatrixApiConstants.Matrix);
+        protected override string RequestUri => "_matrix/client/r0";
 
         public async Task<LoginResponse> LoginAsync(KeyPair keyPair, CancellationToken cancellationToken)
         {

@@ -1,30 +1,20 @@
-﻿namespace Matrix.Sdk.Core.Infrastructure.Services
+﻿namespace Matrix.Sdk.Clients
 {
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
-    using Dto.Room.Create;
-    using Dto.Room.Join;
-    using Dto.Room.Joined;
-    using Extensions;
+    using Core.Infrastructure.Dto.Room.Create;
+    using Core.Infrastructure.Dto.Room.Join;
+    using Core.Infrastructure.Dto.Room.Joined;
+    using Core.Infrastructure.Extensions;
 
-    public class RoomService
+    public class RoomClient : BaseApiClient
     {
-        private const string RequestUri = "_matrix/client/r0";
-        private readonly IHttpClientFactory _httpClientFactory;
-
-        public RoomService(IHttpClientFactory httpClientFactory)
+        public RoomClient(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
         {
-            _httpClientFactory = httpClientFactory;
         }
 
-        private HttpClient CreateHttpClient(string accessToken)
-        {
-            HttpClient httpClient = _httpClientFactory.CreateClient(MatrixApiConstants.Matrix);
-            httpClient.AddBearerToken(accessToken);
-
-            return httpClient;
-        }
+        protected override string RequestUri => "_matrix/client/r0";
 
         public async Task<CreateRoomResponse> CreateRoomAsync(string accessToken, string[]? members,
             CancellationToken cancellationToken)

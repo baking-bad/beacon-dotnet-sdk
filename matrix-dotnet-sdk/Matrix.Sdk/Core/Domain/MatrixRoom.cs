@@ -2,7 +2,7 @@ namespace Matrix.Sdk.Core.Domain
 {
     using System.Collections.Generic;
 
-    public class MatrixRoom
+    public record MatrixRoom
     {
         public MatrixRoom(string id, MatrixRoomStatus status, List<string> joinedUserIds)
         {

@@ -1,4 +1,4 @@
-namespace Matrix.Sdk.Core.Application
+namespace Matrix.Sdk.Core
 {
     using System;
     using System.Collections.Generic;

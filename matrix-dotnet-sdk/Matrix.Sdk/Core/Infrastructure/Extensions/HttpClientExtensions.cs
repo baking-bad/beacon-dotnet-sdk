@@ -36,7 +36,7 @@ namespace Matrix.Sdk.Core.Infrastructure.Extensions
             HttpResponseMessage response = await httpClient.PostAsync(requestUri, null, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
-                throw new MatrixApiException(response.RequestMessage.RequestUri,
+                throw new ApiException(response.RequestMessage.RequestUri,
                     null, null, response.StatusCode);
         }
 
@@ -54,7 +54,7 @@ namespace Matrix.Sdk.Core.Infrastructure.Extensions
             string result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new MatrixApiException(response.RequestMessage.RequestUri,
+                throw new ApiException(response.RequestMessage.RequestUri,
                     json, result, response.StatusCode);
 
             return JsonConvert.DeserializeObject<TResponse>(result, settings)!;
@@ -74,7 +74,7 @@ namespace Matrix.Sdk.Core.Infrastructure.Extensions
             string result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new MatrixApiException(response.RequestMessage.RequestUri,
+                throw new ApiException(response.RequestMessage.RequestUri,
                     json, result, response.StatusCode);
 
             return JsonConvert.DeserializeObject<TResponse>(result, settings)!;
@@ -87,7 +87,7 @@ namespace Matrix.Sdk.Core.Infrastructure.Extensions
             string result = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new MatrixApiException(response.RequestMessage.RequestUri,
+                throw new ApiException(response.RequestMessage.RequestUri,
                     null, result, response.StatusCode);
 
             return JsonConvert.DeserializeObject<TResponse>(result, GetJsonSettings())!;

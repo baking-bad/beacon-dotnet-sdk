@@ -1,10 +1,10 @@
-﻿using System;
-
-namespace Matrix.Examples.ConsoleApp
+﻿namespace Matrix.Examples.ConsoleApp
 {
-    class Program
+    using System;
+
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
         }

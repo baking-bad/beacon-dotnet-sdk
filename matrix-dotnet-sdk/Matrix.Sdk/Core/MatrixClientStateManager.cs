@@ -1,4 +1,4 @@
-namespace Matrix.Sdk.Core.Application
+namespace Matrix.Sdk.Core
 {
     using System;
     using System.Collections.Concurrent;
@@ -7,9 +7,9 @@ namespace Matrix.Sdk.Core.Application
     using Domain;
     using Microsoft.Extensions.Logging;
 
-    public class ClientStateManager
+    public class MatrixClientStateManager
     {
-        private readonly ILogger<ClientStateManager> _logger;
+        private readonly ILogger<MatrixClientStateManager> _logger;
 
         private readonly MatrixClientState _state = new()
         {
@@ -19,16 +19,17 @@ namespace Matrix.Sdk.Core.Application
             TransactionNumber = 0
         };
 
-        public ClientStateManager(ILogger<ClientStateManager> logger)
+        public MatrixClientStateManager(ILogger<MatrixClientStateManager> logger)
         {
             _logger = logger;
         }
 
-        public string AccessToken => _state.AccessToken!;
+        public string AccessToken => _state.AccessToken ??
+                                     throw new InvalidOperationException("No access token has been provided.");
 
         public ulong Timeout => _state.Timeout;
 
-        public string UserId => _state.UserId!;
+        // public string UserId => _state.UserId!;
 
         public string NextBatch => _state.NextBatch!;
 

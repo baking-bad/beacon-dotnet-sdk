@@ -1,7 +1,6 @@
-namespace Matrix.Sdk.Core.Application.Listener
+namespace Matrix.Sdk.Core.Listener
 {
     using System;
-    using Notifier;
 
     public abstract class MatrixEventListener<T> : IObserver<T>
     {

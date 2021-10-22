@@ -1,35 +1,25 @@
-﻿namespace Matrix.Sdk.Core.Infrastructure.Services
+﻿namespace Matrix.Sdk.Clients
 {
     using System;
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
-    using Dto.Event;
-    using Dto.Sync;
-    using Extensions;
+    using Core.Infrastructure.Dto.Event;
+    using Core.Infrastructure.Dto.Sync;
+    using Core.Infrastructure.Extensions;
 
-    public class EventService
+    public class EventClient : BaseApiClient
     {
-        private const string RequestUri = "_matrix/client/r0";
-        private readonly IHttpClientFactory _httpClientFactory;
-
-        public EventService(IHttpClientFactory httpClientFactory)
+        public EventClient(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
         {
-            _httpClientFactory = httpClientFactory;
         }
 
-        private HttpClient CreateHttpClient(string accessToken)
-        {
-            HttpClient httpClient = _httpClientFactory.CreateClient(MatrixApiConstants.Matrix);
-            httpClient.AddBearerToken(accessToken);
-
-            return httpClient;
-        }
+        protected override string RequestUri => "_matrix/client/r0";
 
         public async Task<SyncResponse> SyncAsync(string accessToken, CancellationToken cancellationToken,
             ulong? timeout = null, string? nextBatch = null)
         {
-            var uri = new Uri($"{MatrixApiConstants.BaseAddress}{RequestUri}/sync");
+            var uri = new Uri($"{Constants.BaseAddress}{RequestUri}/sync");
 
             if (timeout != null)
                 uri = uri.AddParameter("timeout", timeout.ToString());

@@ -1,4 +1,4 @@
-namespace Matrix.Sdk.Core.Application.Listener
+namespace Matrix.Sdk.Core.Listener
 {
     using System;
     using System.Collections.Generic;

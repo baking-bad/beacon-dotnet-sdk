@@ -22,9 +22,9 @@ namespace Matrix.Sdk.Core.Infrastructure.Dto.Sync.Event
         {
             set => EventType = value switch
             {
-                MatrixApiConstants.EventType.Create => EventType.Create,
-                MatrixApiConstants.EventType.Member => EventType.Member,
-                MatrixApiConstants.EventType.Message => EventType.Message,
+                Constants.EventType.Create => EventType.Create,
+                Constants.EventType.Member => EventType.Member,
+                Constants.EventType.Message => EventType.Message,
                 _ => EventType.Unknown
             };
         }

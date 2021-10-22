@@ -5,9 +5,12 @@ namespace Matrix.Sdk
     using System;
     using System.Net;
 
-    public class MatrixApiException : Exception
+    /// <summary>
+    ///     Represents errors that occur from the Matrix API.
+    /// </summary>
+    public class ApiException : Exception
     {
-        public MatrixApiException(Uri uri, string? requestContent, string? responseContent, HttpStatusCode statusCode)
+        public ApiException(Uri uri, string? requestContent, string? responseContent, HttpStatusCode statusCode)
             : base($"Matrix API error. Status: {statusCode}, json: {responseContent}")
         {
             Uri = uri;

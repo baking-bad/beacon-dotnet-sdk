@@ -2,33 +2,34 @@ namespace Matrix.Sdk
 {
     using System;
     using System.Collections.Generic;
-    using Core.Application;
-    using Core.Application.Network;
-    using Core.Application.Notifier;
+    using Clients;
+    using Core;
     using Core.Domain;
     using Core.Domain.Room;
     using Core.Infrastructure.Repositories;
     using Core.Infrastructure.Services;
     using Microsoft.Extensions.DependencyInjection;
 
-    public static class ServiceCollectionExtensions
+    /// <summary>
+    ///     Extensions methods to configure an <see cref="IServiceCollection" /> for <see cref="IHttpClientFactory" /> with
+    ///     Matrix Sdk.
+    /// </summary>
+    public static class MatrixClientServiceExtensions
     {
         public static IServiceCollection AddMatrixSdk(this IServiceCollection services)
         {
-            services.AddHttpClient(MatrixApiConstants.Matrix,
-                c => { c.BaseAddress = new Uri(MatrixApiConstants.BaseAddress); });
+            services.AddHttpClient(Constants.Matrix,
+                c => { c.BaseAddress = new Uri(Constants.BaseAddress); });
             // services.AddHttpClient();
 
             services.AddSingleton<MatrixCryptographyService>();
-            services.AddSingleton<EventService>();
-            services.AddSingleton<RoomService>();
-            services.AddSingleton<UserService>();
+            services.AddSingleton<EventClient>();
+            services.AddSingleton<RoomClient>();
+            services.AddSingleton<UserClient>();
             services.AddSingleton<MatrixServerService>();
-
             services.AddTransient<MatrixClient>();
-            services.AddTransient<INetworkService, MatrixClientNetworkService>();
 
-            services.AddTransient<ClientStateManager>();
+            services.AddTransient<MatrixClientStateManager>();
             services.AddTransient<MatrixRoomFactory>();
             services.AddTransient<MatrixEventNotifier<List<BaseRoomEvent>>>();
 
