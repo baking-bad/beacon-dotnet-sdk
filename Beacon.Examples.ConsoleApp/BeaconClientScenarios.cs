@@ -18,7 +18,6 @@ namespace Beacon.Examples.ConsoleApp
 
     public static class BeaconClientScenarios
     {
-        // ReSharper disable once InconsistentNaming
         public static async Task Setup(IServiceProvider serviceProvider)
         {
             var QRCode =
@@ -38,7 +37,7 @@ namespace Beacon.Examples.ConsoleApp
                 null);
 
             // var seed = Guid.NewGuid().ToString();
-            var seed = "44cf34fa-b4d4-ec89-cb5c-22e14f6156c6";
+            const string seed = "44cf34fa-b4d4-ec89-cb5c-22e14f6156c6";
             // var public = BeaconCryptographyService.ToHexString(Encoding.Default.GetBytes(seed));
 
             // BeaconCryptographyService.ToHexString(seed);
@@ -47,8 +46,8 @@ namespace Beacon.Examples.ConsoleApp
             MatrixClient matrixClient = serviceProvider.GetRequiredService<MatrixClient>();
             IChannelOpeningMessageBuilder channelOpeningMessageBuilder =
                 serviceProvider.GetRequiredService<IChannelOpeningMessageBuilder>();
+            
             var clientOptions = new ClientOptions("Test App Name", "beacon-node-0.papers.tech:8448");
-
             var client = new P2PClient(matrixClient, channelOpeningMessageBuilder, clientOptions);
 
             await client.StartAsync(keyPair);
