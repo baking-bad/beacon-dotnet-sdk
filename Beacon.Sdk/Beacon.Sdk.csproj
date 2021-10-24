@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Folder Include="Core" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\matrix-dotnet-sdk\Matrix.Sdk\Matrix.Sdk.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Base58Check" Version="0.2.0" />
+    </ItemGroup>
+
+</Project>

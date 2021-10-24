@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Beacon.Sdk\Beacon.Sdk.csproj" />
+      <ProjectReference Include="..\matrix-dotnet-sdk\Matrix.Examples.ConsoleApp\Matrix.Examples.ConsoleApp.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0-preview.4.21253.7" />
+      <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
+    </ItemGroup>
+
+</Project>
