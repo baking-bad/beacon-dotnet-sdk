@@ -1,0 +1,101 @@
+namespace Beacon.Sdk.Core.Infrastructure.Cryptography
+{
+    using System;
+    using System.Linq;
+    using System.Text;
+    using Libsodium;
+    using Matrix.Sdk.Core.Utils;
+    using Sodium;
+    using SodiumCore = Sodium.SodiumCore;
+    using SodiumLibrary = Libsodium.SodiumLibrary;
+
+    public class CryptographyService : ICryptographyService
+    {
+        private static readonly int MacBytes = SodiumLibrary.crypto_box_macbytes();
+        private static readonly int NonceBytes = SodiumLibrary.crypto_box_noncebytes();
+
+        public SessionKeyPair CreateServerSessionKeyPair(byte[] clientPublicKey, byte[] serverSecretKey)
+        {
+            byte[] serverPublicKeyCurve =
+                PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(serverSecretKey[32..64])!;
+            byte[] serverSecretKeyCurve = PublicKeyAuth.ConvertEd25519SecretKeyToCurve25519SecretKey(serverSecretKey)!;
+            byte[] clientPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(clientPublicKey)!;
+
+            return KeyExchange.CreateServerSessionKeyPair(serverPublicKeyCurve, serverSecretKeyCurve,
+                clientPublicKeyCurve);
+        }
+
+        public byte[] Hash(byte[] input) => GenericHash.Hash(input, null, input.Length);
+
+        public byte[] Decrypt(byte[] encryptedBytes, byte[] sharedKey)
+        {
+            byte[] nonce = encryptedBytes[..NonceBytes];
+            byte[] cipher = encryptedBytes[NonceBytes..];
+
+            return SecretBox.Open(cipher, nonce, sharedKey);
+        }
+
+
+        public byte[] Encrypt(byte[] message, byte[] recipientPublicKey)
+        {
+            byte[] nonce = SodiumCore.GetRandomBytes(NonceBytes)!;
+            byte[] result = SealedPublicKeyBox.Create(message, recipientPublicKey);
+
+            return nonce.Concat(result).ToArray();
+        }
+
+        public KeyPair GenerateEd25519KeyPair(string seed)
+        {
+            byte[] hash = GenericHash.Hash(seed, (byte[]?) null, 32);
+
+            return PublicKeyAuth.GenerateKeyPair(hash);
+        }
+
+        public HexString EncryptAsHex(string message, byte[] recipientPublicKey)
+        {
+            byte[] bytes = HexString.TryParse(message, out HexString hexString)
+                ? hexString.ToByteArray()
+                : Encoding.UTF8.GetBytes(message);
+
+            byte[] encryptedBytes = Encrypt(bytes, recipientPublicKey);
+
+            if (!HexString.TryParse(encryptedBytes, out HexString result))
+                throw new InvalidOperationException("Can not parse encryptedBytes");
+
+            return result;
+        }
+
+        public string DecryptAsString(string encryptedMessage, byte[] sharedKey)
+        {
+            byte[] encryptedBytes = HexString.TryParse(encryptedMessage, out HexString hexString)
+                ? hexString.ToByteArray()
+                : Encoding.UTF8.GetBytes(encryptedMessage);
+
+            byte[] decryptedBytes = Decrypt(encryptedBytes, sharedKey);
+
+            return Encoding.UTF8.GetString(decryptedBytes);
+        }
+
+        public string ToHexString(byte[] input)
+        {
+            var hexString = BitConverter.ToString(input);
+            string result = hexString.Replace("-", "");
+
+            return result.ToLower();
+        }
+
+        public byte[] ConvertEd25519PublicKeyToCurve25519PublicKey(byte[] publicKey) =>
+            PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(publicKey) ??
+            throw new NullReferenceException("Can not convert public key.");
+
+        public string EncryptMessageAsString(string message, byte[] publicKey)
+        {
+            byte[]? result = SealedPublicKeyBox.Create(message, publicKey);
+
+            return Encoding.UTF8.GetString(result);
+        }
+
+        public static bool Validate(string input) => HexString.TryParse(input, out HexString hexString) &&
+                                                     hexString.ToString().Length >= NonceBytes + MacBytes;
+    }
+}

@@ -32,7 +32,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
                     $"{nameof(clientPublicKey)} size must be {PublicKeyBytes} bytes in length.");
 
             if (SodiumLibrary.crypto_kx_server_session_keys(rx, tx, serverPublicKey, serverSecretKey,
-                clientPublicKey) != 0)
+                    clientPublicKey) != 0)
                 throw new Exception($"{nameof(SodiumLibrary)}: {nameof(KeyExchange)} error.");
 
             return new SessionKeyPair(rx, tx);

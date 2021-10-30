@@ -5,15 +5,13 @@ namespace Beacon.Examples.ConsoleApp
     using System.Threading.Tasks;
     using Base58Check;
     using Matrix.Sdk;
-    using Matrix.Sdk.Core.Infrastructure.Services;
     using Matrix.Sdk.Listener;
     using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
-    using Sdk.Core.Domain.Beacon.P2P;
-    using Sdk.Core.Domain.Pairing;
     using Sdk.Core.Infrastructure.Cryptography;
-    using Sdk.Core.Infrastructure.Transport.P2P;
-    using Sdk.Core.Infrastructure.Transport.P2P.ChannelOpening;
+    using Sdk.Core.Transport.P2P;
+    using Sdk.Core.Transport.P2P.ChannelOpening;
+    using Sdk.Core.Transport.P2P.Dto.Handshake;
     using Sodium;
 
     public static class BeaconClientScenarios
@@ -41,14 +39,14 @@ namespace Beacon.Examples.ConsoleApp
             // var public = BeaconCryptographyService.ToHexString(Encoding.Default.GetBytes(seed));
 
             // BeaconCryptographyService.ToHexString(seed);
-            KeyPair keyPair = BeaconCryptographyService.GenerateEd25519KeyPair(seed);
+            KeyPair keyPair = CryptographyService.GenerateEd25519KeyPair(seed);
 
             MatrixClient matrixClient = serviceProvider.GetRequiredService<MatrixClient>();
             IChannelOpeningMessageBuilder channelOpeningMessageBuilder =
                 serviceProvider.GetRequiredService<IChannelOpeningMessageBuilder>();
-            
-            var clientOptions = new ClientOptions("Test App Name", "beacon-node-0.papers.tech:8448");
-            var client = new P2PClient(matrixClient, channelOpeningMessageBuilder, clientOptions);
+
+            var clientOptions = new P2PClientOptions("Test App Name", "beacon-node-0.papers.tech:8448");
+            var client = new P2PClient(matrixClient, channelOpeningMessageBuilder);
 
             await client.StartAsync(keyPair);
             await client.SendPairingResponseAsync(beaconPeer);
@@ -61,7 +59,7 @@ namespace Beacon.Examples.ConsoleApp
         {
             MatrixClient matrixClient = serviceProvider.GetRequiredService<MatrixClient>();
             var seed = Guid.NewGuid().ToString();
-            KeyPair keyPair = MatrixCryptographyService.GenerateEd25519KeyPair(seed);
+            KeyPair keyPair = Matrix.Sdk.Core.Infrastructure.Services.CryptographyService.GenerateEd25519KeyPair(seed);
 
             await matrixClient.StartAsync(keyPair); //Todo: generate once and then store seed?
 

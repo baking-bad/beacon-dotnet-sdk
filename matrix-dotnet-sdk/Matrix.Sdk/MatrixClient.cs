@@ -2,157 +2,130 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Clients;
     using Core;
-    using Core.Domain;
+    using Core.Domain.MatrixRoom;
+    using Core.Domain.Network;
     using Core.Domain.Room;
-    using Core.Infrastructure.Dto.Event;
+    using Core.Domain.Services;
     using Core.Infrastructure.Dto.Login;
-    using Core.Infrastructure.Dto.Room.Create;
-    using Core.Infrastructure.Dto.Room.Join;
-    using Core.Infrastructure.Dto.Room.Joined;
-    using Core.Infrastructure.Dto.Sync;
     using Microsoft.Extensions.Logging;
     using Sodium;
+    using LoginRequest = Core.Domain.Services.LoginRequest;
 
     public class MatrixClient : IMatrixClient
     {
         private readonly CancellationTokenSource _cts = new();
-        private readonly EventClient _eventClient;
         private readonly ILogger<MatrixClient> _logger;
-        private readonly RoomClient _roomClient;
-        private readonly MatrixClientStateManager _stateManager;
-        private readonly UserClient _userClient;
-        private Timer _pollingTimer = null!;
+        private readonly INetworkService _networkService;
+        private readonly ISyncService _syncService;
 
-        public MatrixClient(
-            MatrixClientStateManager stateManager,
-            ILogger<MatrixClient> logger,
-            MatrixEventNotifier<List<BaseRoomEvent>> matrixEventNotifier,
-            EventClient eventClient,
-            RoomClient roomClient,
-            UserClient userClient)
+        private string? _accessToken;
+        private Uri? _baseAddress;
+        private ulong _transactionNumber;
+
+        public MatrixClient(ILogger<MatrixClient> logger, INetworkService networkService, ISyncService syncService,
+            MatrixEventNotifier<List<BaseRoomEvent>> matrixEventNotifier)
         {
-            _stateManager = stateManager;
             _logger = logger;
-
+            _networkService = networkService;
+            _syncService = syncService;
             MatrixEventNotifier = matrixEventNotifier;
-            _eventClient = eventClient;
-            _roomClient = roomClient;
-            _userClient = userClient;
         }
 
-        public string UserId => _stateManager.UserId;
-
+        public string UserId { get; private set; }
+        
         public MatrixEventNotifier<List<BaseRoomEvent>> MatrixEventNotifier { get; }
 
-        //Todo: store on disk
-        public MatrixRoom[] InvitedRooms =>
-            _stateManager.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Invited).ToArray();
+        public MatrixRoom[] InvitedRooms => _syncService.InvitedRooms;
 
-        public MatrixRoom[] JoinedRooms =>
-            _stateManager.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Joined).ToArray();
+        public MatrixRoom[] JoinedRooms => _syncService.JoinedRooms;
 
-        public MatrixRoom[] LeftRooms =>
-            _stateManager.MatrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Left).ToArray();
+        public MatrixRoom[] LeftRooms => _syncService.LeftRooms;
 
-        public async Task StartAsync(KeyPair keyPair)
+        public async Task StartAsync(Uri? baseAddress, KeyPair keyPair)
         {
             _logger.LogInformation("MatrixClient: Starting...");
 
-            LoginResponse response = await _userClient.LoginAsync(keyPair, _cts.Token);
-            _stateManager.UpdateStateWith(response.UserId, response.AccessToken, Constants.FirstSyncTimout);
+            _baseAddress = baseAddress ?? new Uri(Constants.FallBackAddress);
 
-            _pollingTimer = new Timer(async _ => await PollAsync());
-            _pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+            var request = new LoginRequest(_baseAddress, keyPair);
+            LoginResponse response = await _networkService.LoginAsync(request, _cts.Token);
+
+            UserId = response.UserId;
+            _accessToken = response.AccessToken;
+
+            _syncService.Start(_baseAddress, _accessToken, _cts.Token,
+                batch => { MatrixEventNotifier.NotifyAll(batch.MatrixRoomEvents); });
 
             _logger.LogInformation("MatrixClient: Ready");
         }
 
-        public void Stop()
+        public async Task StopAsync()
         {
             _logger.LogInformation("MatrixClient: Stopping...");
 
+            await Task.Yield();
+
             _cts.Cancel();
-            _pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+            _syncService.Stop();
 
             _logger.LogInformation("MatrixClient: Stopped");
         }
 
         public async Task<MatrixRoom> CreateTrustedPrivateRoomAsync(string[] invitedUserIds)
         {
-            CreateRoomResponse response =
-                await _roomClient.CreateRoomAsync(_stateManager.AccessToken, invitedUserIds, _cts.Token);
+            var request =
+                new CreateTrustedPrivateRoomRequest(_baseAddress!, _accessToken!, invitedUserIds);
 
-            var matrixRoom = new MatrixRoom(response.RoomId, MatrixRoomStatus.Unknown);
-            _stateManager.UpdateMatrixRoom(response.RoomId, matrixRoom);
+            MatrixRoom matrixRoom = await _networkService.CreateTrustedPrivateRoomAsync(request, _cts.Token);
+
+            _syncService.UpdateMatrixRoom(matrixRoom.Id, matrixRoom);
 
             return matrixRoom;
         }
 
         public async Task<MatrixRoom> JoinTrustedPrivateRoomAsync(string roomId)
         {
-            if (_stateManager.MatrixRooms.TryGetValue(roomId, out MatrixRoom matrixRoom))
+            MatrixRoom? matrixRoom = _syncService.GetMatrixRoom(roomId);
+            if (matrixRoom != null)
                 return matrixRoom;
 
-            JoinRoomResponse response =
-                await _roomClient.JoinRoomAsync(_stateManager.AccessToken, roomId, _cts.Token);
+            var request = new JoinTrustedPrivateRoomRequest(_baseAddress!, _accessToken!, roomId);
+            matrixRoom = await _networkService.JoinTrustedPrivateRoomAsync(request, _cts.Token);
 
-            matrixRoom = new MatrixRoom(response.RoomId, MatrixRoomStatus.Unknown);
-
-            _stateManager.UpdateMatrixRoom(response.RoomId, matrixRoom);
+            _syncService.UpdateMatrixRoom(matrixRoom.Id, matrixRoom);
 
             return matrixRoom;
         }
 
         public async Task<string> SendMessageAsync(string roomId, string message)
         {
-            string transactionId = CreateTransactionId(_stateManager);
-            EventResponse eventResponse = await _eventClient.SendMessageAsync(_stateManager.AccessToken, _cts.Token,
-                roomId, transactionId, message);
+            string transactionId = CreateTransactionId();
 
-            if (eventResponse.EventId == null)
-                throw new NullReferenceException(nameof(eventResponse.EventId));
-
-            return eventResponse.EventId;
+            var request = new SendMessageRequest(_baseAddress!, _accessToken!, roomId, transactionId, message);
+            return await _networkService.SendMessageAsync(request, _cts.Token);
         }
 
         public async Task<List<string>> GetJoinedRoomsIdsAsync()
         {
-            JoinedRoomsResponse response = await _roomClient.GetJoinedRoomsAsync(_stateManager.AccessToken, _cts.Token);
-
-            return response.JoinedRoomIds;
+            var request = new GetJoinedRoomsIdsRequest(_baseAddress!, _accessToken!);
+            return await _networkService.GetJoinedRoomsIdsAsync(request, _cts.Token);
         }
 
-        public async Task LeaveRoomAsync(string roomId) =>
-            await _roomClient.LeaveRoomAsync(_stateManager.AccessToken, roomId, _cts.Token);
-
-        private async Task PollAsync()
+        public async Task LeaveRoomAsync(string roomId)
         {
-            _pollingTimer.Change(Timeout.Infinite, Timeout.Infinite);
-
-            SyncResponse response = await _eventClient.SyncAsync(_stateManager.AccessToken,
-                timeout: _stateManager.Timeout,
-                nextBatch: _stateManager.NextBatch,
-                cancellationToken: _cts.Token);
-
-            SyncBatch syncBatch = SyncBatch.Factory.CreateFromSync(response.NextBatch, response.Rooms);
-            _stateManager.UpdateStateWith(syncBatch, syncBatch.NextBatch, Constants.LaterSyncTimout);
-
-            MatrixEventNotifier.NotifyAll(syncBatch.MatrixRoomEvents);
-
-            _pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+            var request = new LeaveRoomRequest(_baseAddress!, _accessToken!, roomId);
+            await _networkService.LeaveRoomAsync(request, _cts.Token);
         }
 
-        private static string CreateTransactionId(MatrixClientStateManager matrixClientStateManager)
+        private string CreateTransactionId()
         {
             long timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            ulong counter = matrixClientStateManager.TransactionNumber;
+            ulong counter = _transactionNumber;
 
-            matrixClientStateManager.TransactionNumber += 1;
+            _transactionNumber += 1;
 
             return $"m{timestamp}.{counter}";
         }

@@ -7,7 +7,8 @@
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Sdk;
-    using Sdk.Core.Domain;
+    using Sdk.Core.Domain.MatrixRoom;
+    using Sdk.Core.Domain.Services;
     using Sdk.Core.Infrastructure.Services;
     using Sdk.Listener;
     using Serilog;
@@ -19,7 +20,7 @@
         private static IHostBuilder CreateHostBuilder() => new HostBuilder()
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddMatrixSdk();
+                services.AddMatrixClient();
                 services.AddConsoleApp();
             }).UseConsoleLifetime();
 
@@ -53,10 +54,10 @@
 
         private static async Task RunAsync(IServiceProvider serviceProvider)
         {
-            (MatrixClient firstClient, TextMessageListener firstListener) =
+            (IMatrixClient firstClient, TextMessageListener firstListener) =
                 await SetupClientWithTextListener(serviceProvider);
 
-            (MatrixClient secondClient, TextMessageListener secondListener) =
+            (IMatrixClient secondClient, TextMessageListener secondListener) =
                 await SetupClientWithTextListener(serviceProvider);
 
             MatrixRoom firstClientMatrixRoom = await firstClient.CreateTrustedPrivateRoomAsync(new[]
@@ -78,21 +79,24 @@
 
             Console.ReadLine();
 
-            firstClient.Stop();
-            secondClient.Stop();
+            await firstClient.StopAsync();
+            await secondClient.StopAsync();
 
             firstListener.Unsubscribe();
             secondListener.Unsubscribe();
         }
 
-        private static async Task<(MatrixClient, TextMessageListener)> SetupClientWithTextListener(
+        private static async Task<(IMatrixClient, TextMessageListener)> SetupClientWithTextListener(
             IServiceProvider serviceProvider)
         {
-            MatrixClient matrixClient = serviceProvider.GetRequiredService<MatrixClient>();
+            IMatrixClient matrixClient = serviceProvider.GetRequiredService<IMatrixClient>();
+            ICryptographyService cryptographyService = serviceProvider.GetRequiredService<ICryptographyService>();
+            
             var seed = Guid.NewGuid().ToString();
-            KeyPair keyPair = MatrixCryptographyService.GenerateEd25519KeyPair(seed);
-
-            await matrixClient.StartAsync(keyPair); //Todo: generate once and then store seed?
+            KeyPair keyPair = cryptographyService.GenerateEd25519KeyPair(seed);
+            Uri nodeAddress = new Uri(Constants.FallBackAddress);
+            
+            await matrixClient.StartAsync(null, keyPair); //Todo: generate once and then store seed?
 
             var textMessageListener = new TextMessageListener(matrixClient.UserId, (listenerId, textMessageEvent) =>
             {
