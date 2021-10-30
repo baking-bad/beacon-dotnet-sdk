@@ -2,18 +2,19 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Core" />
+        <ProjectReference Include="..\matrix-dotnet-sdk\Matrix.Sdk\Matrix.Sdk.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\matrix-dotnet-sdk\Matrix.Sdk\Matrix.Sdk.csproj" />
+        <PackageReference Include="Base58Check" Version="0.2.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Base58Check" Version="0.2.0" />
+        <Folder Include="Core\Beacon"/>
     </ItemGroup>
 
 </Project>

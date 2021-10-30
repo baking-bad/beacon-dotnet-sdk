@@ -3,11 +3,13 @@ namespace Matrix.Sdk.Core.Domain
     using System.Collections.Generic;
     using System.Linq;
     using Infrastructure.Dto.Sync;
+    using MatrixRoom;
     using Room;
 
     public class SyncBatch
     {
-        private SyncBatch(string nextBatch, List<MatrixRoom> matrixRooms, List<BaseRoomEvent> matrixRoomEvents)
+        private SyncBatch(string nextBatch, List<MatrixRoom.MatrixRoom> matrixRooms,
+            List<BaseRoomEvent> matrixRoomEvents)
         {
             NextBatch = nextBatch;
             MatrixRooms = matrixRooms;
@@ -15,7 +17,7 @@ namespace Matrix.Sdk.Core.Domain
         }
 
         public string NextBatch { get; }
-        public List<MatrixRoom> MatrixRooms { get; }
+        public List<MatrixRoom.MatrixRoom> MatrixRooms { get; }
         public List<BaseRoomEvent> MatrixRoomEvents { get; }
 
 
@@ -26,13 +28,13 @@ namespace Matrix.Sdk.Core.Domain
 
             public static SyncBatch CreateFromSync(string nextBatch, Rooms rooms)
             {
-                List<MatrixRoom> matrixRooms = GetMatrixRoomsFromSync(rooms);
+                List<MatrixRoom.MatrixRoom> matrixRooms = GetMatrixRoomsFromSync(rooms);
                 List<BaseRoomEvent> matrixRoomEvents = GetMatrixEventsFromSync(rooms);
 
                 return new SyncBatch(nextBatch, matrixRooms, matrixRoomEvents);
             }
 
-            private static List<MatrixRoom> GetMatrixRoomsFromSync(Rooms rooms)
+            private static List<MatrixRoom.MatrixRoom> GetMatrixRoomsFromSync(Rooms rooms)
             {
                 var joinedMatrixRooms = rooms.Join.Select(pair => MatrixRoomFactory.CreateJoined(pair.Key, pair.Value))
                     .ToList();

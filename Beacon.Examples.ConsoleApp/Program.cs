@@ -8,27 +8,28 @@
     using Microsoft.Extensions.Logging;
     using Sdk;
     using Serilog;
+    using Serilog.Sinks.SystemConsole.Themes;
 
     internal class Program
     {
         private static IHostBuilder CreateHostBuilder() => new HostBuilder()
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddBeaconSdk();
+                services.AddBeaconClient();
                 services.AddConsoleApp();
             }).UseConsoleLifetime();
 
         private static async Task<int> Main(string[] args)
         {
-            var host = CreateHostBuilder().Build();
+            IHost host = CreateHostBuilder().Build();
 
-            var theme = LoggerSetup.SetupTheme();
+            SystemConsoleTheme theme = LoggerSetup.SetupTheme();
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .WriteTo.Console(theme: theme)
                 .CreateLogger();
 
-            var logger = host.Services.GetRequiredService<ILogger<Program>>();
+            ILogger<Program> logger = host.Services.GetRequiredService<ILogger<Program>>();
 
             logger.LogInformation("START");
 

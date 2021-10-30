@@ -43,7 +43,7 @@ namespace Matrix.Sdk.Core.Infrastructure.Extensions
         // Todo: Refactor
         // See: https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-how-to?pivots=dotnet-5-0#httpclient-and-httpcontent-extension-methods
         public static async Task<TResponse> PostAsJsonAsync<TResponse>(this HttpClient httpClient,
-            string requestUri, object model, CancellationToken cancellationToken)
+            string requestUri, object? model, CancellationToken cancellationToken)
         {
             JsonSerializerSettings settings = GetJsonSettings();
 
