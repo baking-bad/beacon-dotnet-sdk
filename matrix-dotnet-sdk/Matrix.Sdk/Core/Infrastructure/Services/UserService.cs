@@ -10,13 +10,13 @@ namespace Matrix.Sdk.Core.Infrastructure.Services
     using Dto.Login;
     using Extensions;
     using Sodium;
-    using LoginRequest = Dto.Login.LoginRequest;
 
     public class UserService : BaseApiService
     {
         private readonly ICryptographyService _cryptographyService;
 
-        public UserService(IHttpClientFactory httpClientFactory, ICryptographyService cryptographyService) : base(httpClientFactory)
+        public UserService(IHttpClientFactory httpClientFactory, ICryptographyService cryptographyService) : base(
+            httpClientFactory)
         {
             _cryptographyService = cryptographyService;
         }
@@ -38,6 +38,28 @@ namespace Matrix.Sdk.Core.Infrastructure.Services
                 (
                     "m.id.user",
                     hexId
+                ),
+                password,
+                deviceId,
+                "m.login.password"
+            );
+
+            HttpClient httpClient = CreateHttpClient(baseAddress);
+
+            var path = $"{ResourcePath}/login";
+
+            return await httpClient.PostAsJsonAsync<LoginResponse>(path, model, cancellationToken);
+        }
+
+        public async Task<LoginResponse> LoginAsync(Uri baseAddress, string user, string password, string deviceId,
+            CancellationToken cancellationToken)
+        {
+            var model = new LoginRequest
+            (
+                new Identifier
+                (
+                    "m.id.user",
+                    user
                 ),
                 password,
                 deviceId,

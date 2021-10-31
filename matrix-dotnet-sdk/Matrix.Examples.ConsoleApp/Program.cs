@@ -9,7 +9,6 @@
     using Sdk;
     using Sdk.Core.Domain.MatrixRoom;
     using Sdk.Core.Domain.Services;
-    using Sdk.Core.Infrastructure.Services;
     using Sdk.Listener;
     using Serilog;
     using Serilog.Sinks.SystemConsole.Themes;
@@ -60,6 +59,9 @@
             (IMatrixClient secondClient, TextMessageListener secondListener) =
                 await SetupClientWithTextListener(serviceProvider);
 
+            firstClient.Start();
+            secondClient.Start();
+            
             MatrixRoom firstClientMatrixRoom = await firstClient.CreateTrustedPrivateRoomAsync(new[]
             {
                 secondClient.UserId
@@ -79,8 +81,8 @@
 
             Console.ReadLine();
 
-            await firstClient.StopAsync();
-            await secondClient.StopAsync();
+            firstClient.Stop();
+            secondClient.Stop();
 
             firstListener.Unsubscribe();
             secondListener.Unsubscribe();
@@ -91,12 +93,12 @@
         {
             IMatrixClient matrixClient = serviceProvider.GetRequiredService<IMatrixClient>();
             ICryptographyService cryptographyService = serviceProvider.GetRequiredService<ICryptographyService>();
-            
+
             var seed = Guid.NewGuid().ToString();
             KeyPair keyPair = cryptographyService.GenerateEd25519KeyPair(seed);
-            Uri nodeAddress = new Uri(Constants.FallBackAddress);
-            
-            await matrixClient.StartAsync(null, keyPair); //Todo: generate once and then store seed?
+            var nodeAddress = new Uri(Constants.FallBackNodeAddress);
+
+            await matrixClient.LoginAsync(nodeAddress, keyPair); //Todo: generate once and then store seed?
 
             var textMessageListener = new TextMessageListener(matrixClient.UserId, (listenerId, textMessageEvent) =>
             {

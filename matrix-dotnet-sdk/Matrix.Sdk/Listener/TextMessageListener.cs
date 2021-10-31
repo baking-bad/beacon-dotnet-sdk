@@ -27,9 +27,3 @@ namespace Matrix.Sdk.Listener
         }
     }
 }
-// private void OnNewTextMsg(string listenerId, TextMessageEvent value)
-// {
-//     var (roomId, senderUserId, message) = value;
-//     if (listenerId != senderUserId)
-//         Console.WriteLine($"RoomId: {roomId} received message from {senderUserId}: {message}.");
-// }

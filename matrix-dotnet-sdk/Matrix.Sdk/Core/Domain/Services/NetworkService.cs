@@ -12,6 +12,7 @@ namespace Matrix.Sdk.Core.Domain.Services
     using Infrastructure.Services;
     using MatrixRoom;
     using Network;
+    using LoginRequest = Network.LoginRequest;
 
     public class NetworkService : INetworkService
     {
@@ -27,7 +28,8 @@ namespace Matrix.Sdk.Core.Domain.Services
         }
 
         public async Task<LoginResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken) =>
-            await _userService.LoginAsync(request.NodeAddress, request.KeyPair, cancellationToken);
+            await _userService.LoginAsync(request.NodeAddress, request.User, request.Password, request.DeviceId,
+                cancellationToken);
 
         public async Task<MatrixRoom> CreateTrustedPrivateRoomAsync(CreateTrustedPrivateRoomRequest request,
             CancellationToken cancellationToken)

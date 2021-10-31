@@ -6,7 +6,7 @@ namespace Matrix.Sdk.Core.Domain
     using MatrixRoom;
     using Room;
 
-    public class SyncBatch
+    public record SyncBatch
     {
         private SyncBatch(string nextBatch, List<MatrixRoom.MatrixRoom> matrixRooms,
             List<BaseRoomEvent> matrixRoomEvents)
@@ -19,7 +19,6 @@ namespace Matrix.Sdk.Core.Domain
         public string NextBatch { get; }
         public List<MatrixRoom.MatrixRoom> MatrixRooms { get; }
         public List<BaseRoomEvent> MatrixRoomEvents { get; }
-
 
         internal static class Factory
         {

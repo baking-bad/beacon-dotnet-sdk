@@ -15,14 +15,13 @@ namespace Matrix.Sdk.Core.Domain.Services
     {
         private readonly EventService _eventService;
         private readonly ILogger<SyncService> _logger;
-
         private readonly ConcurrentDictionary<string, MatrixRoom> _matrixRooms = new();
+
         private string? _accessToken;
         private CancellationToken _cancellationToken;
         private string _nextBatch;
         private Uri? _nodeAddress;
         private Timer? _pollingTimer;
-
         private ulong _timeout;
 
         public SyncService(EventService eventService, ILogger<SyncService> logger)
@@ -51,10 +50,7 @@ namespace Matrix.Sdk.Core.Domain.Services
             _pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
         }
 
-        public void Stop()
-        {
-            _pollingTimer!.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
-        }
+        public void Stop() => _pollingTimer!.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
 
         public void UpdateMatrixRoom(string roomId, MatrixRoom matrixRoom)
         {

@@ -61,7 +61,7 @@ namespace Beacon.Examples.ConsoleApp
             var seed = Guid.NewGuid().ToString();
             KeyPair keyPair = Matrix.Sdk.Core.Infrastructure.Services.CryptographyService.GenerateEd25519KeyPair(seed);
 
-            await matrixClient.StartAsync(keyPair); //Todo: generate once and then store seed?
+            await matrixClient.StartSync(keyPair); //Todo: generate once and then store seed?
 
             var textMessageListener = new TextMessageListener(matrixClient.UserId, (listenerId, textMessageEvent) =>
             {

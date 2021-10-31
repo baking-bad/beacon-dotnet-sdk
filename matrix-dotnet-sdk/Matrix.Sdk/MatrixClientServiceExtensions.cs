@@ -34,13 +34,3 @@ namespace Matrix.Sdk
         }
     }
 }
-
-// services.AddHttpClient(Constants.Matrix,
-//     c => { c.BaseAddress = new Uri(Constants.BaseAddress); });
-// services.AddHttpClient();
-
-// services.AddHttpClient<>()
-
-// services.AddSingleton<ISeedRepository, MemorySeedRepository>();
-// services.AddTransient<MatrixClientStateManager>();
-// services.AddTransient<MatrixRoomFactory>();

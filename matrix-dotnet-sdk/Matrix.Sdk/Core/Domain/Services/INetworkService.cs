@@ -6,6 +6,7 @@ namespace Matrix.Sdk.Core.Domain.Services
     using Infrastructure.Dto.Login;
     using MatrixRoom;
     using Network;
+    using LoginRequest = Network.LoginRequest;
 
     public interface INetworkService
     {
