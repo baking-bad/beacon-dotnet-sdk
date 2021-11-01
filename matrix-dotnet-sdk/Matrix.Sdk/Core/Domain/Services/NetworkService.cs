@@ -51,8 +51,7 @@ namespace Matrix.Sdk.Core.Domain.Services
         }
 
         public async Task<string> SendMessageAsync(Uri baseAddress, string accessToken, string roomId,
-            string transactionId,
-            string message, CancellationToken cancellationToken)
+            string transactionId, string message, CancellationToken cancellationToken)
         {
             EventResponse eventResponse = await _eventService.SendMessageAsync(baseAddress, accessToken,
                 cancellationToken, roomId, transactionId, message);

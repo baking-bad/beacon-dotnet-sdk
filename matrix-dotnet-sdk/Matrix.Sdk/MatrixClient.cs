@@ -71,8 +71,10 @@
             UserId = response.UserId;
             _accessToken = response.AccessToken;
 
-            _pollingService.Start(BaseAddress, _accessToken,
-                batch => { MatrixEventNotifier.NotifyAll(batch.MatrixRoomEvents); });
+            _pollingService.Start(BaseAddress, _accessToken, batch =>
+                {
+                    MatrixEventNotifier.NotifyAll(batch.MatrixRoomEvents);
+                });
 
             _logger.LogInformation("Matrix client: Logged in and began sync");
         }
