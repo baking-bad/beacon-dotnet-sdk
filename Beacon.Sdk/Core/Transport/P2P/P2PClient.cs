@@ -21,14 +21,17 @@
         private readonly IChannelOpeningMessageBuilder _channelOpeningMessageBuilder;
         private readonly IMatrixClient _matrixClient;
 
+        private readonly RelayServerService _relayServerService;
+
         private string? _appName;
         private KeyPair? _keyPair;
-        private string? _relayServer;
 
-        public P2PClient(IMatrixClient matrixClient, IChannelOpeningMessageBuilder channelOpeningMessageBuilder)
+        public P2PClient(IMatrixClient matrixClient, IChannelOpeningMessageBuilder channelOpeningMessageBuilder,
+            RelayServerService relayServerService)
         {
             _matrixClient = matrixClient;
             _channelOpeningMessageBuilder = channelOpeningMessageBuilder;
+            _relayServerService = relayServerService;
 
             //Todo: refactor
             SodiumCore.Init();
@@ -38,7 +41,12 @@
         {
             try
             {
-                await _matrixClient.StartAsync(keyPair);
+                string relayServer = await _relayServerService.GetRelayServer(keyPair.PublicKey);
+                var nodeAddress = new Uri(relayServer);
+
+                await _matrixClient.StartAsync(nodeAddress, keyPair);
+                // _matrixClient.MatrixEventNotifier.
+                // _matrixClient.StartSync();
 
                 _keyPair = keyPair;
             }
@@ -78,8 +86,10 @@
                 _channelOpeningMessageBuilder.Reset();
                 _channelOpeningMessageBuilder.BuildRecipientId(response.ReceiverRelayServer,
                     response.ReceiverPublicKeyHex);
+
                 _channelOpeningMessageBuilder.BuildPairingPayload(response.Id, response.Version, senderPublicKeyHex,
-                    response.RelayServer, response.AppName);
+                    response.ReceiverRelayServer, response.SenderAppName);
+
                 _channelOpeningMessageBuilder.BuildEncryptedPayload(response.ReceiverPublicKeyHex);
 
                 ChannelOpeningMessage channelOpeningMessage = _channelOpeningMessageBuilder.Message;

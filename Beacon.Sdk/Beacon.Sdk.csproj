@@ -13,8 +13,4 @@
         <PackageReference Include="Base58Check" Version="0.2.0"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Core\Beacon"/>
-    </ItemGroup>
-
 </Project>

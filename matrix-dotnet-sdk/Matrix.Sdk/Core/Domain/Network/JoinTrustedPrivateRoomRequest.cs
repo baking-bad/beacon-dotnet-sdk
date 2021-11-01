@@ -2,5 +2,5 @@ namespace Matrix.Sdk.Core.Domain.Network
 {
     using System;
 
-    public record JoinTrustedPrivateRoomRequest(Uri NodeAddress, string AccessToken, string RoomId);
+    public record JoinTrustedPrivateRoomRequest(Uri BaseAddress, string AccessToken, string RoomId);
 }

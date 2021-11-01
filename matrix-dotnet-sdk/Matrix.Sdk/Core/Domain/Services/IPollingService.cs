@@ -1,10 +1,9 @@
 namespace Matrix.Sdk.Core.Domain.Services
 {
     using System;
-    using System.Threading;
     using MatrixRoom;
 
-    public interface ISyncService
+    public interface IPollingService
     {
         MatrixRoom[] InvitedRooms { get; }
 
@@ -12,8 +11,7 @@ namespace Matrix.Sdk.Core.Domain.Services
 
         MatrixRoom[] LeftRooms { get; }
 
-        void Start(Uri nodeAddress, string accessToken, CancellationToken cancellationToken,
-            Action<SyncBatch> onNewSyncBatch);
+        void Start(Uri nodeAddress, string accessToken, Action<SyncBatch> onNewSyncBatch);
 
         void Stop();
 

@@ -11,20 +11,20 @@ namespace Matrix.Sdk.Core.Domain.Services
     using MatrixRoom;
     using Microsoft.Extensions.Logging;
 
-    public class SyncService : ISyncService
+    public class PollingService : IPollingService
     {
+        private readonly CancellationTokenSource _cts = new();
         private readonly EventService _eventService;
-        private readonly ILogger<SyncService> _logger;
+        private readonly ILogger<PollingService> _logger;
         private readonly ConcurrentDictionary<string, MatrixRoom> _matrixRooms = new();
 
         private string? _accessToken;
-        private CancellationToken _cancellationToken;
         private string _nextBatch;
         private Uri? _nodeAddress;
         private Timer? _pollingTimer;
         private ulong _timeout;
 
-        public SyncService(EventService eventService, ILogger<SyncService> logger)
+        public PollingService(EventService eventService, ILogger<PollingService> logger)
         {
             _eventService = eventService;
             _logger = logger;
@@ -39,18 +39,20 @@ namespace Matrix.Sdk.Core.Domain.Services
 
         public MatrixRoom[] LeftRooms => _matrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Left).ToArray();
 
-        public void Start(Uri nodeAddress, string accessToken, CancellationToken cancellationToken,
-            Action<SyncBatch> onNewSyncBatch)
+        public void Start(Uri nodeAddress, string accessToken, Action<SyncBatch> onNewSyncBatch)
         {
             _nodeAddress = nodeAddress;
             _accessToken = accessToken;
-            _cancellationToken = cancellationToken;
 
             _pollingTimer = new Timer(async _ => await PollAsync(onNewSyncBatch));
             _pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
         }
 
-        public void Stop() => _pollingTimer!.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+        public void Stop()
+        {
+            _cts.Cancel();
+            _pollingTimer!.Change(Timeout.Infinite, Timeout.Infinite);
+        }
 
         public void UpdateMatrixRoom(string roomId, MatrixRoom matrixRoom)
         {
@@ -66,23 +68,32 @@ namespace Matrix.Sdk.Core.Domain.Services
 
         private async Task PollAsync(Action<SyncBatch> onNewSyncBatch)
         {
-            _pollingTimer!.Change(Timeout.Infinite, Timeout.Infinite);
+            try
+            {
+                _pollingTimer!.Change(Timeout.Infinite, Timeout.Infinite);
 
-            SyncResponse response = await _eventService.SyncAsync(_nodeAddress!, _accessToken!,
-                timeout: _timeout,
-                nextBatch: _nextBatch,
-                cancellationToken: _cancellationToken);
+                SyncResponse response = await _eventService.SyncAsync(_nodeAddress!, _accessToken!, _cts.Token,
+                    _timeout, _nextBatch);
 
-            SyncBatch syncBatch = SyncBatch.Factory.CreateFromSync(response.NextBatch, response.Rooms);
+                SyncBatch syncBatch = SyncBatch.Factory.CreateFromSync(response.NextBatch, response.Rooms);
 
-            _nextBatch = syncBatch.NextBatch;
-            _timeout = Constants.LaterSyncTimout;
+                _nextBatch = syncBatch.NextBatch;
+                _timeout = Constants.LaterSyncTimout;
 
-            RefreshRooms(syncBatch.MatrixRooms);
+                RefreshRooms(syncBatch.MatrixRooms);
 
-            onNewSyncBatch(syncBatch);
+                onNewSyncBatch(syncBatch);
 
-            _pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+                _pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogInformation("Polling: HTTP Get request canceled");
+            }
+            catch (Exception)
+            {
+                _logger.LogError("Exception");
+            }
         }
 
         private void RefreshRooms(List<MatrixRoom> matrixRooms)

@@ -2,5 +2,5 @@ namespace Matrix.Sdk.Core.Domain.Network
 {
     using System;
 
-    public record GetJoinedRoomsIdsRequest(Uri NodeAddress, string AccessToken);
+    public record GetJoinedRoomsIdsRequest(Uri BaseAddress, string AccessToken);
 }

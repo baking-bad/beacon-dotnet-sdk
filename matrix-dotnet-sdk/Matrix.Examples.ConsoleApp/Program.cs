@@ -59,9 +59,7 @@
             (IMatrixClient secondClient, TextMessageListener secondListener) =
                 await SetupClientWithTextListener(serviceProvider);
 
-            firstClient.Start();
-            secondClient.Start();
-            
+
             MatrixRoom firstClientMatrixRoom = await firstClient.CreateTrustedPrivateRoomAsync(new[]
             {
                 secondClient.UserId
@@ -81,8 +79,15 @@
 
             Console.ReadLine();
 
-            firstClient.Stop();
-            secondClient.Stop();
+            try
+            {
+                await firstClient.StopAsync();
+                await secondClient.StopAsync();
+            }
+            catch (Exception ex)
+            {
+            }
+
 
             firstListener.Unsubscribe();
             secondListener.Unsubscribe();
@@ -98,7 +103,7 @@
             KeyPair keyPair = cryptographyService.GenerateEd25519KeyPair(seed);
             var nodeAddress = new Uri(Constants.FallBackNodeAddress);
 
-            await matrixClient.LoginAsync(nodeAddress, keyPair); //Todo: generate once and then store seed?
+            await matrixClient.StartAsync(nodeAddress, keyPair); //Todo: generate once and then store seed?
 
             var textMessageListener = new TextMessageListener(matrixClient.UserId, (listenerId, textMessageEvent) =>
             {

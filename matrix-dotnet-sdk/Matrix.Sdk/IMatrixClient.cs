@@ -9,11 +9,13 @@ namespace Matrix.Sdk
     using Sodium;
 
     /// <summary>
-    /// A Client for interaction with Matrix.
+    ///     A Client for interaction with Matrix.
     /// </summary>
     public interface IMatrixClient
     {
         string UserId { get; }
+
+        Uri? BaseAddress { get; }
 
         MatrixEventNotifier<List<BaseRoomEvent>> MatrixEventNotifier { get; }
 
@@ -23,11 +25,9 @@ namespace Matrix.Sdk
 
         MatrixRoom[] LeftRooms { get; }
 
-        Task LoginAsync(Uri? baseAddress, KeyPair keyPair);
+        Task StartAsync(Uri? baseAddress, KeyPair keyPair);
 
-        void Start();
-
-        void Stop();
+        Task StopAsync();
 
         Task<MatrixRoom> CreateTrustedPrivateRoomAsync(string[] invitedUserIds);
 
