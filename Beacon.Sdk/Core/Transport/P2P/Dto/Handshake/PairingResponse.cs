@@ -6,7 +6,5 @@ namespace Beacon.Sdk.Core.Transport.P2P.Dto.Handshake
         string Id,
         HexString ReceiverPublicKeyHex,
         string ReceiverRelayServer,
-        int Version,
-        string SenderAppName,
-        string SenderRelayServer);
+        int Version);
 }

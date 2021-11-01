@@ -95,7 +95,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             return Encoding.UTF8.GetString(result);
         }
 
-        public static bool Validate(string input) => HexString.TryParse(input, out HexString hexString) &&
-                                                     hexString.ToString().Length >= NonceBytes + MacBytes;
+        public bool Validate(string input) =>
+            HexString.TryParse(input,
+                out HexString hexString) && // content can be non-hex if it's a connection open request
+            hexString.ToString().Length >= NonceBytes + MacBytes;
     }
 }

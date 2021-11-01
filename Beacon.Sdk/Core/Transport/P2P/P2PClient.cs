@@ -6,49 +6,71 @@
     using System.Threading.Tasks;
     using ChannelOpening;
     using Dto.Handshake;
+    using Infrastructure.Cryptography.Libsodium;
+    using Infrastructure.Repositories;
     using Matrix.Sdk;
     using Matrix.Sdk.Core.Domain.MatrixRoom;
     using Matrix.Sdk.Core.Domain.Room;
     using Matrix.Sdk.Core.Utils;
     using Matrix.Sdk.Listener;
     using Sodium;
+    using SodiumCore = Sodium.SodiumCore;
 
-    public class P2PClient : IP2PClient
+    // public class EventListenerRepository
+    // {
+    //     private readonly IEventListenerFactory _eventListenerFactory;
+    // }
+
+    public reacord P
+
+    public class P2PClient // : IP2PClient
     {
         private static readonly Dictionary<HexString, MatrixEventListener<List<BaseRoomEvent>>>
-            EncryptedMessageListeners = new();
+            CachedEncryptedMessageListeners = new();
 
         private readonly IChannelOpeningMessageBuilder _channelOpeningMessageBuilder;
+        private readonly ICryptographyService _cryptographyService;
+        private readonly IEventListenerFactory _eventListenerFactory;
         private readonly IMatrixClient _matrixClient;
 
         private readonly RelayServerService _relayServerService;
-
-        private string? _appName;
+        private readonly ISessionKeyPairRepository _sessionKeyPairRepository;
         private KeyPair? _keyPair;
 
-        public P2PClient(IMatrixClient matrixClient, IChannelOpeningMessageBuilder channelOpeningMessageBuilder,
+        public P2PClient(
+            IMatrixClient matrixClient,
+            IChannelOpeningMessageBuilder channelOpeningMessageBuilder,
+            IEventListenerFactory eventListenerFactory,
+            ISessionKeyPairRepository sessionKeyPairRepository,
+            ICryptographyService cryptographyService,
             RelayServerService relayServerService)
         {
             _matrixClient = matrixClient;
             _channelOpeningMessageBuilder = channelOpeningMessageBuilder;
+            _eventListenerFactory = eventListenerFactory;
+            _sessionKeyPairRepository = sessionKeyPairRepository;
+            _cryptographyService = cryptographyService;
             _relayServerService = relayServerService;
 
             //Todo: refactor
             SodiumCore.Init();
         }
 
-        public async Task StartAsync(KeyPair keyPair)
+        public string? Name { get; private set; }
+
+        public Uri? BaseAddress { get; private set; }
+
+        public async Task StartAsync(string name, KeyPair keyPair)
         {
             try
             {
-                string relayServer = await _relayServerService.GetRelayServer(keyPair.PublicKey);
-                var nodeAddress = new Uri(relayServer);
-
-                await _matrixClient.StartAsync(nodeAddress, keyPair);
-                // _matrixClient.MatrixEventNotifier.
-                // _matrixClient.StartSync();
-
+                Name = name;
                 _keyPair = keyPair;
+
+                string relayServer = await _relayServerService.GetRelayServer(keyPair.PublicKey);
+                BaseAddress = new Uri(relayServer);
+
+                await _matrixClient.StartAsync(BaseAddress, keyPair);
             }
             catch (Exception e)
             {
@@ -57,21 +79,40 @@
             }
         }
 
-        public void ListenToPublicKeyHex(HexString publicKey, EncryptedMessageListener listener)
+        public async Task StopAsync()
         {
-            if (EncryptedMessageListeners.TryGetValue(publicKey, out _))
+            await _matrixClient.StopAsync();
+        }
+
+        public void ListenToPublicKeyHex(HexString senderPublicKeyHex, Action<string> messageCallback)
+        {
+            // If the listener is already registered, we do nothing.
+            if (CachedEncryptedMessageListeners.TryGetValue(senderPublicKeyHex, out _))
                 return;
 
-            // ReSharper disable once ArgumentsStyleNamedExpression
-            // var listener = new EncryptedMessageListener(_cryptographyService, _keyPair!, publicKey, e => { });
-            listener.ListenTo(_matrixClient.MatrixEventNotifier);
+            // In the context of this method, there are sender and receiver, so we need a proper naming.
+            KeyPair receiverKeyPair = _keyPair ?? throw new NullReferenceException("_keyPair");
+            SessionKeyPair serverSessionKeyPair =
+                _sessionKeyPairRepository.CreateOrReadServer(senderPublicKeyHex, receiverKeyPair);
 
-            EncryptedMessageListeners[publicKey] = listener;
+            EncryptedMessageListener listener =
+                _eventListenerFactory.CreateEncryptedMessageListener(_keyPair, senderPublicKeyHex, textMessageEvent =>
+                {
+                    string message =
+                        _cryptographyService.DecryptAsString(textMessageEvent.Message,
+                            serverSessionKeyPair.Rx);
+
+                    messageCallback(message);
+                });
+
+            listener.ListenTo(_matrixClient.MatrixEventNotifier);
+            CachedEncryptedMessageListeners[senderPublicKeyHex] = listener;
         }
 
         public void RemoveListenerForPublicKey(HexString publicKey)
         {
-            if (EncryptedMessageListeners.TryGetValue(publicKey, out MatrixEventListener<List<BaseRoomEvent>> listener))
+            if (CachedEncryptedMessageListeners.TryGetValue(publicKey,
+                    out MatrixEventListener<List<BaseRoomEvent>> listener))
                 listener.Unsubscribe();
         }
 
@@ -80,15 +121,17 @@
         {
             try
             {
-                if (!HexString.TryParse(_keyPair!.PublicKey, out HexString senderPublicKeyHex))
+                if (!HexString.TryParse(_keyPair!.PublicKey, out HexString senderHexPublicKey))
                     throw new InvalidOperationException("Can not parse sender public key.");
+
+                string senderAppName = Name ?? throw new NullReferenceException("Provide P2PClient Name");
 
                 _channelOpeningMessageBuilder.Reset();
                 _channelOpeningMessageBuilder.BuildRecipientId(response.ReceiverRelayServer,
                     response.ReceiverPublicKeyHex);
 
-                _channelOpeningMessageBuilder.BuildPairingPayload(response.Id, response.Version, senderPublicKeyHex,
-                    response.ReceiverRelayServer, response.SenderAppName);
+                _channelOpeningMessageBuilder.BuildPairingPayload(response.Id, response.Version, senderHexPublicKey,
+                    response.ReceiverRelayServer, senderAppName);
 
                 _channelOpeningMessageBuilder.BuildEncryptedPayload(response.ReceiverPublicKeyHex);
 

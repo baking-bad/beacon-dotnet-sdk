@@ -25,5 +25,7 @@ namespace Beacon.Sdk.Core
         byte[] ConvertEd25519PublicKeyToCurve25519PublicKey(byte[] publicKey);
 
         string EncryptMessageAsString(string message, byte[] publicKey);
+
+        bool Validate(string input);
     }
 }

@@ -9,7 +9,7 @@ namespace Beacon.Sdk
 
     public static class BeaconClientServiceExtensions
     {
-        public static IServiceCollection AddBeaconClient(this IServiceCollection services)
+        public static IServiceCollection AddBeaconClient(this IServiceCollection services, string AppName)
         {
             services.AddMatrixClient();
             services.AddSingleton<ISdkStorage, SdkStorage>();

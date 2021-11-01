@@ -7,6 +7,8 @@ namespace Beacon.Sdk
     using Matrix.Sdk.Core.Utils;
     using Sodium;
 
+    public record BeaconPeer(string Name, HexString HexPublicKey, string Version);
+
     public class WalletBeaconClient
     {
         private readonly ICryptographyService _cryptographyService;
@@ -42,7 +44,7 @@ namespace Beacon.Sdk
             await _p2PClient.StartAsync(_keyPair);
         }
 
-        public async Task AddPeerAsync(P2PPairingRequest pairingRequest)
+        public async Task AddPeerAsync(P2PPairingRequest pairingRequest, bool withPairingResponse = true)
         {
             if (!HexString.TryParse(pairingRequest.PublicKey, out HexString receiverPublicKeyHex))
                 throw new InvalidOperationException("Can not parse receiver public key.");
@@ -55,11 +57,16 @@ namespace Beacon.Sdk
                 pairingRequestId,
                 receiverPublicKeyHex,
                 pairingRequest.RelayServer,
-                version,
-                AppName,
-                "beacon-node-0.papers.tech:8448");
+                version);
 
-            await _p2PClient.SendPairingResponseAsync(pairingResponse);
+            if (withPairingResponse)
+                await _p2PClient.SendPairingResponseAsync(pairingResponse);
+        }
+
+        public async Task AddPeerAsync(BeaconPeer peer, bool sendPairingResponse = true)
+        {
+            if (sendPairingResponse)
+                await _p2PClient.SendPairingResponseAsync(pairingResponse);
         }
 
         public void Connect()
