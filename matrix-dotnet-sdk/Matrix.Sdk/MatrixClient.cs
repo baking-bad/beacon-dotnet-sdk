@@ -6,13 +6,11 @@
     using System.Threading.Tasks;
     using Core;
     using Core.Domain.MatrixRoom;
-    using Core.Domain.Network;
     using Core.Domain.Room;
     using Core.Domain.Services;
     using Core.Infrastructure.Dto.Login;
     using Microsoft.Extensions.Logging;
     using Sodium;
-    using LoginRequest = Core.Domain.Network.LoginRequest;
 
     /// <summary>
     ///     A Client for interaction with Matrix.
@@ -20,7 +18,7 @@
     public class MatrixClient : IMatrixClient
     {
         private readonly ICryptographyService _cryptographyService;
-        private readonly CancellationTokenSource _cts = new();
+        private readonly CancellationTokenSource _cts = new(); // todo: refactor.
         private readonly ILogger<MatrixClient> _logger;
 
         private readonly INetworkService _networkService;
@@ -67,8 +65,8 @@
             var password = $"ed:{hexSignature}:{publicKeyHex}";
             string deviceId = publicKeyHex;
 
-            var request = new LoginRequest(BaseAddress, hexId, password, deviceId);
-            LoginResponse response = await _networkService.LoginAsync(request, _cts.Token);
+            LoginResponse response =
+                await _networkService.LoginAsync(BaseAddress, hexId, password, deviceId, _cts.Token);
 
             UserId = response.UserId;
             _accessToken = response.AccessToken;
@@ -92,10 +90,9 @@
 
         public async Task<MatrixRoom> CreateTrustedPrivateRoomAsync(string[] invitedUserIds)
         {
-            var request =
-                new CreateTrustedPrivateRoomRequest(BaseAddress!, _accessToken!, invitedUserIds);
-
-            MatrixRoom matrixRoom = await _networkService.CreateTrustedPrivateRoomAsync(request, _cts.Token);
+            MatrixRoom matrixRoom =
+                await _networkService.CreateTrustedPrivateRoomAsync(BaseAddress!, _accessToken!, invitedUserIds,
+                    _cts.Token);
 
             _pollingService.UpdateMatrixRoom(matrixRoom.Id, matrixRoom);
 
@@ -108,8 +105,8 @@
             if (matrixRoom != null)
                 return matrixRoom;
 
-            var request = new JoinTrustedPrivateRoomRequest(BaseAddress!, _accessToken!, roomId);
-            matrixRoom = await _networkService.JoinTrustedPrivateRoomAsync(request, _cts.Token);
+            matrixRoom =
+                await _networkService.JoinTrustedPrivateRoomAsync(BaseAddress!, _accessToken!, roomId, _cts.Token);
 
             _pollingService.UpdateMatrixRoom(matrixRoom.Id, matrixRoom);
 
@@ -120,21 +117,15 @@
         {
             string transactionId = CreateTransactionId();
 
-            var request = new SendMessageRequest(BaseAddress!, _accessToken!, roomId, transactionId, message);
-            return await _networkService.SendMessageAsync(request, _cts.Token);
+            return await _networkService.SendMessageAsync(BaseAddress!, _accessToken!, roomId, transactionId, message,
+                _cts.Token);
         }
 
-        public async Task<List<string>> GetJoinedRoomsIdsAsync()
-        {
-            var request = new GetJoinedRoomsIdsRequest(BaseAddress!, _accessToken!);
-            return await _networkService.GetJoinedRoomsIdsAsync(request, _cts.Token);
-        }
+        public async Task<List<string>> GetJoinedRoomsIdsAsync() =>
+            await _networkService.GetJoinedRoomsIdsAsync(BaseAddress!, _accessToken!, _cts.Token);
 
-        public async Task LeaveRoomAsync(string roomId)
-        {
-            var request = new LeaveRoomRequest(BaseAddress!, _accessToken!, roomId);
-            await _networkService.LeaveRoomAsync(request, _cts.Token);
-        }
+        public async Task LeaveRoomAsync(string roomId) =>
+            await _networkService.LeaveRoomAsync(BaseAddress!, _accessToken!, roomId, _cts.Token);
 
         private string CreateTransactionId()
         {

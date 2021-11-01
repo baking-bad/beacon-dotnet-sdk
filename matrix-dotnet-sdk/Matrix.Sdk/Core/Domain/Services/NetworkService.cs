@@ -11,8 +11,6 @@ namespace Matrix.Sdk.Core.Domain.Services
     using Infrastructure.Dto.Room.Joined;
     using Infrastructure.Services;
     using MatrixRoom;
-    using Network;
-    using LoginRequest = Network.LoginRequest;
 
     public class NetworkService : INetworkService
     {
@@ -27,35 +25,37 @@ namespace Matrix.Sdk.Core.Domain.Services
             _userService = userService;
         }
 
-        public async Task<LoginResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken) =>
-            await _userService.LoginAsync(request.BaseAddress, request.User, request.Password, request.DeviceId,
-                cancellationToken);
+        public async Task<LoginResponse> LoginAsync(Uri baseAddress, string user, string password, string deviceId,
+            CancellationToken cancellationToken) =>
+            await _userService.LoginAsync(baseAddress, user, password, deviceId, cancellationToken);
 
-        public async Task<MatrixRoom> CreateTrustedPrivateRoomAsync(CreateTrustedPrivateRoomRequest request,
+        public async Task<MatrixRoom> CreateTrustedPrivateRoomAsync(Uri baseAddress, string accessToken,
+            string[] invitedUserIds,
             CancellationToken cancellationToken)
         {
             CreateRoomResponse response =
-                await _roomService.CreateRoomAsync(request.BaseAddress, request.AccessToken, request.InvitedUserIds,
+                await _roomService.CreateRoomAsync(baseAddress, accessToken, invitedUserIds,
                     cancellationToken);
 
             return new MatrixRoom(response.RoomId, MatrixRoomStatus.Unknown);
         }
 
-        public async Task<MatrixRoom> JoinTrustedPrivateRoomAsync(JoinTrustedPrivateRoomRequest request,
+        public async Task<MatrixRoom> JoinTrustedPrivateRoomAsync(Uri baseAddress, string accessToken, string roomId,
             CancellationToken cancellationToken)
         {
             JoinRoomResponse response =
-                await _roomService.JoinRoomAsync(request.BaseAddress, request.AccessToken, request.RoomId,
+                await _roomService.JoinRoomAsync(baseAddress, accessToken, roomId,
                     cancellationToken);
 
             return new MatrixRoom(response.RoomId, MatrixRoomStatus.Unknown);
         }
 
-        public async Task<string> SendMessageAsync(SendMessageRequest request, CancellationToken cancellationToken)
+        public async Task<string> SendMessageAsync(Uri baseAddress, string accessToken, string roomId,
+            string transactionId,
+            string message, CancellationToken cancellationToken)
         {
-            EventResponse eventResponse = await _eventService.SendMessageAsync(request.BaseAddress, request.AccessToken,
-                cancellationToken,
-                request.RoomId, request.TransactionId, request.Message);
+            EventResponse eventResponse = await _eventService.SendMessageAsync(baseAddress, accessToken,
+                cancellationToken, roomId, transactionId, message);
 
             if (eventResponse.EventId == null)
                 throw new NullReferenceException(nameof(eventResponse.EventId));
@@ -63,17 +63,17 @@ namespace Matrix.Sdk.Core.Domain.Services
             return eventResponse.EventId;
         }
 
-        public async Task<List<string>> GetJoinedRoomsIdsAsync(GetJoinedRoomsIdsRequest request,
+        public async Task<List<string>> GetJoinedRoomsIdsAsync(Uri baseAddress, string accessToken,
             CancellationToken cancellationToken)
         {
             JoinedRoomsResponse response =
-                await _roomService.GetJoinedRoomsAsync(request.BaseAddress, request.AccessToken, cancellationToken);
+                await _roomService.GetJoinedRoomsAsync(baseAddress, accessToken, cancellationToken);
 
             return response.JoinedRoomIds;
         }
 
-        public async Task LeaveRoomAsync(LeaveRoomRequest request, CancellationToken cancellationToken) =>
-            await _roomService.LeaveRoomAsync(request.BaseAddress, request.AccessToken, request.RoomId,
-                cancellationToken);
+        public async Task LeaveRoomAsync(Uri baseAddress, string accessToken, string roomId,
+            CancellationToken cancellationToken) =>
+            await _roomService.LeaveRoomAsync(baseAddress, accessToken, roomId, cancellationToken);
     }
 }
