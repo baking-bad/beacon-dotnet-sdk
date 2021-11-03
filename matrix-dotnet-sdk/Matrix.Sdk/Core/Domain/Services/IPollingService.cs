@@ -3,7 +3,7 @@ namespace Matrix.Sdk.Core.Domain.Services
     using System;
     using MatrixRoom;
 
-    public interface IPollingService
+    public interface IPollingService : IDisposable
     {
         MatrixRoom[] InvitedRooms { get; }
 
@@ -11,7 +11,11 @@ namespace Matrix.Sdk.Core.Domain.Services
 
         MatrixRoom[] LeftRooms { get; }
 
-        void Start(Uri nodeAddress, string accessToken, Action<SyncBatch> onNewSyncBatch);
+        public event Action<SyncBatch> SyncBatchReceived;
+        
+        void Init(Uri nodeAddress, string accessToken);
+
+        void Start();
 
         void Stop();
 

@@ -50,7 +50,7 @@ namespace Matrix.Sdk.Core.Domain.Services
 
             return new MatrixRoom(response.RoomId, MatrixRoomStatus.Unknown);
         }
-        
+
         public async Task<string> SendMessageAsync(SendMessageRequest request, CancellationToken cancellationToken)
         {
             EventResponse eventResponse = await _eventService.SendMessageAsync(request.BaseAddress, request.AccessToken,

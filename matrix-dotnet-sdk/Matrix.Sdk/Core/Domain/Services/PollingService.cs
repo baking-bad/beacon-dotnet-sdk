@@ -31,6 +31,8 @@ namespace Matrix.Sdk.Core.Domain.Services
             _timeout = Constants.FirstSyncTimout;
         }
 
+        public event Action<SyncBatch> SyncBatchReceived;
+        
         public MatrixRoom[] InvitedRooms =>
             _matrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Invited).ToArray();
 
@@ -39,15 +41,22 @@ namespace Matrix.Sdk.Core.Domain.Services
 
         public MatrixRoom[] LeftRooms => _matrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Left).ToArray();
 
-        public void Start(Uri nodeAddress, string accessToken, Action<SyncBatch> onNewSyncBatch)
+        public void Init(Uri nodeAddress, string accessToken)
         {
             _nodeAddress = nodeAddress;
             _accessToken = accessToken;
 
-            _pollingTimer = new Timer(async _ => await PollAsync(onNewSyncBatch));
-            _pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+            _pollingTimer = new Timer(async _ => await PollAsync());
         }
 
+        public void Start()
+        {
+            if (_pollingTimer == null)
+                throw new NullReferenceException("Call Init first.");
+            
+            _pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+        }
+        
         public void Stop()
         {
             _cts.Cancel();
@@ -65,8 +74,8 @@ namespace Matrix.Sdk.Core.Domain.Services
 
         public MatrixRoom? GetMatrixRoom(string roomId) =>
             _matrixRooms.TryGetValue(roomId, out MatrixRoom matrixRoom) ? matrixRoom : null;
-
-        private async Task PollAsync(Action<SyncBatch> onNewSyncBatch)
+        
+        private async Task PollAsync()
         {
             try
             {
@@ -81,8 +90,7 @@ namespace Matrix.Sdk.Core.Domain.Services
                 _timeout = Constants.LaterSyncTimout;
 
                 RefreshRooms(syncBatch.MatrixRooms);
-
-                onNewSyncBatch(syncBatch);
+                SyncBatchReceived(syncBatch);
 
                 _pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
             }
@@ -110,6 +118,12 @@ namespace Matrix.Sdk.Core.Domain.Services
 
                     _matrixRooms.TryUpdate(room.Id, updatedRoom, retrievedRoom);
                 }
+        }
+
+        public void Dispose()
+        {
+            _cts.Dispose();
+            _pollingTimer?.Dispose();
         }
     }
 }
