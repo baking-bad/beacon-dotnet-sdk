@@ -21,9 +21,9 @@
     //     private readonly IEventListenerFactory _eventListenerFactory;
     // }
 
-    public reacord P
+    public record ClientOptions(string AppName);
 
-    public class P2PClient // : IP2PClient
+    public class P2PClient : IP2PClient
     {
         private static readonly Dictionary<HexString, MatrixEventListener<List<BaseRoomEvent>>>
             CachedEncryptedMessageListeners = new();
@@ -43,7 +43,7 @@
             IEventListenerFactory eventListenerFactory,
             ISessionKeyPairRepository sessionKeyPairRepository,
             ICryptographyService cryptographyService,
-            RelayServerService relayServerService)
+            RelayServerService relayServerService, ClientOptions options)
         {
             _matrixClient = matrixClient;
             _channelOpeningMessageBuilder = channelOpeningMessageBuilder;
@@ -52,19 +52,20 @@
             _cryptographyService = cryptographyService;
             _relayServerService = relayServerService;
 
+            AppName = options.AppName;
+
             //Todo: refactor
             SodiumCore.Init();
         }
 
-        public string? Name { get; private set; }
+        public string AppName { get; private set; }
 
         public Uri? BaseAddress { get; private set; }
 
-        public async Task StartAsync(string name, KeyPair keyPair)
+        public async Task StartAsync(KeyPair keyPair)
         {
             try
             {
-                Name = name;
                 _keyPair = keyPair;
 
                 string relayServer = await _relayServerService.GetRelayServer(keyPair.PublicKey);
@@ -81,22 +82,21 @@
 
         public async Task StopAsync()
         {
-            await _matrixClient.StopAsync();
+            await _matrixClient.Stop();
         }
 
-        public void ListenToPublicKeyHex(HexString senderPublicKeyHex, Action<string> messageCallback)
+        public void ListenToHexPublicKey(HexString hexPublicKey, Action<string> messageCallback)
         {
             // If the listener is already registered, we do nothing.
-            if (CachedEncryptedMessageListeners.TryGetValue(senderPublicKeyHex, out _))
+            if (CachedEncryptedMessageListeners.TryGetValue(hexPublicKey, out _))
                 return;
-
-            // In the context of this method, there are sender and receiver, so we need a proper naming.
-            KeyPair receiverKeyPair = _keyPair ?? throw new NullReferenceException("_keyPair");
+            
+            KeyPair keyPair = _keyPair ?? throw new NullReferenceException("_keyPair")
             SessionKeyPair serverSessionKeyPair =
-                _sessionKeyPairRepository.CreateOrReadServer(senderPublicKeyHex, receiverKeyPair);
+                _sessionKeyPairRepository.CreateOrReadServer(hexPublicKey, keyPair);
 
             EncryptedMessageListener listener =
-                _eventListenerFactory.CreateEncryptedMessageListener(_keyPair, senderPublicKeyHex, textMessageEvent =>
+                _eventListenerFactory.CreateEncryptedMessageListener(keyPair, hexPublicKey, textMessageEvent =>
                 {
                     string message =
                         _cryptographyService.DecryptAsString(textMessageEvent.Message,
@@ -106,34 +106,28 @@
                 });
 
             listener.ListenTo(_matrixClient.MatrixEventNotifier);
-            CachedEncryptedMessageListeners[senderPublicKeyHex] = listener;
+            CachedEncryptedMessageListeners[hexPublicKey] = listener;
         }
 
-        public void RemoveListenerForPublicKey(HexString publicKey)
+        public void RemoveListenerForPublicKey(HexString hexPublicKey)
         {
-            if (CachedEncryptedMessageListeners.TryGetValue(publicKey,
-                    out MatrixEventListener<List<BaseRoomEvent>> listener))
+            if (CachedEncryptedMessageListeners.TryGetValue(hexPublicKey, out MatrixEventListener<List<BaseRoomEvent>> listener))
                 listener.Unsubscribe();
         }
-
-
-        public async Task SendPairingResponseAsync(PairingResponse response)
+        
+        public async Task SendChannelOpeningMessageAsync(string id, HexString receiverHexPublicKey, string receiverRelayServer, int version)
         {
             try
             {
                 if (!HexString.TryParse(_keyPair!.PublicKey, out HexString senderHexPublicKey))
                     throw new InvalidOperationException("Can not parse sender public key.");
 
-                string senderAppName = Name ?? throw new NullReferenceException("Provide P2PClient Name");
-
+                var senderRelayServer = (BaseAddress ?? throw new NullReferenceException("Provide P2PClient BaseAddress")).ToString();
+                
                 _channelOpeningMessageBuilder.Reset();
-                _channelOpeningMessageBuilder.BuildRecipientId(response.ReceiverRelayServer,
-                    response.ReceiverPublicKeyHex);
-
-                _channelOpeningMessageBuilder.BuildPairingPayload(response.Id, response.Version, senderHexPublicKey,
-                    response.ReceiverRelayServer, senderAppName);
-
-                _channelOpeningMessageBuilder.BuildEncryptedPayload(response.ReceiverPublicKeyHex);
+                _channelOpeningMessageBuilder.BuildRecipientId(receiverRelayServer, receiverHexPublicKey);
+                _channelOpeningMessageBuilder.BuildPairingPayload(id, version, senderHexPublicKey, senderRelayServer, AppName);
+                _channelOpeningMessageBuilder.BuildEncryptedPayload(receiverHexPublicKey);
 
                 ChannelOpeningMessage channelOpeningMessage = _channelOpeningMessageBuilder.Message;
 

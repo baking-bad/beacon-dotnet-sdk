@@ -11,11 +11,11 @@ namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
 
         void Reset();
 
-        void BuildRecipientId(string relayServer, HexString publicKey);
+        void BuildRecipientId(string relayServer, HexString hexPublicKey);
 
-        void BuildPairingPayload(string pairingRequestId, int payloadVersion, HexString senderPublicKeyHex,
+        void BuildPairingPayload(string pairingRequestId, int payloadVersion, HexString senderHexPublicKey,
             string senderRelayServer, string senderAppName);
 
-        void BuildEncryptedPayload(HexString receiverPublicKeyHex);
+        void BuildEncryptedPayload(HexString receiverHexPublicKey);
     }
 }

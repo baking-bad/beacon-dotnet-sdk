@@ -1,18 +1,18 @@
 namespace Beacon.Sdk.Core
 {
+    using System;
     using System.Threading.Tasks;
     using Matrix.Sdk.Core.Utils;
     using Sodium;
-    using Transport.P2P.Dto.Handshake;
 
     public interface IP2PClient
     {
         Task StartAsync(KeyPair keyPair);
 
-        void ListenToPublicKeyHex(HexString publicKey, EncryptedMessageListener listener);
+        void ListenToHexPublicKey(HexString hexPublicKey, Action<string> messageCallback);
 
-        void RemoveListenerForPublicKey(HexString publicKey);
+        void RemoveListenerForPublicKey(HexString hexPublicKey);
 
-        Task SendPairingResponseAsync(PairingResponse response);
+        Task SendChannelOpeningMessageAsync(string id, HexString receiverHexPublicKey, string receiverRelayServer, int version);
     }
 }
