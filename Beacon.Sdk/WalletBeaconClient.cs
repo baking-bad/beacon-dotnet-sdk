@@ -3,8 +3,10 @@ namespace Beacon.Sdk
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Core;
     using Core.Domain.Interfaces;
     using Core.Domain.Interfaces.Data;
+    using Core.Infrastructure.Serialization;
     using Core.Transport.P2P;
     using Core.Transport.P2P.Dto.Handshake;
     using Matrix.Sdk.Core.Utils;
@@ -15,18 +17,21 @@ namespace Beacon.Sdk
         private readonly IP2PCommunicationClient _p2PCommunicationClient;
         private readonly IBeaconPeerRepository _beaconPeerRepository;
         private readonly ICryptographyService _cryptographyService;
+        private readonly JsonSerializerService _jsonSerializerService;
 
         private KeyPair? _keyPair;
 
         public WalletBeaconClient(
             IP2PCommunicationClient p2PCommunicationClient,
             ICryptographyService cryptographyService,
-            IBeaconPeerRepository beaconPeerRepository,
+            IBeaconPeerRepository beaconPeerRepository, 
+            JsonSerializerService jsonSerializerService,
             WalletBeaconClientOptions options)
         {
             _cryptographyService = cryptographyService;
             _beaconPeerRepository = beaconPeerRepository;
             _p2PCommunicationClient = p2PCommunicationClient;
+            _jsonSerializerService = jsonSerializerService;
 
             AppName = options.AppName;
         }
@@ -48,9 +53,12 @@ namespace Beacon.Sdk
                 throw new ArgumentException("sender is not IP2PCommunicationClient");
 
             List<string> messages = e.Messages;
-            
-            
-            OnBeaconMessageReceived.Invoke(this, new BeaconMessageEventArgs());
+
+            foreach (string message in messages)
+            {
+                _jsonSerializerService.Deserialize(message);
+                OnBeaconMessageReceived.Invoke(this, new BeaconMessageEventArgs());
+            }
         }
 
         public async Task AddPeerAsync(P2PPairingRequest pairingRequest, bool sendPairingResponse = true)

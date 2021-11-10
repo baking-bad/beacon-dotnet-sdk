@@ -12,5 +12,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Serialization
             };
 
         public string Serialize(object model) => JsonConvert.SerializeObject(model, JsonSettings);
+
+        public object? Deserialize(string input) => JsonConvert.DeserializeObject(input);
     }
 }
