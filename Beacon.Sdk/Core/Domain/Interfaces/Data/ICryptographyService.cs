@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core
+namespace Beacon.Sdk.Core.Domain.Interfaces.Data
 {
     using Infrastructure.Cryptography.Libsodium;
     using Matrix.Sdk.Core.Utils;
