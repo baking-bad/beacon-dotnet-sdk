@@ -14,6 +14,8 @@ namespace Beacon.Examples.ConsoleApp
     using Sdk.Core.Transport.P2P.Dto.Handshake;
     using Sodium;
 
+    public record P2PClientOptions(string AppName, string RelayServer);
+    
     public static class BeaconClientScenarios
     {
         public static async Task Setup(IServiceProvider serviceProvider)
@@ -46,7 +48,7 @@ namespace Beacon.Examples.ConsoleApp
                 serviceProvider.GetRequiredService<IChannelOpeningMessageBuilder>();
 
             var clientOptions = new P2PClientOptions("Test App Name", "beacon-node-0.papers.tech:8448");
-            var client = new P2PClient(matrixClient, channelOpeningMessageBuilder);
+            var client = new P2PCommunicationCommunicationClient(matrixClient, channelOpeningMessageBuilder);
 
             await client.StartAsync(keyPair);
             await client.SendChannelOpeningMessageAsync(beaconPeer);

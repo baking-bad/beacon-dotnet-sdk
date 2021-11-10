@@ -15,7 +15,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             _cryptographyService = cryptographyService;
         }
 
-        public BeaconPeer CreateOrUpdate(string name, HexString hexPublicKey, string version)
+        public BeaconPeer Create(string name, HexString hexPublicKey, string version)
         {
             BeaconPeer beaconPeer = BeaconPeer.Factory.Create(_cryptographyService, name, hexPublicKey, version);
             InMemoryBeaconPeers[beaconPeer.UserId] = beaconPeer;
