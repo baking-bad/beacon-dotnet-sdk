@@ -31,8 +31,8 @@ namespace Matrix.Sdk.Core.Domain.Services
             _timeout = Constants.FirstSyncTimout;
         }
 
-        public event Action<SyncBatch> SyncBatchReceived;
-        
+        public event EventHandler<SyncBatchEventArgs> OnSyncBatchReceived;
+
         public MatrixRoom[] InvitedRooms =>
             _matrixRooms.Values.Where(x => x.Status == MatrixRoomStatus.Invited).ToArray();
 
@@ -53,10 +53,10 @@ namespace Matrix.Sdk.Core.Domain.Services
         {
             if (_pollingTimer == null)
                 throw new NullReferenceException("Call Init first.");
-            
+
             _pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
         }
-        
+
         public void Stop()
         {
             _cts.Cancel();
@@ -74,7 +74,13 @@ namespace Matrix.Sdk.Core.Domain.Services
 
         public MatrixRoom? GetMatrixRoom(string roomId) =>
             _matrixRooms.TryGetValue(roomId, out MatrixRoom matrixRoom) ? matrixRoom : null;
-        
+
+        public void Dispose()
+        {
+            _cts.Dispose();
+            _pollingTimer?.Dispose();
+        }
+
         private async Task PollAsync()
         {
             try
@@ -90,7 +96,7 @@ namespace Matrix.Sdk.Core.Domain.Services
                 _timeout = Constants.LaterSyncTimout;
 
                 RefreshRooms(syncBatch.MatrixRooms);
-                SyncBatchReceived(syncBatch);
+                OnSyncBatchReceived.Invoke(this, new SyncBatchEventArgs(syncBatch));
 
                 _pollingTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
             }
@@ -118,12 +124,6 @@ namespace Matrix.Sdk.Core.Domain.Services
 
                     _matrixRooms.TryUpdate(room.Id, updatedRoom, retrievedRoom);
                 }
-        }
-
-        public void Dispose()
-        {
-            _cts.Dispose();
-            _pollingTimer?.Dispose();
         }
     }
 }

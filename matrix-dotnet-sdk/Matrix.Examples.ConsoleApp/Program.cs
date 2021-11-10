@@ -17,7 +17,7 @@
     internal class Program
     {
         private static IHostBuilder CreateHostBuilder() => new HostBuilder()
-            .ConfigureServices((hostContext, services) =>
+            .ConfigureServices((_, services) =>
             {
                 services.AddMatrixClient();
                 services.AddConsoleApp();
@@ -59,7 +59,6 @@
             (IMatrixClient secondClient, TextMessageListener secondListener) =
                 await SetupClientWithTextListener(serviceProvider);
 
-
             MatrixRoom firstClientMatrixRoom = await firstClient.CreateTrustedPrivateRoomAsync(new[]
             {
                 secondClient.UserId
@@ -79,15 +78,8 @@
 
             Console.ReadLine();
 
-            try
-            {
-                await firstClient.StopAsync();
-                await secondClient.StopAsync();
-            }
-            catch (Exception ex)
-            {
-            }
-
+            firstClient.Stop();
+            secondClient.Stop();
 
             firstListener.Unsubscribe();
             secondListener.Unsubscribe();
@@ -103,7 +95,8 @@
             KeyPair keyPair = cryptographyService.GenerateEd25519KeyPair(seed);
             var nodeAddress = new Uri(Constants.FallBackNodeAddress);
 
-            await matrixClient.StartAsync(nodeAddress, keyPair); //Todo: generate once and then store seed?
+            await matrixClient.LoginAsync(nodeAddress, keyPair); //Todo: generate once and then store seed?
+            matrixClient.Start();
 
             var textMessageListener = new TextMessageListener(matrixClient.UserId, (listenerId, textMessageEvent) =>
             {

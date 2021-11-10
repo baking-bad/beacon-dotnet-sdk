@@ -3,9 +3,7 @@ namespace Matrix.Sdk
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Core;
     using Core.Domain.MatrixRoom;
-    using Core.Domain.Room;
     using Sodium;
 
     /// <summary>
@@ -13,11 +11,13 @@ namespace Matrix.Sdk
     /// </summary>
     public interface IMatrixClient
     {
+        event EventHandler<MatrixRoomEventsEventArgs> OnMatrixRoomEventsReceived; 
+        
         string UserId { get; }
 
         Uri? BaseAddress { get; }
 
-        MatrixEventNotifier<List<BaseRoomEvent>> MatrixEventNotifier { get; }
+        bool LoggedIn { get; }
 
         MatrixRoom[] InvitedRooms { get; }
 
@@ -25,9 +25,11 @@ namespace Matrix.Sdk
 
         MatrixRoom[] LeftRooms { get; }
 
-        Task StartAsync(Uri? baseAddress, KeyPair keyPair);
+        Task LoginAsync(Uri? baseAddress, KeyPair keyPair);
 
-        Task StopAsync();
+        void Start();
+
+        void Stop();
 
         Task<MatrixRoom> CreateTrustedPrivateRoomAsync(string[] invitedUserIds);
 

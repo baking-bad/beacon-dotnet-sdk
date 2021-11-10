@@ -4,13 +4,11 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Core;
+    using Core.Domain;
     using Core.Domain.MatrixRoom;
     using Core.Domain.Network;
-    using Core.Domain.Room;
     using Core.Domain.Services;
     using Core.Infrastructure.Dto.Login;
-    using Microsoft.Extensions.Logging;
     using Sodium;
     using LoginRequest = Core.Domain.Network.LoginRequest;
 
@@ -21,7 +19,6 @@
     {
         private readonly ICryptographyService _cryptographyService;
         private readonly CancellationTokenSource _cts = new();
-        private readonly ILogger<MatrixClient> _logger;
 
         private readonly INetworkService _networkService;
         private readonly IPollingService _pollingService;
@@ -31,22 +28,20 @@
 
         public MatrixClient(INetworkService networkService,
             IPollingService pollingService,
-            ICryptographyService cryptographyService,
-            MatrixEventNotifier<List<BaseRoomEvent>> matrixEventNotifier,
-            ILogger<MatrixClient> logger)
+            ICryptographyService cryptographyService)
         {
             _networkService = networkService;
             _pollingService = pollingService;
             _cryptographyService = cryptographyService;
-
-            MatrixEventNotifier = matrixEventNotifier;
-            _logger = logger;
         }
 
+        public event EventHandler<MatrixRoomEventsEventArgs> OnMatrixRoomEventsReceived; 
+        
         public string UserId { get; private set; }
+
         public Uri? BaseAddress { get; private set; }
 
-        public MatrixEventNotifier<List<BaseRoomEvent>> MatrixEventNotifier { get; }
+        public bool LoggedIn { get; private set; }
 
         public MatrixRoom[] InvitedRooms => _pollingService.InvitedRooms;
 
@@ -54,9 +49,8 @@
 
         public MatrixRoom[] LeftRooms => _pollingService.LeftRooms;
 
-        public async Task StartAsync(Uri? baseAddress, KeyPair keyPair)
+        public async Task LoginAsync(Uri? baseAddress, KeyPair keyPair)
         {
-            _logger.LogInformation("Matrix client: Starting");
             BaseAddress = baseAddress ?? new Uri(Constants.FallBackNodeAddress);
 
             byte[] loginDigest = _cryptographyService.GenerateLoginDigest();
@@ -73,30 +67,29 @@
             UserId = response.UserId;
             _accessToken = response.AccessToken;
 
-            _pollingService.Start(BaseAddress, _accessToken, batch =>
-                {
-                    MatrixEventNotifier.NotifyAll(batch.MatrixRoomEvents);
-                });
+            _pollingService.Init(BaseAddress, _accessToken);
 
-            _logger.LogInformation("Matrix client: Logged in and began sync");
+            LoggedIn = true;
         }
 
-        public async Task StopAsync()
+        public void Start()
         {
-            _logger.LogInformation("Matrix client: Stopping");
+            if (!LoggedIn)
+                throw new Exception("Call LoginAsync first");
 
-            await Task.CompletedTask;
+            _pollingService.OnSyncBatchReceived += OnSyncBatchReceived;
+            _pollingService.Start();
+        }
 
+        public void Stop()
+        {
             _pollingService.Stop();
-
-            _logger.LogInformation("Matrix client: Stopped");
+            _pollingService.OnSyncBatchReceived -= OnSyncBatchReceived;
         }
 
         public async Task<MatrixRoom> CreateTrustedPrivateRoomAsync(string[] invitedUserIds)
         {
-            var request =
-                new CreateTrustedPrivateRoomRequest(BaseAddress!, _accessToken!, invitedUserIds);
-
+            var request = new CreateTrustedPrivateRoomRequest(BaseAddress!, _accessToken!, invitedUserIds);
             MatrixRoom matrixRoom = await _networkService.CreateTrustedPrivateRoomAsync(request, _cts.Token);
 
             _pollingService.UpdateMatrixRoom(matrixRoom.Id, matrixRoom);
@@ -136,6 +129,16 @@
         {
             var request = new LeaveRoomRequest(BaseAddress!, _accessToken!, roomId);
             await _networkService.LeaveRoomAsync(request, _cts.Token);
+        }
+
+        private void OnSyncBatchReceived(object? sender, SyncBatchEventArgs syncBatchEventArgs)
+        {
+            if (sender is not IPollingService)
+                throw new ArgumentException("sender is not polling service");
+
+            SyncBatch batch = syncBatchEventArgs.SyncBatch;
+            
+            OnMatrixRoomEventsReceived.Invoke(this, new MatrixRoomEventsEventArgs(batch.MatrixRoomEvents));
         }
 
         private string CreateTransactionId()

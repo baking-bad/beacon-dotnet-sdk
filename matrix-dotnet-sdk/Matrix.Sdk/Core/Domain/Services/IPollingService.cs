@@ -5,14 +5,14 @@ namespace Matrix.Sdk.Core.Domain.Services
 
     public interface IPollingService : IDisposable
     {
+        public event EventHandler<SyncBatchEventArgs> OnSyncBatchReceived;
+        
         MatrixRoom[] InvitedRooms { get; }
 
         MatrixRoom[] JoinedRooms { get; }
 
         MatrixRoom[] LeftRooms { get; }
 
-        public event Action<SyncBatch> SyncBatchReceived;
-        
         void Init(Uri nodeAddress, string accessToken);
 
         void Start();
