@@ -1,6 +1,8 @@
 namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
 {
     using System;
+    using Domain.Interfaces;
+    using Domain.Interfaces.Data;
     using Dto.Handshake;
     using Infrastructure.Serialization;
     using Matrix.Sdk.Core.Utils;
@@ -11,7 +13,7 @@ namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
         private readonly ICryptographyService _cryptographyService;
         private readonly JsonSerializerService _jsonSerializerService;
         private ChannelOpeningMessage _message;
-        
+
         public ChannelOpeningMessageBuilder(ICryptographyService cryptographyService,
             JsonSerializerService jsonSerializerService)
         {

@@ -49,7 +49,7 @@ namespace Beacon.Examples.ConsoleApp
             var client = new P2PClient(matrixClient, channelOpeningMessageBuilder);
 
             await client.StartAsync(keyPair);
-            await client.SendPairingResponseAsync(beaconPeer);
+            await client.SendChannelOpeningMessageAsync(beaconPeer);
 
             Console.ReadLine();
         }

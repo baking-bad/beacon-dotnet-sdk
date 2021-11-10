@@ -1,21 +1,30 @@
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
     using System.Collections.Concurrent;
-    using Transport.P2P;
+    using Domain;
+    using Domain.Interfaces.Data;
+    using Matrix.Sdk.Core.Utils;
 
-    public class BeaconPeerRepositoryInMemory : IBeaconPeerRepository
+    public class InMemoryBeaconPeerRepository : IBeaconPeerRepository
     {
+        private readonly ICryptographyService _cryptographyService;
         private static readonly ConcurrentDictionary<string, BeaconPeer> InMemoryBeaconPeers = new();
-       
-        public BeaconPeer CreateOrUpdate(string key, BeaconPeer beaconPeer)
-        {
-            InMemoryBeaconPeers[key] = beaconPeer;
-
-            return InMemoryBeaconPeers[key];
-        }
         
-        public BeaconPeer? TryRead(string key) => InMemoryBeaconPeers.TryGetValue(key, out BeaconPeer? beaconPeer) 
-            ? beaconPeer 
+        public InMemoryBeaconPeerRepository(ICryptographyService cryptographyService)
+        {
+            _cryptographyService = cryptographyService;
+        }
+
+        public BeaconPeer CreateOrUpdate(string name, HexString hexPublicKey, string version)
+        {
+            BeaconPeer beaconPeer = BeaconPeer.Factory.Create(_cryptographyService, name, hexPublicKey, version);
+            InMemoryBeaconPeers[beaconPeer.UserId] = beaconPeer;
+
+            return InMemoryBeaconPeers[beaconPeer.UserId];
+        }
+
+        public BeaconPeer? TryReadByUserId(string userId) => InMemoryBeaconPeers.TryGetValue(userId, out BeaconPeer? beaconPeer)
+            ? beaconPeer
             : null;
     }
 }
