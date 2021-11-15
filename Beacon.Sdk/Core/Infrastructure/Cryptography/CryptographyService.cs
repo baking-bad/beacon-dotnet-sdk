@@ -11,7 +11,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     using SodiumCore = Sodium.SodiumCore;
     using SodiumLibrary = Libsodium.SodiumLibrary;
 
-    public class CryptographyService : ICryptographyService
+    public class CryptographyService //: ICryptographyService
+        : ICryptographyService
     {
         private static readonly int MacBytes = SodiumLibrary.crypto_box_macbytes();
         private static readonly int NonceBytes = SodiumLibrary.crypto_box_noncebytes();
@@ -101,5 +102,44 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             HexString.TryParse(input,
                 out HexString hexString) && // content can be non-hex if it's a connection open request
             hexString.ToString().Length >= NonceBytes + MacBytes;
+        
+        
+        // public string ToHexString(byte[] input)
+        // {
+        //     var hexString = BitConverter.ToString(input);
+        //
+        //     string result = hexString.Replace("-", "");
+        //
+        //     return result.ToLower();
+        // }
+
+        public byte[] GenerateLoginDigest()
+        {
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds() * 1000;
+            var message = $"login:{now / 1000 / (5 * 60)}";
+
+            return GenericHash.Hash(message, (byte[]?) null, 32);
+        }
+
+        // public KeyPair GenerateEd25519KeyPair(string seed)
+        // {
+        //     byte[] hash = GenericHash.Hash(seed, (byte[]?) null, 32);
+        //
+        //     return PublicKeyAuth.GenerateKeyPair(hash);
+        // }
+
+        public string GenerateHexSignature(byte[] loginDigest, byte[] secretKey)
+        {
+            byte[] signature = PublicKeyAuth.SignDetached(loginDigest, secretKey);
+
+            return ToHexString(signature);
+        }
+
+        public string GenerateHexId(byte[] publicKey)
+        {
+            byte[] hash = GenericHash.Hash(publicKey, null, publicKey.Length);
+
+            return ToHexString(hash);
+        }
     }
 }
