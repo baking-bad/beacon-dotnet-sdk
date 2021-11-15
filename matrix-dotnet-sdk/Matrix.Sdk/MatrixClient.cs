@@ -49,28 +49,41 @@
 
         public MatrixRoom[] LeftRooms => _pollingService.LeftRooms;
 
-        public async Task LoginAsync(Uri? baseAddress, KeyPair keyPair)
+        public async Task LoginAsync(LoginRequest request)
         {
-            BaseAddress = baseAddress ?? new Uri(Constants.FallBackNodeAddress);
-
-            byte[] loginDigest = _cryptographyService.GenerateLoginDigest();
-            string hexSignature = _cryptographyService.GenerateHexSignature(loginDigest, keyPair.PrivateKey);
-            string publicKeyHex = _cryptographyService.ToHexString(keyPair.PublicKey);
-            string hexId = _cryptographyService.GenerateHexId(keyPair.PublicKey);
-
-            var password = $"ed:{hexSignature}:{publicKeyHex}";
-            string deviceId = publicKeyHex;
-
-            var request = new LoginRequest(BaseAddress, hexId, password, deviceId);
             LoginResponse response = await _networkService.LoginAsync(request, _cts.Token);
-
+            
+            BaseAddress = request.BaseAddress;
             UserId = response.UserId;
             _accessToken = response.AccessToken;
-
+           
             _pollingService.Init(BaseAddress, _accessToken);
 
             LoggedIn = true;
         }
+        
+        // public async Task LoginAsync(Uri? baseAddress, KeyPair keyPair)
+        // {
+        //     BaseAddress = baseAddress ?? new Uri(Constants.FallBackNodeAddress);
+        //
+        //     byte[] loginDigest = _cryptographyService.GenerateLoginDigest();
+        //     string hexSignature = _cryptographyService.GenerateHexSignature(loginDigest, keyPair.PrivateKey);
+        //     string publicKeyHex = _cryptographyService.ToHexString(keyPair.PublicKey);
+        //     string hexId = _cryptographyService.GenerateHexId(keyPair.PublicKey);
+        //
+        //     var password = $"ed:{hexSignature}:{publicKeyHex}";
+        //     string deviceId = publicKeyHex;
+        //
+        //     var request = new LoginRequest(BaseAddress, hexId, password, deviceId);
+        //     LoginResponse response = await _networkService.LoginAsync(request, _cts.Token);
+        //
+        //     UserId = response.UserId;
+        //     _accessToken = response.AccessToken;
+        //
+        //     _pollingService.Init(BaseAddress, _accessToken);
+        //
+        //     LoggedIn = true;
+        // }
 
         public void Start()
         {

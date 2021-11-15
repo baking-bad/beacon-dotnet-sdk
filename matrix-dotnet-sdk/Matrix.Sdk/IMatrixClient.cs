@@ -4,6 +4,7 @@ namespace Matrix.Sdk
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Core.Domain.MatrixRoom;
+    using Core.Domain.Network;
     using Sodium;
 
     /// <summary>
@@ -25,7 +26,7 @@ namespace Matrix.Sdk
 
         MatrixRoom[] LeftRooms { get; }
 
-        Task LoginAsync(Uri? baseAddress, KeyPair keyPair);
+        Task LoginAsync(LoginRequest request);
 
         void Start();
 
