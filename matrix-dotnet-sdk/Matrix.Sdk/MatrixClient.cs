@@ -9,7 +9,6 @@
     using Core.Domain.Network;
     using Core.Domain.Services;
     using Core.Infrastructure.Dto.Login;
-    using Sodium;
     using LoginRequest = Core.Domain.Network.LoginRequest;
 
     /// <summary>
@@ -17,7 +16,6 @@
     /// </summary>
     public class MatrixClient : IMatrixClient
     {
-        private readonly ICryptographyService _cryptographyService;
         private readonly CancellationTokenSource _cts = new();
 
         private readonly INetworkService _networkService;
@@ -27,16 +25,14 @@
         private ulong _transactionNumber;
 
         public MatrixClient(INetworkService networkService,
-            IPollingService pollingService,
-            ICryptographyService cryptographyService)
+            IPollingService pollingService)
         {
             _networkService = networkService;
             _pollingService = pollingService;
-            _cryptographyService = cryptographyService;
         }
 
-        public event EventHandler<MatrixRoomEventsEventArgs> OnMatrixRoomEventsReceived; 
-        
+        public event EventHandler<MatrixRoomEventsEventArgs> OnMatrixRoomEventsReceived;
+
         public string UserId { get; private set; }
 
         public Uri? BaseAddress { get; private set; }
@@ -52,38 +48,15 @@
         public async Task LoginAsync(LoginRequest request)
         {
             LoginResponse response = await _networkService.LoginAsync(request, _cts.Token);
-            
+
             BaseAddress = request.BaseAddress;
             UserId = response.UserId;
             _accessToken = response.AccessToken;
-           
+
             _pollingService.Init(BaseAddress, _accessToken);
 
             LoggedIn = true;
         }
-        
-        // public async Task LoginAsync(Uri? baseAddress, KeyPair keyPair)
-        // {
-        //     BaseAddress = baseAddress ?? new Uri(Constants.FallBackNodeAddress);
-        //
-        //     byte[] loginDigest = _cryptographyService.GenerateLoginDigest();
-        //     string hexSignature = _cryptographyService.GenerateHexSignature(loginDigest, keyPair.PrivateKey);
-        //     string publicKeyHex = _cryptographyService.ToHexString(keyPair.PublicKey);
-        //     string hexId = _cryptographyService.GenerateHexId(keyPair.PublicKey);
-        //
-        //     var password = $"ed:{hexSignature}:{publicKeyHex}";
-        //     string deviceId = publicKeyHex;
-        //
-        //     var request = new LoginRequest(BaseAddress, hexId, password, deviceId);
-        //     LoginResponse response = await _networkService.LoginAsync(request, _cts.Token);
-        //
-        //     UserId = response.UserId;
-        //     _accessToken = response.AccessToken;
-        //
-        //     _pollingService.Init(BaseAddress, _accessToken);
-        //
-        //     LoggedIn = true;
-        // }
 
         public void Start()
         {
@@ -150,7 +123,7 @@
                 throw new ArgumentException("sender is not polling service");
 
             SyncBatch batch = syncBatchEventArgs.SyncBatch;
-            
+
             OnMatrixRoomEventsReceived.Invoke(this, new MatrixRoomEventsEventArgs(batch.MatrixRoomEvents));
         }
 

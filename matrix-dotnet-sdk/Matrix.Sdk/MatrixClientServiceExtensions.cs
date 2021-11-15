@@ -15,8 +15,6 @@ namespace Matrix.Sdk
     {
         public static IServiceCollection AddMatrixClient(this IServiceCollection services)
         {
-            services.AddSingleton<ICryptographyService, CryptographyService>();
-
             services.AddSingleton<ClientService>();
 
             services.AddHttpClient();

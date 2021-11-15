@@ -11,6 +11,7 @@
 
     <ItemGroup>
         <PackageReference Include="Base58Check" Version="0.2.0" />
+        <PackageReference Include="Sodium.Core" Version="1.2.3" />
     </ItemGroup>
 
 </Project>

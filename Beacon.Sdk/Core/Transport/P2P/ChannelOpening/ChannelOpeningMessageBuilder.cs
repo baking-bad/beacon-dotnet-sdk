@@ -1,7 +1,6 @@
 namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
 {
     using System;
-    using Domain.Interfaces;
     using Domain.Interfaces.Data;
     using Dto.Handshake;
     using Infrastructure.Serialization;

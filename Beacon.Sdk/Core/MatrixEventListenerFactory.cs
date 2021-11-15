@@ -1,10 +1,5 @@
 namespace Beacon.Sdk.Core
 {
-    using System;
-    using Domain.Interfaces;
-    using Matrix.Sdk.Core.Domain.Room;
-    using Matrix.Sdk.Core.Utils;
-
     // public interface IMatrixEventListenerFactory
     // {
     //     EncryptedMessageListener CreateEncryptedMessageListener(HexString publicKeyToListen,

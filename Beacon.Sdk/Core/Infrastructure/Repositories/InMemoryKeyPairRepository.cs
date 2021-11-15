@@ -3,7 +3,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     using System;
     using System.Collections.Generic;
     using Cryptography.Libsodium;
-    using Domain.Interfaces;
     using Domain.Interfaces.Data;
     using Matrix.Sdk.Core.Utils;
     using Sodium;

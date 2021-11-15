@@ -3,7 +3,6 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
     using System;
     using System.Threading.Tasks;
     using Matrix.Sdk.Core.Utils;
-    using Sodium;
     using Transport.P2P;
 
     public interface IP2PCommunicationService

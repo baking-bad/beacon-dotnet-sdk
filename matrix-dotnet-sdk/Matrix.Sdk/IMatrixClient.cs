@@ -5,15 +5,12 @@ namespace Matrix.Sdk
     using System.Threading.Tasks;
     using Core.Domain.MatrixRoom;
     using Core.Domain.Network;
-    using Sodium;
 
     /// <summary>
     ///     A Client for interaction with Matrix.
     /// </summary>
     public interface IMatrixClient
     {
-        event EventHandler<MatrixRoomEventsEventArgs> OnMatrixRoomEventsReceived; 
-        
         string UserId { get; }
 
         Uri? BaseAddress { get; }
@@ -25,6 +22,7 @@ namespace Matrix.Sdk
         MatrixRoom[] JoinedRooms { get; }
 
         MatrixRoom[] LeftRooms { get; }
+        event EventHandler<MatrixRoomEventsEventArgs> OnMatrixRoomEventsReceived;
 
         Task LoginAsync(LoginRequest request);
 

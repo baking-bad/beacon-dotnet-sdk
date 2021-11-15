@@ -15,7 +15,7 @@ namespace Matrix.Sdk.Core.Domain.Services
     {
         private readonly CancellationTokenSource _cts = new();
         private readonly EventService _eventService;
-        private readonly ILogger<PollingService> _logger;
+        private readonly ILogger<PollingService>? _logger;
         private readonly ConcurrentDictionary<string, MatrixRoom> _matrixRooms = new();
 
         private string? _accessToken;
@@ -24,7 +24,7 @@ namespace Matrix.Sdk.Core.Domain.Services
         private Timer? _pollingTimer;
         private ulong _timeout;
 
-        public PollingService(EventService eventService, ILogger<PollingService> logger)
+        public PollingService(EventService eventService, ILogger<PollingService>? logger)
         {
             _eventService = eventService;
             _logger = logger;
@@ -66,10 +66,10 @@ namespace Matrix.Sdk.Core.Domain.Services
         public void UpdateMatrixRoom(string roomId, MatrixRoom matrixRoom)
         {
             if (!_matrixRooms.TryGetValue(roomId, out MatrixRoom oldValue))
-                _logger.LogInformation($"RoomId: {roomId}: could not get value");
+                _logger?.LogInformation($"RoomId: {roomId}: could not get value");
 
             if (!_matrixRooms.TryUpdate(roomId, matrixRoom, oldValue))
-                _logger.LogInformation($"RoomId: {roomId}: could not update value");
+                _logger?.LogInformation($"RoomId: {roomId}: could not update value");
         }
 
         public MatrixRoom? GetMatrixRoom(string roomId) =>
@@ -102,11 +102,11 @@ namespace Matrix.Sdk.Core.Domain.Services
             }
             catch (TaskCanceledException)
             {
-                _logger.LogInformation("Polling: HTTP Get request canceled");
+                _logger?.LogInformation("Polling: HTTP Get request canceled");
             }
             catch (Exception)
             {
-                _logger.LogError("Exception");
+                _logger?.LogError("Exception");
             }
         }
 
