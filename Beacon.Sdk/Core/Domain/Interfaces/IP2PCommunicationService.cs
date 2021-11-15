@@ -6,14 +6,14 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
     using Sodium;
     using Transport.P2P;
 
-    public interface IP2PCommunicationClient
+    public interface IP2PCommunicationService
     {
         event EventHandler<P2PMessageEventArgs> OnP2PMessagesReceived;
         
-        Task LoginAsync(KeyPair keyPair);
-
+        Task LoginAsync();
+        
         void Start();
-
+        
         void Stop();
 
         Task SendChannelOpeningMessageAsync(string id, HexString receiverHexPublicKey,

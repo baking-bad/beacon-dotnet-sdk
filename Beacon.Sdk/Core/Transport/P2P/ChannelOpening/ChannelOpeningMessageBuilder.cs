@@ -10,15 +10,19 @@ namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
 
     public class ChannelOpeningMessageBuilder : IChannelOpeningMessageBuilder
     {
+        private readonly IKeyPairRepository _keyPairRepository;
         private readonly ICryptographyService _cryptographyService;
         private readonly JsonSerializerService _jsonSerializerService;
         private ChannelOpeningMessage _message;
 
-        public ChannelOpeningMessageBuilder(ICryptographyService cryptographyService,
+        public ChannelOpeningMessageBuilder(
+            IKeyPairRepository keyPairRepository, 
+            ICryptographyService cryptographyService,
             JsonSerializerService jsonSerializerService)
         {
             _cryptographyService = cryptographyService;
             _jsonSerializerService = jsonSerializerService;
+            _keyPairRepository = keyPairRepository;
         }
 
         public ChannelOpeningMessage Message => _message;
@@ -36,9 +40,14 @@ namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
             _message.RecipientId = $"@{hexHash}:{relayServer}";
         }
 
-        public void BuildPairingPayload(string pairingRequestId, int payloadVersion, HexString senderHexPublicKey,
+        public void BuildPairingPayload(string pairingRequestId, int payloadVersion,
             string senderRelayServer, string senderAppName)
         {
+            KeyPair keyPair = _keyPairRepository.KeyPair;
+            
+            if (!HexString.TryParse(keyPair!.PublicKey, out HexString senderHexPublicKey))
+                throw new InvalidOperationException("Can not parse sender public key.");
+            
             _message.Payload = payloadVersion switch
             {
                 1 => senderHexPublicKey.ToString(),
@@ -55,9 +64,7 @@ namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
             _message.Payload = _cryptographyService.EncryptMessageAsString(_message.Payload, curve25519PublicKey);
         }
 
-        private string BuildPairingPayloadV2(string pairingRequestId, HexString senderHexPublicKey,
-            string senderRelayServer,
-            string senderAppName)
+        private string BuildPairingPayloadV2(string pairingRequestId, HexString senderHexPublicKey, string senderRelayServer, string senderAppName)
         {
             var pairingResponse = new P2PPairingResponse(
                 pairingRequestId,
