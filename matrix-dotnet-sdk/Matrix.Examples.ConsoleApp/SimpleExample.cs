@@ -5,8 +5,7 @@ namespace Matrix.Examples.ConsoleApp
     using System.Threading.Tasks;
     using Sdk;
     using Sdk.Core.Domain.MatrixRoom;
-    using Sdk.Core.Domain.Network;
-    using Sdk.Core.Domain.Room;
+    using Sdk.Core.Domain.RoomEvent;
     using Serilog;
     using Serilog.Sinks.SystemConsole.Themes;
     using Sodium;
@@ -15,6 +14,8 @@ namespace Matrix.Examples.ConsoleApp
     {
         private static readonly CryptographyService CryptographyService = new();
 
+        public record LoginRequest(Uri BaseAddress, string Username, string Password, string DeviceId);
+        
         private static LoginRequest CreateLoginRequest()
         {
             var seed = Guid.NewGuid().ToString();
@@ -30,7 +31,10 @@ namespace Matrix.Examples.ConsoleApp
 
             var baseAddress = new Uri("https://beacon-node-0.papers.tech:8448/");
 
-            return new LoginRequest(baseAddress, hexId, password, deviceId);
+            
+            LoginRequest loginRequest = new LoginRequest(baseAddress, hexId, password, deviceId);
+
+            return loginRequest;
         }
 
         public async Task Run()
@@ -41,13 +45,13 @@ namespace Matrix.Examples.ConsoleApp
                 .WriteTo.Console(theme: theme)
                 .CreateLogger();
 
-            var firstFactory = new MatrixClientFactory();
-            var secondFactory = new MatrixClientFactory();
+            var factory = new MatrixClientFactory();
+            var anotherFactory = new MatrixClientFactory();
 
-            IMatrixClient firstClient = firstFactory.Create();
-            IMatrixClient secondClient = secondFactory.Create();
+            IMatrixClient client = factory.Create();
+            IMatrixClient anotherClient = anotherFactory.Create();
 
-            firstClient.OnMatrixRoomEventsReceived += (sender, eventArgs) =>
+            client.OnMatrixRoomEventsReceived += (sender, eventArgs) =>
             {
                 foreach (BaseRoomEvent roomEvent in eventArgs.MatrixRoomEvents)
                 {
@@ -55,12 +59,12 @@ namespace Matrix.Examples.ConsoleApp
                         continue;
 
                     (string roomId, string senderUserId, string message) = textMessageEvent;
-                    if (firstClient.UserId != senderUserId)
+                    if (client.UserId != senderUserId)
                         Console.WriteLine($"RoomId: {roomId} received message from {senderUserId}: {message}.");
                 }
             };
 
-            secondClient.OnMatrixRoomEventsReceived += (sender, eventArgs) =>
+            anotherClient.OnMatrixRoomEventsReceived += (sender, eventArgs) =>
             {
                 foreach (BaseRoomEvent roomEvent in eventArgs.MatrixRoomEvents)
                 {
@@ -68,36 +72,44 @@ namespace Matrix.Examples.ConsoleApp
                         continue;
 
                     (string roomId, string senderUserId, string message) = textMessageEvent;
-                    if (firstClient.UserId != senderUserId)
+                    if (anotherClient.UserId != senderUserId)
                         Console.WriteLine($"RoomId: {roomId} received message from {senderUserId}: {message}.");
                 }
             };
 
-            await firstClient.LoginAsync(CreateLoginRequest());
-            await secondClient.LoginAsync(CreateLoginRequest());
+            (Uri matrixNodeAddress, string username, string password, string deviceId) = CreateLoginRequest();
+            await client.LoginAsync(matrixNodeAddress, username, password, deviceId);
+            
+            LoginRequest request2 = CreateLoginRequest();
+            await anotherClient.LoginAsync(request2.BaseAddress, request2.Username, request2.Password, request2.DeviceId);
 
-            MatrixRoom firstClientMatrixRoom = await firstClient.CreateTrustedPrivateRoomAsync(new[]
+            client.Start();
+            anotherClient.Start();
+            
+            MatrixRoom matrixRoom = await client.CreateTrustedPrivateRoomAsync(new[]
             {
-                secondClient.UserId
+                anotherClient.UserId
             });
-
-            MatrixRoom matrixRoom = await secondClient.JoinTrustedPrivateRoomAsync(firstClientMatrixRoom.Id);
-
+            
+            await anotherClient.JoinTrustedPrivateRoomAsync(matrixRoom.Id);
+            
             var spin = new SpinWait();
-            while (secondClient.JoinedRooms.Length == 0)
+            while (anotherClient.JoinedRooms.Length == 0)
                 spin.SpinOnce();
+            
+            await client.SendMessageAsync(matrixRoom.Id, "Hello");
+            await anotherClient.SendMessageAsync(anotherClient.JoinedRooms[0].Id, ", ");
+            
+            await client.SendMessageAsync(matrixRoom.Id, "World");
+            await anotherClient.SendMessageAsync(anotherClient.JoinedRooms[0].Id, "!");
 
-            await firstClient.SendMessageAsync(firstClientMatrixRoom.Id, "Hello");
-            await secondClient.SendMessageAsync(secondClient.JoinedRooms[0].Id, ", ");
-
-            await firstClient.SendMessageAsync(firstClientMatrixRoom.Id, "World");
-            await secondClient.SendMessageAsync(secondClient.JoinedRooms[0].Id, "!");
-
-
+            await client.GetJoinedRoomsIdsAsync();
+            string roomId = String.Empty;
+            await client.LeaveRoomAsync(roomId);
             Console.ReadLine();
-
-            firstClient.Stop();
-            secondClient.Stop();
+            
+            client.Stop();
+            anotherClient.Stop();
         }
     }
 }
