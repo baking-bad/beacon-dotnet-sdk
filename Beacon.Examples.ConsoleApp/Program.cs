@@ -14,8 +14,8 @@
         private static IHostBuilder CreateHostBuilder() => new HostBuilder()
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddBeaconClient();
-                services.AddConsoleApp();
+                // services.AddBeaconClient();
+                // services.AddConsoleApp();
             }).UseConsoleLifetime();
 
         private static async Task<int> Main(string[] args)

@@ -4,7 +4,7 @@ namespace Matrix.Sdk.Core.Domain
     using System.Linq;
     using Infrastructure.Dto.Sync;
     using MatrixRoom;
-    using Room;
+    using RoomEvent;
 
     public record SyncBatch
     {

@@ -2,7 +2,7 @@ namespace Matrix.Sdk
 {
     using System.Collections.Generic;
     using Core;
-    using Core.Domain.Room;
+    using Core.Domain.RoomEvent;
     using Core.Domain.Services;
     using Core.Infrastructure.Services;
     using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +25,6 @@ namespace Matrix.Sdk
 
             services.AddTransient<MatrixEventNotifier<List<BaseRoomEvent>>>();
             services.AddTransient<IPollingService, PollingService>();
-            services.AddTransient<INetworkService, NetworkService>();
             services.AddTransient<IMatrixClient, MatrixClient>();
 
             return services;

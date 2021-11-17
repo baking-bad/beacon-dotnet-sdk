@@ -14,7 +14,7 @@
         {
         }
 
-        public async Task<SyncResponse> SyncAsync(Uri baseAddress, string accessToken,
+        public async Task<SyncResponse> SyncAsync(string accessToken,
             CancellationToken cancellationToken,
             ulong? timeout = null, string? nextBatch = null)
         {
@@ -26,20 +26,19 @@
             if (nextBatch != null)
                 uri = uri.AddParameter("since", nextBatch);
 
-            HttpClient httpClient = CreateHttpClient(baseAddress, accessToken);
+            HttpClient httpClient = CreateHttpClient(accessToken);
 
             return await httpClient.GetAsJsonAsync<SyncResponse>(uri.ToString(), cancellationToken);
         }
 
-        public async Task<EventResponse> SendMessageAsync(Uri baseAddress, string accessToken,
-            CancellationToken cancellationToken,
+        public async Task<EventResponse> SendMessageAsync(string accessToken,
             string roomId, string transactionId,
-            string message)
+            string message, CancellationToken cancellationToken)
         {
             const string eventType = "m.room.message";
             var model = new MessageEvent(MessageType.Text, message);
 
-            HttpClient httpClient = CreateHttpClient(baseAddress, accessToken);
+            HttpClient httpClient = CreateHttpClient(accessToken);
 
             var path = $"{ResourcePath}/rooms/{roomId}/send/{eventType}/{transactionId}";
 

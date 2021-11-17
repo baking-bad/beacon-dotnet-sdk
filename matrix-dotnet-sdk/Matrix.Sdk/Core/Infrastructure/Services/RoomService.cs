@@ -15,7 +15,7 @@
         {
         }
 
-        public async Task<CreateRoomResponse> CreateRoomAsync(Uri baseAddress, string accessToken, string[]? members,
+        public async Task<CreateRoomResponse> CreateRoomAsync(string accessToken, string[]? members,
             CancellationToken cancellationToken)
         {
             var model = new CreateRoomRequest
@@ -25,17 +25,17 @@
                 IsDirect: true
             );
 
-            HttpClient httpClient = CreateHttpClient(baseAddress, accessToken);
+            HttpClient httpClient = CreateHttpClient(accessToken);
 
             var path = $"{ResourcePath}/createRoom";
 
             return await httpClient.PostAsJsonAsync<CreateRoomResponse>(path, model, cancellationToken);
         }
 
-        public async Task<JoinRoomResponse> JoinRoomAsync(Uri baseAddress, string accessToken, string roomId,
+        public async Task<JoinRoomResponse> JoinRoomAsync(string accessToken, string roomId,
             CancellationToken cancellationToken)
         {
-            HttpClient httpClient = CreateHttpClient(baseAddress, accessToken);
+            HttpClient httpClient = CreateHttpClient(accessToken);
 
             var path = $"{ResourcePath}/rooms/{roomId}/join";
 
@@ -43,20 +43,20 @@
         }
 
 
-        public async Task<JoinedRoomsResponse> GetJoinedRoomsAsync(Uri baseAddress, string accessToken,
+        public async Task<JoinedRoomsResponse> GetJoinedRoomsAsync(string accessToken,
             CancellationToken cancellationToken)
         {
-            HttpClient httpClient = CreateHttpClient(baseAddress, accessToken);
+            HttpClient httpClient = CreateHttpClient(accessToken);
 
             var path = $"{ResourcePath}/joined_rooms";
 
             return await httpClient.GetAsJsonAsync<JoinedRoomsResponse>(path, cancellationToken);
         }
 
-        public async Task LeaveRoomAsync(Uri baseAddress, string accessToken, string roomId,
+        public async Task LeaveRoomAsync(string accessToken, string roomId,
             CancellationToken cancellationToken)
         {
-            HttpClient httpClient = CreateHttpClient(baseAddress, accessToken);
+            HttpClient httpClient = CreateHttpClient(accessToken);
 
             var path = $"{ResourcePath}/rooms/{roomId}/leave";
 

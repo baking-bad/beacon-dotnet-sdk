@@ -2,7 +2,7 @@ namespace Matrix.Sdk
 {
     using System;
     using System.Collections.Generic;
-    using Core.Domain.Room;
+    using Core.Domain.RoomEvent;
 
     public class MatrixRoomEventsEventArgs : EventArgs
     {

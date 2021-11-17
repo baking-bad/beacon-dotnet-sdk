@@ -24,16 +24,15 @@ namespace Matrix.Sdk
                 return _client;
 
             var eventService = new EventService(_httpClientFactory);
-            var networkService = new NetworkService
-            (
-                eventService,
-                new RoomService(_httpClientFactory), 
-                new UserService(_httpClientFactory)
-            );
-
+            var userService = new UserService(_httpClientFactory);
+            var roomService = new RoomService(_httpClientFactory);
             var pollingService = new PollingService(eventService, logger);
 
-            _client = new MatrixClient(networkService, pollingService);
+            _client = new MatrixClient(
+                pollingService,
+                userService,
+                roomService,
+                eventService);
 
             return _client;
         }

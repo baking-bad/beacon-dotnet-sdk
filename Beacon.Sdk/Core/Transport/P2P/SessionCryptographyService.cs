@@ -6,7 +6,7 @@ namespace Beacon.Sdk.Core.Transport.P2P
     using Domain.Interfaces.Data;
     using Infrastructure.Cryptography.Libsodium;
     using Matrix.Sdk.Core.Domain.Network;
-    using Matrix.Sdk.Core.Domain.Room;
+    using Matrix.Sdk.Core.Domain.RoomEvent;
     using Microsoft.Extensions.Logging;
     using Sodium;
 

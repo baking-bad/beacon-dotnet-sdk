@@ -2,7 +2,6 @@
 
 namespace Matrix.Sdk.Core.Infrastructure.Services
 {
-    using System;
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
@@ -15,7 +14,7 @@ namespace Matrix.Sdk.Core.Infrastructure.Services
         {
         }
 
-        public async Task<LoginResponse> LoginAsync(Uri baseAddress, string user, string password, string deviceId,
+        public async Task<LoginResponse> LoginAsync(string user, string password, string deviceId,
             CancellationToken cancellationToken)
         {
             var model = new LoginRequest
@@ -30,7 +29,7 @@ namespace Matrix.Sdk.Core.Infrastructure.Services
                 "m.login.password"
             );
 
-            HttpClient httpClient = CreateHttpClient(baseAddress);
+            HttpClient httpClient = CreateHttpClient();
 
             var path = $"{ResourcePath}/login";
 

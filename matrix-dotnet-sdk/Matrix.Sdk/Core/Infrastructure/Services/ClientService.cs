@@ -15,10 +15,10 @@ namespace Matrix.Sdk.Core.Infrastructure.Services
 
         protected override string ResourcePath => "_matrix/client/versions";
 
-        public async Task<MatrixServerVersionsResponse> GetMatrixClientVersions(Uri baseAddress,
+        public async Task<MatrixServerVersionsResponse> GetMatrixClientVersions(Uri address,
             CancellationToken cancellationToken)
         {
-            HttpClient httpClient = CreateHttpClient(baseAddress);
+            HttpClient httpClient = CreateHttpClient();
 
             return await httpClient.GetAsJsonAsync<MatrixServerVersionsResponse>(ResourcePath, cancellationToken);
         }

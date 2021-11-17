@@ -20,7 +20,6 @@ namespace Matrix.Sdk.Core.Domain.Services
 
         private string? _accessToken;
         private string _nextBatch;
-        private Uri? _nodeAddress;
         private Timer? _pollingTimer;
         private ulong _timeout;
 
@@ -43,7 +42,7 @@ namespace Matrix.Sdk.Core.Domain.Services
 
         public void Init(Uri nodeAddress, string accessToken)
         {
-            _nodeAddress = nodeAddress;
+            _eventService.BaseAddress = nodeAddress;
             _accessToken = accessToken;
 
             _pollingTimer = new Timer(async _ => await PollAsync());
@@ -87,7 +86,7 @@ namespace Matrix.Sdk.Core.Domain.Services
             {
                 _pollingTimer!.Change(Timeout.Infinite, Timeout.Infinite);
 
-                SyncResponse response = await _eventService.SyncAsync(_nodeAddress!, _accessToken!, _cts.Token,
+                SyncResponse response = await _eventService.SyncAsync(_accessToken!, _cts.Token,
                     _timeout, _nextBatch);
 
                 SyncBatch syncBatch = SyncBatch.Factory.CreateFromSync(response.NextBatch, response.Rooms);

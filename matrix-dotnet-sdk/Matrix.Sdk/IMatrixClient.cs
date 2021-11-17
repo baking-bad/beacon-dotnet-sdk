@@ -4,7 +4,6 @@ namespace Matrix.Sdk
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Core.Domain.MatrixRoom;
-    using Core.Domain.Network;
 
     /// <summary>
     ///     A Client for interaction with Matrix.
@@ -22,9 +21,10 @@ namespace Matrix.Sdk
         MatrixRoom[] JoinedRooms { get; }
 
         MatrixRoom[] LeftRooms { get; }
+        
         event EventHandler<MatrixRoomEventsEventArgs> OnMatrixRoomEventsReceived;
 
-        Task LoginAsync(LoginRequest request);
+        Task LoginAsync(Uri baseAddress, string user, string password, string deviceId);
 
         void Start();
 

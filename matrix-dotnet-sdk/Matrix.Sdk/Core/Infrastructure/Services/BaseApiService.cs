@@ -8,7 +8,9 @@ namespace Matrix.Sdk.Core.Infrastructure.Services
     {
         // see: https://github.com/dotnet/aspnetcore/issues/28385#issuecomment-853766480
         private readonly IHttpClientFactory _httpClientFactory;
-
+        
+        public Uri? BaseAddress { get; set; }
+        
         protected BaseApiService(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
@@ -16,20 +18,24 @@ namespace Matrix.Sdk.Core.Infrastructure.Services
 
         protected virtual string ResourcePath => "_matrix/client/r0";
 
+
         /// <summary>
         ///     Creates HttpClient
         /// </summary>
-        /// <param name="baseAddress">Address of a Matrix node.</param>
         /// <param name="accessToken">User access token.</param>
-        /// <returns></returns>
-        protected HttpClient CreateHttpClient(Uri? baseAddress = null, string? accessToken = null)
+        /// <returns>HttpClient</returns>
+        protected HttpClient CreateHttpClient(string? accessToken = null)
         {
             HttpClient httpClient = _httpClientFactory.CreateClient(Constants.Matrix);
 
             if (accessToken != null)
                 httpClient.AddBearerToken(accessToken);
 
-            if (baseAddress != null) httpClient.BaseAddress = baseAddress;
+            if (BaseAddress == null) 
+                throw new NullReferenceException("set base address");
+            
+            if (httpClient.BaseAddress == null) 
+                httpClient.BaseAddress = BaseAddress;
 
             return httpClient;
         }

@@ -3,7 +3,7 @@ namespace Matrix.Sdk.Core.Domain.MatrixRoom
     using System.Collections.Generic;
     using Infrastructure.Dto.Sync;
     using Infrastructure.Dto.Sync.Event.Room;
-    using Room;
+    using RoomEvent;
 
     public class MatrixRoomFactory
     {

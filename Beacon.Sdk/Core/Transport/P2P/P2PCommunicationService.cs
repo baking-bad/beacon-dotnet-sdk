@@ -9,7 +9,7 @@
     using Matrix.Sdk;
     using Matrix.Sdk.Core.Domain.MatrixRoom;
     using Matrix.Sdk.Core.Domain.Network;
-    using Matrix.Sdk.Core.Domain.Room;
+    using Matrix.Sdk.Core.Domain.RoomEvent;
     using Matrix.Sdk.Core.Utils;
     using SodiumCore = Sodium.SodiumCore;
 
