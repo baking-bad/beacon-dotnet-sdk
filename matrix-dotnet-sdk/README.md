@@ -1,35 +1,33 @@
 # **Matrix .NET SDK**
+![matrix-logo](matrix-logo.svg)
 
-This open-source library allows you to build .NET apps compatible with Matrix Protocol
-(http://www.matrix.org).
+This open-source library allows you to build .NET apps compatible with [Matrix Protocol](http://www.matrix.org).
 It has support for a limited subset of the APIs presently. 
 
-This SDK was built for interaction with the Beacon Node (https://github.com/airgap-it/beacon-node). It supports login through the crypto auth provider (https://github.com/airgap-it/beacon-node/blob/master/docker/crypto_auth_provider.py).  
+This SDK was built for interaction with the [Beacon Node](https://github.com/airgap-it/beacon-node). It supports login through the [`crypto_auth_provider.py`](https://github.com/airgap-it/beacon-node/blob/master/docker/crypto_auth_provider.py).  
+
 
 # Use the SDK in your app
-## Installation
+For a complete example, refer to [`SimpleExample.cs`](https://github.com/baking-bad/beacon-dotnet-sdk/blob/main/matrix-dotnet-sdk/Matrix.Examples.ConsoleApp/SimpleExample.cs).
+You can also clone this repository and run `Matrix.Examples.ConsoleApp`.
 
-## Usage
-For a complete example, refer to https://github.com/baking-bad/beacon-dotnet-sdk/blob/main/matrix-dotnet-sdk/Matrix.Examples.ConsoleApp/SimpleExample.cs
+Here is step by step guide:
 
-You can also clone this repository and run `Matrix.Examples.ConsoleApp`
-
-## Create
+## 1. Create 
 Use MatrixClientFactory to create an instance of `MatrixClient`
 ```cs
 var factory = new MatrixClientFactory();
 IMatrixClient client = factory.Create();
 ```
 
-## Login
-Currently, `MatrixClient` supports only password login
-(https://spec.matrix.org/v1.1/client-server-api/#password-based).
+## 2. Login
+Currently, `MatrixClient` supports only [password login](https://spec.matrix.org/v1.1/client-server-api/#password-based).
 
 ```cs
 await client.LoginAsync(matrixNodeAddress, username, password, deviceId);
 ```
 
-## Start listening for incoming events
+## 3. Start listening for incoming events
 To listen for the incoming Matrix room events you need to subscribe to `OnMatrixRoomEventsReceived;`
 
 ```cs
@@ -57,33 +55,24 @@ If you need to **stop** listening, for example, when the app is suspended, then 
 ```cs
 client.Stop();
 ```
-
-## Create room
+## 4. Basic functions
 
 ```cs
+// Create room
 MatrixRoom matrixRoom = await client.CreateTrustedPrivateRoomAsync(new[]
 {
     anotherClient.UserId
 });
-```
 
-## Join room
-
-```cs
+// Join room
 await anotherClient.JoinTrustedPrivateRoomAsync(matrixRoom.Id);
-```
 
-## Send message
-```cs
+// Send message
 await client.SendMessageAsync(matrixRoom.Id, "some message");
-```
 
-## Get joined rooms ids
-```cs
+//Get joined rooms ids
 await client.GetJoinedRoomsIdsAsync();
-```
 
-## Leave room
-```cs
+// Leave room
 await client.LeaveRoomAsync(roomId);
 ```
