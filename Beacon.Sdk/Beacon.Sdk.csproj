@@ -2,7 +2,21 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
-        <Nullable>enable</Nullable>
+        <LangVersion>9</LangVersion>
+
+        <PackageId>Beacon.Sdk</PackageId>
+        <PackageTags>beacon sdk tezos dapp wallet p2p</PackageTags>
+        <PackageProjectUrl>https://github.com/baking-bad/beacon-dotnet-sdk</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/baking-bad/beacon-dotnet-sdk/blob/main/LICENSE</PackageLicenseUrl>
+
+        <RepositoryUrl>https://github.com/baking-bad/beacon-dotnet-sdk</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+
+        <Authors>Mikhail Tatarenko</Authors>
+        <Product>Beacon.Sdk</Product>
+        <Description>Beacon .NET SDK for Tezos wallet developers to seamlessly connect to multiple dApps.</Description>
+        <Version>0.0.1</Version>
+        <Copyright>Copyright © Baking Bad 2019-2021</Copyright>
     </PropertyGroup>
 
     <ItemGroup>
