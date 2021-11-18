@@ -1,6 +1,6 @@
 namespace Beacon.Sdk.Core.Domain.Interfaces.Data
 {
-    using Matrix.Sdk.Core.Utils;
+    using Utils;
 
     public interface IBeaconPeerRepository
     {

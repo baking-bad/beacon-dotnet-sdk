@@ -1,8 +1,8 @@
 namespace Beacon.Sdk.Core.Domain.Interfaces.Data
 {
     using Infrastructure.Cryptography.Libsodium;
-    using Matrix.Sdk.Core.Utils;
     using Sodium;
+    using Utils;
 
     public interface IKeyPairRepository
     {

@@ -5,8 +5,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     using System.Text;
     using Domain.Interfaces.Data;
     using Libsodium;
-    using Matrix.Sdk.Core.Utils;
     using Sodium;
+    using Utils;
     using SodiumCore = Sodium.SodiumCore;
     using SodiumLibrary = Libsodium.SodiumLibrary;
 

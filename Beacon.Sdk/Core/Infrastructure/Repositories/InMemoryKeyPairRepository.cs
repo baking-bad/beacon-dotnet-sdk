@@ -4,8 +4,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     using System.Collections.Generic;
     using Cryptography.Libsodium;
     using Domain.Interfaces.Data;
-    using Matrix.Sdk.Core.Utils;
     using Sodium;
+    using Utils;
 
     public class InMemoryKeyPairRepository : IKeyPairRepository
     {

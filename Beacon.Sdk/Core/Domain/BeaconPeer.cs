@@ -2,7 +2,7 @@ namespace Beacon.Sdk.Core.Domain
 {
     using System;
     using Interfaces.Data;
-    using Matrix.Sdk.Core.Utils;
+    using Utils;
 
     public class BeaconPeer
     {

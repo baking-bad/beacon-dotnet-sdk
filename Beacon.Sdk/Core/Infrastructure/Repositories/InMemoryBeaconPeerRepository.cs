@@ -3,7 +3,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     using System.Collections.Concurrent;
     using Domain;
     using Domain.Interfaces.Data;
-    using Matrix.Sdk.Core.Utils;
+    using Utils;
 
     public class InMemoryBeaconPeerRepository : IBeaconPeerRepository
     {

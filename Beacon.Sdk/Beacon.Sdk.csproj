@@ -6,11 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\matrix-dotnet-sdk\Matrix.Sdk\Matrix.Sdk.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
         <PackageReference Include="Base58Check" Version="0.2.0" />
+        <PackageReference Include="Matrix.Sdk" Version="0.0.1" />
         <PackageReference Include="Sodium.Core" Version="1.2.3" />
     </ItemGroup>
 

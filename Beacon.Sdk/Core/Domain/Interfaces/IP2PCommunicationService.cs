@@ -2,8 +2,8 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
 {
     using System;
     using System.Threading.Tasks;
-    using Matrix.Sdk.Core.Utils;
     using Transport.P2P;
+    using Utils;
 
     public interface IP2PCommunicationService
     {

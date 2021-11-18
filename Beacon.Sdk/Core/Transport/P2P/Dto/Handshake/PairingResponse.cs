@@ -1,6 +1,6 @@
 namespace Beacon.Sdk.Core.Transport.P2P.Dto.Handshake
 {
-    using Matrix.Sdk.Core.Utils;
+    using Utils;
 
     public record PairingResponse(
         string Id,

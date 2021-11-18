@@ -5,7 +5,6 @@ namespace Beacon.Sdk.Core.Transport.P2P
     using Domain;
     using Domain.Interfaces.Data;
     using Infrastructure.Cryptography.Libsodium;
-    using Matrix.Sdk.Core.Domain.Network;
     using Matrix.Sdk.Core.Domain.RoomEvent;
     using Microsoft.Extensions.Logging;
     using Sodium;
@@ -77,5 +76,8 @@ namespace Beacon.Sdk.Core.Transport.P2P
             
             return new LoginRequest(new Uri(relayServer), hexId, password, deviceId);
         }
+
+        public record LoginRequest(Uri Address, string Username, string Password, string DeviceId);
+
     }
 }

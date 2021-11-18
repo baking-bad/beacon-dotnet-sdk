@@ -8,9 +8,8 @@
     using Domain.Interfaces;
     using Matrix.Sdk;
     using Matrix.Sdk.Core.Domain.MatrixRoom;
-    using Matrix.Sdk.Core.Domain.Network;
     using Matrix.Sdk.Core.Domain.RoomEvent;
-    using Matrix.Sdk.Core.Utils;
+    using Utils;
     using SodiumCore = Sodium.SodiumCore;
 
     public class P2PCommunicationService : IP2PCommunicationService
@@ -35,9 +34,9 @@
 
         public async Task LoginAsync()
         {
-            LoginRequest request = await _sessionCryptographyService.CreateLoginRequest();
+            SessionCryptographyService.LoginRequest request = await _sessionCryptographyService.CreateLoginRequest();
             
-            await _matrixClient.LoginAsync(request);
+            await _matrixClient.LoginAsync(request.Address, request.Username, request.Password, request.DeviceId);
         }
 
         public void Start()

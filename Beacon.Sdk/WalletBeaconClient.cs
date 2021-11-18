@@ -9,12 +9,12 @@ namespace Beacon.Sdk
     using Core.Infrastructure.Serialization;
     using Core.Transport.P2P;
     using Core.Transport.P2P.Dto.Handshake;
-    using Matrix.Sdk.Core.Utils;
+    using Core.Utils;
     using Sodium;
     
     public class WalletBeaconClient : IWalletBeaconClient
     {
-        private readonly IP2PCommunicationClient _p2PCommunicationClient;
+        private readonly IP2PCommunicationService _p2PCommunicationClient;
         private readonly IBeaconPeerRepository _beaconPeerRepository;
         private readonly ICryptographyService _cryptographyService;
         private readonly JsonSerializerService _jsonSerializerService;
@@ -22,7 +22,7 @@ namespace Beacon.Sdk
         private KeyPair? _keyPair;
 
         public WalletBeaconClient(
-            IP2PCommunicationClient p2PCommunicationClient,
+            IP2PCommunicationService p2PCommunicationClient,
             ICryptographyService cryptographyService,
             IBeaconPeerRepository beaconPeerRepository, 
             JsonSerializerService jsonSerializerService,
@@ -40,16 +40,11 @@ namespace Beacon.Sdk
         
         public string AppName { get; }
 
-        public async Task InitAsync()
-        {
-            _keyPair = ReadBeaconSecret();
-
-            await _p2PCommunicationClient.LoginAsync(_keyPair);
-        }
+        public async Task InitAsync() => await _p2PCommunicationClient.LoginAsync();
 
         private void OnP2PMessagesReceived(object? sender, P2PMessageEventArgs e)
         {
-            if (sender is not IP2PCommunicationClient)
+            if (sender is not IP2PCommunicationService)
                 throw new ArgumentException("sender is not IP2PCommunicationClient");
 
             List<string> messages = e.Messages;

@@ -1,4 +1,4 @@
-namespace Matrix.Sdk.Core.Utils
+namespace Beacon.Sdk.Core.Utils
 {
     using System;
     using System.Text;

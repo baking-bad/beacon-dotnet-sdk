@@ -1,6 +1,6 @@
 namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
 {
-    using Matrix.Sdk.Core.Utils;
+    using Utils;
 
     /// <summary>
     ///     Implements logic for building struct ChannelOpeningMessage.
