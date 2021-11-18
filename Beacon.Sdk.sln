@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Beacon.Sdk", "Beacon.Sdk\Be
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Beacon.Examples.ConsoleApp", "Beacon.Examples.ConsoleApp\Beacon.Examples.ConsoleApp.csproj", "{A5014245-7537-49C3-BD95-44BBBA5D4F25}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Matrix.Sdk.Tests", "matrix-dotnet-sdk\Matrix.Sdk.Tests\Matrix.Sdk.Tests.csproj", "{08B507B5-1B02-4DA2-A673-AC19D4BE298E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Beacon.Sdk.Tests", "Beacon.Sdk.Tests\Beacon.Sdk.Tests.csproj", "{823F5CBF-CD65-47C2-9A11-BF8D0E34BE5C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,9 +20,9 @@ Global
 		{A5014245-7537-49C3-BD95-44BBBA5D4F25}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5014245-7537-49C3-BD95-44BBBA5D4F25}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A5014245-7537-49C3-BD95-44BBBA5D4F25}.Release|Any CPU.Build.0 = Release|Any CPU
-		{08B507B5-1B02-4DA2-A673-AC19D4BE298E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{08B507B5-1B02-4DA2-A673-AC19D4BE298E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{08B507B5-1B02-4DA2-A673-AC19D4BE298E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{08B507B5-1B02-4DA2-A673-AC19D4BE298E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{823F5CBF-CD65-47C2-9A11-BF8D0E34BE5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{823F5CBF-CD65-47C2-9A11-BF8D0E34BE5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{823F5CBF-CD65-47C2-9A11-BF8D0E34BE5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{823F5CBF-CD65-47C2-9A11-BF8D0E34BE5C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

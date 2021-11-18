@@ -1,4 +1,4 @@
-namespace Matrix.Sdk.Tests
+namespace Beacon.Sdk.Tests
 {
     using Core.Utils;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
