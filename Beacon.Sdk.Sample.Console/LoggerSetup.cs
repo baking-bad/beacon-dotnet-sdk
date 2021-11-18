@@ -1,4 +1,4 @@
-namespace Beacon.Examples.ConsoleApp
+namespace Beacon.Sdk.Sample.Console
 {
     using System;
     using System.Collections.Generic;
