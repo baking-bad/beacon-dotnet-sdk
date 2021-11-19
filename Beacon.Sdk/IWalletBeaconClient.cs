@@ -4,11 +4,6 @@ namespace Beacon.Sdk
     using System.Threading.Tasks;
     using Core.Transport.P2P.Dto.Handshake;
 
-    public class BeaconMessageEventArgs : EventArgs
-    {
-        
-    }
-    
     public interface IWalletBeaconClient
     {
         event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;

@@ -3,32 +3,26 @@ namespace Beacon.Sdk
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Core;
     using Core.Domain.Interfaces;
     using Core.Domain.Interfaces.Data;
     using Core.Infrastructure.Serialization;
     using Core.Transport.P2P;
     using Core.Transport.P2P.Dto.Handshake;
     using Core.Utils;
-    using Sodium;
-    
+
+
     public class WalletBeaconClient : IWalletBeaconClient
     {
         private readonly IP2PCommunicationService _p2PCommunicationClient;
         private readonly IBeaconPeerRepository _beaconPeerRepository;
-        private readonly ICryptographyService _cryptographyService;
         private readonly JsonSerializerService _jsonSerializerService;
-
-        private KeyPair? _keyPair;
 
         public WalletBeaconClient(
             IP2PCommunicationService p2PCommunicationClient,
-            ICryptographyService cryptographyService,
             IBeaconPeerRepository beaconPeerRepository, 
             JsonSerializerService jsonSerializerService,
             WalletBeaconClientOptions options)
         {
-            _cryptographyService = cryptographyService;
             _beaconPeerRepository = beaconPeerRepository;
             _p2PCommunicationClient = p2PCommunicationClient;
             _jsonSerializerService = jsonSerializerService;
@@ -36,7 +30,7 @@ namespace Beacon.Sdk
             AppName = options.AppName;
         }
 
-        public event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
+        public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
         
         public string AppName { get; }
 
@@ -51,8 +45,9 @@ namespace Beacon.Sdk
 
             foreach (string message in messages)
             {
-                _jsonSerializerService.Deserialize(message);
-                OnBeaconMessageReceived.Invoke(this, new BeaconMessageEventArgs());
+                BeaconBaseMessage beaconBaseMessage = _jsonSerializerService.Deserialize<BeaconBaseMessage>(message);
+           
+                OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs(beaconBaseMessage));
             }
         }
 
@@ -66,7 +61,7 @@ namespace Beacon.Sdk
 
             var version = int.Parse(pairingRequest.Version);
 
-            _beaconPeerRepository.Create(pairingRequest.Name, receiverPublicKeyHex, pairingRequest.Version);
+            _beaconPeerRepository.Create(pairingRequest.Name, pairingRequest.RelayServer, receiverPublicKeyHex, pairingRequest.Version);
 
             if (sendPairingResponse)
                 await _p2PCommunicationClient.SendChannelOpeningMessageAsync(pairingRequestId, receiverPublicKeyHex,
@@ -83,18 +78,6 @@ namespace Beacon.Sdk
         {
             _p2PCommunicationClient.Stop();
             _p2PCommunicationClient.OnP2PMessagesReceived -= OnP2PMessagesReceived;
-        }
-
-        private KeyPair ReadBeaconSecret()
-        {
-            // Todo: add storage
-            if (_keyPair != null)
-                return _keyPair;
-
-            var seed = Guid.NewGuid().ToString();
-            _keyPair = _cryptographyService.GenerateEd25519KeyPair(seed);
-
-            return _keyPair;
         }
     }
 }
