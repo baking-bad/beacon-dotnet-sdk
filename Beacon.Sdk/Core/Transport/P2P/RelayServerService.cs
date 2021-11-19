@@ -10,11 +10,11 @@ namespace Beacon.Sdk.Core.Transport.P2P
 
     public class RelayServerService
     {
-        private readonly ILogger<RelayServerService> _logger;
+        private readonly ILogger<RelayServerService>? _logger;
         private readonly ClientService _matrixClientService;
         private readonly ISdkStorage _sdkStorage;
 
-        public RelayServerService(ILogger<RelayServerService> logger, ClientService matrixClientService,
+        public RelayServerService(ILogger<RelayServerService>? logger, ClientService matrixClientService,
             ISdkStorage sdkStorage)
         {
             _logger = logger;
@@ -46,6 +46,7 @@ namespace Beacon.Sdk.Core.Transport.P2P
                 {
                     var cts = new CancellationTokenSource();
                     var address = new Uri($@"https://{relayServer}");
+                    _matrixClientService.BaseAddress = address;
                     _ = await _matrixClientService.GetMatrixClientVersions(address, cts.Token);
 
                     _sdkStorage.MatrixSelectedNode = relayServer;
@@ -54,7 +55,7 @@ namespace Beacon.Sdk.Core.Transport.P2P
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogInformation($"Ignoring server \"{relayServer}\", trying another one...");
+                    _logger?.LogInformation($"Ignoring server \"{relayServer}\", trying another one...");
                     offset++;
                 }
             }

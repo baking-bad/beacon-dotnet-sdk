@@ -1,17 +1,22 @@
-﻿namespace Beacon.Examples.ConsoleApp
+﻿namespace Beacon.Sdk.Sample.Console
 {
     using System;
     using System.Threading.Tasks;
+    using Core.Transport.P2P;
+    using Matrix.Sdk.Core.Domain.Services;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
-    using Sdk.Sample.Console;
+    using Serilog;
+    using Serilog.Sinks.SystemConsole.Themes;
 
     internal class Program
     {
         private static IHostBuilder CreateHostBuilder() => new HostBuilder()
             .ConfigureServices((hostContext, services) =>
             {
+                services.AddLogging(loggingBuilder => 
+                    loggingBuilder.AddSerilog(dispose: true));
                 // services.AddBeaconClient();
                 // services.AddConsoleApp();
             }).UseConsoleLifetime();
@@ -27,7 +32,24 @@
                 .CreateLogger();
 
             ILogger<Program> logger = host.Services.GetRequiredService<ILogger<Program>>();
+            ILogger<RelayServerService> relayServerServiceLogger = host.Services.GetRequiredService<ILogger<RelayServerService>>();
+            ILogger<SessionCryptographyService> sessionCryptographyServiceLogger = host.Services.GetRequiredService<ILogger<SessionCryptographyService>>();
+            ILogger<PollingService> pollingServiceLogger = host.Services.GetRequiredService<ILogger<PollingService>>();
+           
+            logger.LogInformation("START");
+            var sample = new Sample(relayServerServiceLogger, sessionCryptographyServiceLogger, pollingServiceLogger);
 
+            try
+            {
+                await sample.Run();
+
+            }
+            catch (Exception ex)
+            {
+                
+            }
+            
+            
             logger.LogInformation("START");
 
             await RunAsync(host.Services);

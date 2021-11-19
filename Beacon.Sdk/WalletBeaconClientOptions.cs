@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core
+namespace Beacon.Sdk
 {
     public record WalletBeaconClientOptions(string AppName, string? IconUrl, string? AppUrl)
     {

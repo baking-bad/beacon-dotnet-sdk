@@ -14,15 +14,14 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
             _cryptographyService = cryptographyService;
         }
-
-        public BeaconPeer Create(string name, HexString hexPublicKey, string version)
+        
+        public BeaconPeer Create(string name, string relayServer, HexString hexPublicKey, string version) 
         {
-            BeaconPeer beaconPeer = BeaconPeer.Factory.Create(_cryptographyService, name, hexPublicKey, version);
+            BeaconPeer beaconPeer = BeaconPeer.Factory.Create(_cryptographyService, name, relayServer,hexPublicKey, version);
             InMemoryBeaconPeers[beaconPeer.UserId] = beaconPeer;
 
             return InMemoryBeaconPeers[beaconPeer.UserId];
         }
-
         public BeaconPeer? TryReadByUserId(string userId) => InMemoryBeaconPeers.TryGetValue(userId, out BeaconPeer? beaconPeer)
             ? beaconPeer
             : null;

@@ -10,7 +10,6 @@
     using Matrix.Sdk.Core.Domain.MatrixRoom;
     using Matrix.Sdk.Core.Domain.RoomEvent;
     using Utils;
-    using SodiumCore = Sodium.SodiumCore;
 
     public class P2PCommunicationService : IP2PCommunicationService
     {
@@ -27,9 +26,6 @@
             _sessionCryptographyService = sessionCryptographyService;
             _matrixClient = matrixClient;
             _channelOpeningMessageBuilder = channelOpeningMessageBuilder;
-
-            //Todo: refactor
-            SodiumCore.Init();
         }
 
         public async Task LoginAsync()
@@ -76,11 +72,14 @@
             try
             {
                 var senderRelayServer =
-                    (_matrixClient.BaseAddress ?? throw new NullReferenceException("Provide P2PClient BaseAddress")).ToString();
+                    (_matrixClient.BaseAddress?.Host ?? throw new NullReferenceException("Provide P2PClient BaseAddress"));
 
                 _channelOpeningMessageBuilder.Reset();
                 _channelOpeningMessageBuilder.BuildRecipientId(receiverRelayServer, receiverHexPublicKey);
-                _channelOpeningMessageBuilder.BuildPairingPayload(id, version, senderRelayServer, appName);
+                _channelOpeningMessageBuilder.BuildPairingPayload(id, version, "beacon-node-0.papers.tech:8448", appName);
+                
+                var t =_channelOpeningMessageBuilder.Message;
+                
                 _channelOpeningMessageBuilder.BuildEncryptedPayload(receiverHexPublicKey);
 
                 ChannelOpeningMessage channelOpeningMessage = _channelOpeningMessageBuilder.Message;

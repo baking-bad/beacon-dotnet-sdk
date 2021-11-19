@@ -60,7 +60,8 @@ namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
             byte[] curve25519PublicKey =
                 _cryptographyService.ConvertEd25519PublicKeyToCurve25519PublicKey(receiverHexPublicKey.ToByteArray());
 
-            _message.Payload = _cryptographyService.EncryptMessageAsString(_message.Payload, curve25519PublicKey);
+            string before = _message.Payload;
+            _message.Payload = _cryptographyService.EncryptMessageAsString(before, curve25519PublicKey);
         }
 
         private string BuildPairingPayloadV2(string pairingRequestId, HexString senderHexPublicKey, string senderRelayServer, string senderAppName)

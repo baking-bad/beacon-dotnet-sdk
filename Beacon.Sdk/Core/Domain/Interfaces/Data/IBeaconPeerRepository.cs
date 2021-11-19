@@ -4,7 +4,7 @@ namespace Beacon.Sdk.Core.Domain.Interfaces.Data
 
     public interface IBeaconPeerRepository
     {
-        BeaconPeer Create(string name, HexString hexPublicKey, string version);
+        BeaconPeer Create(string name, string relaySever, HexString hexPublicKey, string version);
         
         BeaconPeer? TryReadByUserId(string userId);
     }

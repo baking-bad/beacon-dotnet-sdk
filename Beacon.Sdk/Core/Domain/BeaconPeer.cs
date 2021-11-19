@@ -25,14 +25,14 @@ namespace Beacon.Sdk.Core.Domain
 
         internal static class Factory
         {
-            public static BeaconPeer Create(ICryptographyService cryptographyService, string Name, HexString hexPublicKey, string version)
+            public static BeaconPeer Create(ICryptographyService cryptographyService, string name, string relayServer, HexString hexPublicKey, string version)
             {
                 byte[] hash = cryptographyService.Hash(hexPublicKey.ToByteArray());
 
                 if (!HexString.TryParse(hash, out HexString hexHash))
                     throw new Exception();
 
-                return new BeaconPeer(Name, hexPublicKey, version, $"@{hexHash}");
+                return new BeaconPeer(name, hexPublicKey, version, $"@{hexHash}:{relayServer}");
             } 
         }
     }

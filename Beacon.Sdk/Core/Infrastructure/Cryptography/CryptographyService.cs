@@ -36,8 +36,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             return SecretBox.Open(cipher, nonce, sharedKey);
         }
-
-
+        
         public byte[] Encrypt(byte[] message, byte[] recipientPublicKey)
         {
             byte[] nonce = SodiumCore.GetRandomBytes(NonceBytes)!;
@@ -94,7 +93,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         {
             byte[]? result = SealedPublicKeyBox.Create(message, publicKey);
 
-            return Encoding.UTF8.GetString(result);
+            if (!HexString.TryParse(result, out var k)) throw new Exception("HexString.TryParse(result, out var k)");
+            return k.Value;
         }
 
         public bool Validate(string input) =>

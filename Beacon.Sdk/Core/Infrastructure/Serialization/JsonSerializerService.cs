@@ -8,11 +8,12 @@ namespace Beacon.Sdk.Core.Infrastructure.Serialization
         private static JsonSerializerSettings JsonSettings =>
             new()
             {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                NullValueHandling = NullValueHandling.Ignore
             };
 
         public string Serialize(object model) => JsonConvert.SerializeObject(model, JsonSettings);
 
-        public object? Deserialize(string input) => JsonConvert.DeserializeObject(input);
+        public T Deserialize<T>(string input) => JsonConvert.DeserializeObject<T>(input, JsonSettings)!;
     }
 }
