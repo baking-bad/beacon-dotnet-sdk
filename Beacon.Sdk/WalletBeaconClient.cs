@@ -3,14 +3,14 @@ namespace Beacon.Sdk
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Core.Beacon;
     using Core.Domain.Interfaces;
     using Core.Domain.Interfaces.Data;
     using Core.Infrastructure.Serialization;
     using Core.Transport.P2P;
     using Core.Transport.P2P.Dto.Handshake;
     using Core.Utils;
-
-
+    
     public class WalletBeaconClient : IWalletBeaconClient
     {
         private readonly IP2PCommunicationService _p2PCommunicationClient;
@@ -64,10 +64,15 @@ namespace Beacon.Sdk
             _beaconPeerRepository.Create(pairingRequest.Name, pairingRequest.RelayServer, receiverPublicKeyHex, pairingRequest.Version);
 
             if (sendPairingResponse)
-                await _p2PCommunicationClient.SendChannelOpeningMessageAsync(pairingRequestId, receiverPublicKeyHex,
-                    pairingRequest.RelayServer, version, AppName);
+                await _p2PCommunicationClient.SendChannelOpeningMessageAsync(pairingRequestId, receiverPublicKeyHex, pairingRequest.RelayServer, version, AppName);
         }
-
+        
+        
+        private async Task SendAcknowledgeResponseAsync()
+        {
+            
+        }
+        
         public void Connect()
         {
             _p2PCommunicationClient.OnP2PMessagesReceived += OnP2PMessagesReceived;

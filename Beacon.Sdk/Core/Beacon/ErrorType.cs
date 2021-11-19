@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core
+namespace Beacon.Sdk.Core.Beacon
 {
     public class ErrorType
     {
