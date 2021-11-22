@@ -41,7 +41,8 @@
 
             try
             {
-                await sample.Run();
+                // await sample.Run();
+                sample.Test();
 
             }
             catch (Exception ex)

@@ -17,5 +17,7 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
 
         Task SendChannelOpeningMessageAsync(string id, HexString receiverHexPublicKey,
             string receiverRelayServer, int version, string appName);
+
+        Task SendMessageAsync();
     }
 }

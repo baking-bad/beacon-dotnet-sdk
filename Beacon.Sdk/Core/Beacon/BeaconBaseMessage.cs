@@ -1,10 +1,4 @@
 namespace Beacon.Sdk.Core.Beacon
 {
-    public record BeaconBaseMessage
-    {
-        public string Type { get; init; }
-        public string Version { get; init; } 
-        public string Id { get; init; }
-        public string SenderId { get; init; }
-    };
+    public record BeaconBaseMessage(string Type, string Version, string Id, string SenderId);
 }

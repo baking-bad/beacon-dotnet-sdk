@@ -4,6 +4,8 @@ namespace Beacon.Sdk.Sample.Console
     using Core.Transport.P2P;
     using Microsoft.Extensions.Logging;
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
     using Base58Check;
     using Core.Beacon;
@@ -56,6 +58,18 @@ namespace Beacon.Sdk.Sample.Console
             Console.ReadLine();
             
             client.Disconnect();
+        }
+
+        public async void Test()
+        {
+            var factory = new WalletBeaconClientFactory();
+
+            var options = new WalletBeaconClientOptions("Test App Name", null, null);
+            IWalletBeaconClient client = factory.Create(options, _relayServerServiceLogger, _sessionCryptographyServiceLogger, _pollingServiceLogger);
+
+            var acknowledgeResponse =
+                new AcknowledgeResponse(Constants.BeaconVersion, "test", "senderId");
+            await client.RespondAsync(acknowledgeResponse);
         }
     }
 }

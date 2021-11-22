@@ -22,7 +22,6 @@ namespace Beacon.Sdk.Core.Domain
         
         public string UserId { get; }
         
-
         internal static class Factory
         {
             public static BeaconPeer Create(ICryptographyService cryptographyService, string name, string relayServer, HexString hexPublicKey, string version)

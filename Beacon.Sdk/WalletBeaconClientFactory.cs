@@ -59,6 +59,7 @@ namespace Beacon.Sdk
                 p2PCommunicationService, 
                 beaconPeerRepository, 
                 jsonSerializerService, 
+                keyPairRepository,
                 options);
 
             return _client;

@@ -16,9 +16,9 @@ namespace Beacon.Sdk.Core.Utils
             for (var i = 0; i < hexString.Value.Length; i += 2)
             {
                 string hexChar = hexString.Value.Substring(i, 2);
-                var k = Convert.ToByte(hexChar, 16);
-                var t = (char) k;
-                sb.Append(t);
+                var b = Convert.ToByte(hexChar, 16);
+                var c = (char) b;
+                sb.Append(c);
             }
 
             return sb.ToString();

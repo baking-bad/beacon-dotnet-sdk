@@ -102,5 +102,7 @@
                 throw;
             }
         }
+
+        public Task SendMessageAsync() => throw new NotImplementedException();
     }
 }
