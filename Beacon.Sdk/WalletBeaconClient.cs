@@ -35,12 +35,14 @@ namespace Beacon.Sdk
             return Task.CompletedTask;
         }
 
-        public Task AddPeerAsync(P2PPairingRequest pairingRequest, bool sendPairingResponse = true)
+        public async Task AddPeerAsync(P2PPairingRequest pairingRequest, bool sendPairingResponse = true)
         {
             Task.Delay(100);
 
-            var eventArgs = new BeaconMessageEventArgs(); 
-            OnBeaconMessageReceived(this, new BeaconMessageEventArgs());
+            var eventArgs = new BeaconMessageEventArgs(new BeaconBaseMessage("type", "2", "id", "senderId")); 
+            OnBeaconMessageReceived?.Invoke(this,  eventArgs);
+
+            await Task.CompletedTask;
         }
 
         public void Connect() => Console.WriteLine("Connect");
