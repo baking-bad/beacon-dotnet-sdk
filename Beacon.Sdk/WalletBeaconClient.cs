@@ -37,7 +37,7 @@ namespace Beacon.Sdk
 
         public async Task AddPeerAsync(P2PPairingRequest pairingRequest, bool sendPairingResponse = true)
         {
-            Task.Delay(100);
+            await Task.Delay(100);
 
             var eventArgs = new BeaconMessageEventArgs(new BeaconBaseMessage("type", "2", "id", "senderId")); 
             OnBeaconMessageReceived?.Invoke(this,  eventArgs);
