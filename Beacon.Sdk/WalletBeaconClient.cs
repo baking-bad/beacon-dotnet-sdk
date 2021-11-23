@@ -7,30 +7,36 @@ namespace Beacon.Sdk
     using Core.Domain;
     using Core.Domain.Interfaces;
     using Core.Domain.Interfaces.Data;
+    using Core.Domain.Services;
     using Core.Infrastructure.Serialization;
     using Core.Transport.P2P;
     using Core.Transport.P2P.Dto.Handshake;
     using Core.Utils;
     using Sodium;
 
+    /*
+     * Todo: add AppMetadataRepository
+     * add BeaconPeerMatrixRoomRepository
+     *
+     */
     public class WalletBeaconClient : IWalletBeaconClient
     {
         private readonly IP2PCommunicationService _p2PCommunicationClient;
         private readonly IBeaconPeerRepository _beaconPeerRepository;
         private readonly JsonSerializerService _jsonSerializerService;
-        private readonly IKeyPairRepository _keyPairRepository;
-
+        private readonly KeyPairService _keyPairService;
+        
         public WalletBeaconClient(
             IP2PCommunicationService p2PCommunicationClient,
             IBeaconPeerRepository beaconPeerRepository, 
             JsonSerializerService jsonSerializerService,
-            IKeyPairRepository keyPairRepository,
+            KeyPairService keyPairService,
             WalletBeaconClientOptions options)
         {
             _beaconPeerRepository = beaconPeerRepository;
             _p2PCommunicationClient = p2PCommunicationClient;
             _jsonSerializerService = jsonSerializerService;
-            _keyPairRepository = keyPairRepository;
+            _keyPairService = keyPairService;
 
             AppName = options.AppName;
         }
@@ -41,7 +47,7 @@ namespace Beacon.Sdk
         {
             get
             {
-                KeyPair keyPair = _keyPairRepository.KeyPair;
+                KeyPair keyPair = _keyPairService.KeyPair;
                 if (!HexString.TryParse(keyPair.PublicKey, out HexString result))
                     throw new InvalidOperationException("");
                 

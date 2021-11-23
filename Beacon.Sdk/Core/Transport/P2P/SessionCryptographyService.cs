@@ -5,6 +5,7 @@ namespace Beacon.Sdk.Core.Transport.P2P
     using System.Threading.Tasks;
     using Base58Check;
     using Domain;
+    using Domain.Interfaces;
     using Domain.Interfaces.Data;
     using Infrastructure.Cryptography.Libsodium;
     using Matrix.Sdk.Core.Domain.RoomEvent;

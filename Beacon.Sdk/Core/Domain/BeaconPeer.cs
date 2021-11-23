@@ -1,6 +1,7 @@
 namespace Beacon.Sdk.Core.Domain
 {
     using System;
+    using Interfaces;
     using Interfaces.Data;
     using Utils;
 

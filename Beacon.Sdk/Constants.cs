@@ -4,6 +4,8 @@ namespace Beacon.Sdk
     {
         public const string BeaconVersion = "2";
 
+        public const string ConnectionString = "";
+        
         public static readonly string[] KnownRelayServers =
         {
             // "beacon-node-1.sky.papers.tech",

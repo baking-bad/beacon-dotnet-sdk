@@ -1,7 +1,10 @@
 namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
 {
     using System;
+    using Domain;
+    using Domain.Interfaces;
     using Domain.Interfaces.Data;
+    using Domain.Services;
     using Dto.Handshake;
     using Infrastructure.Serialization;
     using Sodium;
@@ -9,19 +12,19 @@ namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
 
     public class ChannelOpeningMessageBuilder : IChannelOpeningMessageBuilder
     {
-        private readonly IKeyPairRepository _keyPairRepository;
         private readonly ICryptographyService _cryptographyService;
         private readonly JsonSerializerService _jsonSerializerService;
+        private readonly KeyPairService _keyPairService;
         private ChannelOpeningMessage _message;
 
         public ChannelOpeningMessageBuilder(
-            IKeyPairRepository keyPairRepository, 
             ICryptographyService cryptographyService,
-            JsonSerializerService jsonSerializerService)
+            JsonSerializerService jsonSerializerService,
+            KeyPairService keyPairService)
         {
             _cryptographyService = cryptographyService;
             _jsonSerializerService = jsonSerializerService;
-            _keyPairRepository = keyPairRepository;
+            _keyPairService = keyPairService;
         }
 
         public ChannelOpeningMessage Message => _message;
@@ -42,9 +45,7 @@ namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
         public void BuildPairingPayload(string pairingRequestId, int payloadVersion,
             string senderRelayServer, string senderAppName)
         {
-            KeyPair keyPair = _keyPairRepository.KeyPair;
-            
-            if (!HexString.TryParse(keyPair!.PublicKey, out HexString senderHexPublicKey))
+            if (!HexString.TryParse(_keyPairService.KeyPair.PublicKey, out HexString senderHexPublicKey))
                 throw new InvalidOperationException("Can not parse sender public key.");
             
             _message.Payload = payloadVersion switch
