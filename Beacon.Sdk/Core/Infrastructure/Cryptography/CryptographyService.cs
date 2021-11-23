@@ -3,6 +3,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     using System;
     using System.Linq;
     using System.Text;
+    using Domain.Interfaces;
     using Domain.Interfaces.Data;
     using Libsodium;
     using Sodium;
@@ -15,20 +16,20 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         private static readonly int MacBytes = SodiumLibrary.crypto_box_macbytes();
         private static readonly int NonceBytes = SodiumLibrary.crypto_box_noncebytes();
 
-        public SessionKeyPair CreateClientSessionKeyPair(byte[] otherPublicKey, byte[] selfPrivateKey)
+        public SessionKeyPair CreateClientSessionKeyPair(byte[] clientPublicKey, byte[] serverPrivateKey)
         {
-            byte[] serverPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(selfPrivateKey[32..64])!;
-            byte[] serverSecretKeyCurve = PublicKeyAuth.ConvertEd25519SecretKeyToCurve25519SecretKey(selfPrivateKey)!;
-            byte[] clientPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(otherPublicKey)!;
+            byte[] serverPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(serverPrivateKey[32..64])!;
+            byte[] serverSecretKeyCurve = PublicKeyAuth.ConvertEd25519SecretKeyToCurve25519SecretKey(serverPrivateKey)!;
+            byte[] clientPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(clientPublicKey)!;
 
             return KeyExchange.CreateClientSessionKeyPair(serverPublicKeyCurve, serverSecretKeyCurve, clientPublicKeyCurve);
         }
 
-        public SessionKeyPair CreateServerSessionKeyPair(byte[] otherPublicKey, byte[] selfPrivateKey)
+        public SessionKeyPair CreateServerSessionKeyPair(byte[] clientPublicKey, byte[] serverPrivateKey)
         {
-            byte[] serverPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(selfPrivateKey[32..64])!;
-            byte[] serverSecretKeyCurve = PublicKeyAuth.ConvertEd25519SecretKeyToCurve25519SecretKey(selfPrivateKey)!;
-            byte[] clientPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(otherPublicKey)!;
+            byte[] serverPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(serverPrivateKey[32..64])!;
+            byte[] serverSecretKeyCurve = PublicKeyAuth.ConvertEd25519SecretKeyToCurve25519SecretKey(serverPrivateKey)!;
+            byte[] clientPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(clientPublicKey)!;
 
             return KeyExchange.CreateServerSessionKeyPair(serverPublicKeyCurve, serverSecretKeyCurve, clientPublicKeyCurve);
         }
