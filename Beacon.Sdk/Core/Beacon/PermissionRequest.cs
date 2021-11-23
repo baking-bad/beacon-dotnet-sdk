@@ -1,6 +1,7 @@
 namespace Beacon.Sdk.Core.Beacon
 {
     using System.Collections.Generic;
+    using Constants;
 
     public record PermissionRequest(
             string Type,
@@ -11,7 +12,7 @@ namespace Beacon.Sdk.Core.Beacon
             Network Network,
             List<string> Scopes)
         : BeaconBaseMessage(
-            Constants.BeaconMessageType.PermissionRequest,
+            BeaconMessageType.PermissionRequest,
             Version,
             Id,
             SenderId);

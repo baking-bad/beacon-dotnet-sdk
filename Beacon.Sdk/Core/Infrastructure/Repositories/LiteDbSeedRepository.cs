@@ -8,12 +8,12 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     using Microsoft.Extensions.Logging;
 
     // Todo: Add secure storage
-    public class LiteDbSeedRepository : ISeedRepository
+    public class LiteDbSeedRepository : BaseLiteDbRepository,  ISeedRepository
     {
         private readonly ILogger<LiteDbSeedRepository> _logger;
         private readonly object _syncRoot = new();
 
-        public LiteDbSeedRepository(ILogger<LiteDbSeedRepository> logger)
+        public LiteDbSeedRepository(ILogger<LiteDbSeedRepository> logger, RepositorySettings settings) : base(settings)
         {
             _logger = logger;
         }
@@ -24,7 +24,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             {
                 lock (_syncRoot)
                 {
-                    using var db = new LiteDatabase(Constants.ConnectionString);
+                    using var db = new LiteDatabase(ConnectionString);
 
                     ILiteCollection<SeedData>? col = db.GetCollection<SeedData>(nameof(SeedData));
 
@@ -47,7 +47,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             {
                 lock (_syncRoot)
                 {
-                    using var db = new LiteDatabase(Constants.ConnectionString);
+                    using var db = new LiteDatabase(ConnectionString);
 
                     ILiteCollection<SeedData>? col = db.GetCollection<SeedData>(nameof(SeedData));
 

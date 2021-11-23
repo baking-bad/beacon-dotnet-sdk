@@ -8,5 +8,5 @@ namespace Beacon.Sdk.Core.Domain.P2P.Dto.Handshake
         string? Icon = null,
         string? AppUrl = null,
         string Type = "p2p-pairing-request",
-        string Version = Constants.BeaconVersion);
+        string Version = BeaconConstants.BeaconVersion);
 }

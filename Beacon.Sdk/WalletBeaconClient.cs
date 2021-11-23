@@ -119,7 +119,7 @@ namespace Beacon.Sdk
         private async Task SendAcknowledgeResponseAsync(BeaconBaseMessage beaconBaseMessage)
         {
             var acknowledgeResponse =
-                new AcknowledgeResponse(Constants.BeaconVersion, beaconBaseMessage.Id, GetSenderId());
+                new AcknowledgeResponse(BeaconConstants.BeaconVersion, beaconBaseMessage.Id, GetSenderId());
         }
     }
 }

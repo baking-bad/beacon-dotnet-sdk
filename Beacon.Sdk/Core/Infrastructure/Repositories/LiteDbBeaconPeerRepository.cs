@@ -7,12 +7,12 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     using LiteDB;
     using Microsoft.Extensions.Logging;
 
-    public class LiteDbBeaconPeerRepository : IBeaconPeerRepository
+    public class LiteDbBeaconPeerRepository : BaseLiteDbRepository, IBeaconPeerRepository
     {
         private readonly ILogger<LiteDbBeaconPeerRepository> _logger;
         private readonly object _syncRoot = new();
 
-        public LiteDbBeaconPeerRepository(ILogger<LiteDbBeaconPeerRepository> logger)
+        public LiteDbBeaconPeerRepository(ILogger<LiteDbBeaconPeerRepository> logger, RepositorySettings settings) : base(settings)
         {
             _logger = logger;
         }
@@ -24,7 +24,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             {
                 lock (_syncRoot)
                 {
-                    using var db = new LiteDatabase(Constants.ConnectionString);
+                    using var db = new LiteDatabase(ConnectionString);
 
                     ILiteCollection<BeaconPeer>? col = db.GetCollection<BeaconPeer>(nameof(BeaconPeer));
 
@@ -49,7 +49,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             {
                 lock (_syncRoot)
                 {
-                    using var db = new LiteDatabase(Constants.ConnectionString);
+                    using var db = new LiteDatabase(ConnectionString);
 
                     ILiteCollection<BeaconPeer>? col = db.GetCollection<BeaconPeer>(nameof(BeaconPeer));
 

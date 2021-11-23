@@ -40,13 +40,13 @@ namespace Beacon.Sdk.Core.Domain.Services.P2P
             if (_sdkStorage.MatrixSelectedNode is {Length: > 0})
                 return _sdkStorage.MatrixSelectedNode;
 
-            int startIndex = PublicKeyToInt(publicKey, Constants.KnownRelayServers.Length);
+            int startIndex = PublicKeyToInt(publicKey, BeaconConstants.KnownRelayServers.Length);
             var offset = 0;
 
-            while (offset < Constants.KnownRelayServers.Length)
+            while (offset < BeaconConstants.KnownRelayServers.Length)
             {
-                int index = (startIndex + offset) % Constants.KnownRelayServers.Length;
-                string relayServer = Constants.KnownRelayServers[index];
+                int index = (startIndex + offset) % BeaconConstants.KnownRelayServers.Length;
+                string relayServer = BeaconConstants.KnownRelayServers[index];
 
                 try
                 {
