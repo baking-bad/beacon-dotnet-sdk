@@ -1,12 +1,14 @@
-namespace Beacon.Sdk.Core.Domain.Interfaces.Data
+namespace Beacon.Sdk.Core.Domain.Interfaces
 {
     using Infrastructure.Cryptography.Libsodium;
-    using Sodium;
     using Utils;
+    using Sodium;
 
     public interface ICryptographyService
     {
-        SessionKeyPair CreateServerSessionKeyPair(byte[] clientPublicKey, byte[] serverSecretKey);
+        SessionKeyPair CreateClientSessionKeyPair(byte[] clientPublicKey, byte[] serverPrivateKey);
+        
+        SessionKeyPair CreateServerSessionKeyPair(byte[] clientPublicKey, byte[] serverPrivateKey);
         
         byte[] Hash(byte[] input);
         
