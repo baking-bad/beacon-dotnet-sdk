@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core.Infrastructure.Serialization
+namespace Beacon.Sdk.Core.Infrastructure
 {
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;

@@ -1,11 +1,11 @@
 namespace Beacon.Sdk.Core.Domain.Interfaces.Data
 {
-    using Utils;
+    using System.Threading.Tasks;
 
     public interface IBeaconPeerRepository
     {
-        BeaconPeer Create(string name, string relaySever, HexString hexPublicKey, string version);
-        
-        BeaconPeer? TryReadByUserId(string userId);
+        Task<BeaconPeer> Create(BeaconPeer peer);
+
+        Task<BeaconPeer?> TryReadByUserId(string userId);
     }
 }

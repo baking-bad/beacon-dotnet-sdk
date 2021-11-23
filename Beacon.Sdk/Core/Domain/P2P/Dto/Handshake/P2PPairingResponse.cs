@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core.Transport.P2P.Dto.Handshake
+namespace Beacon.Sdk.Core.Domain.P2P.Dto.Handshake
 {
     public record P2PPairingResponse(
         string Id,
@@ -9,13 +9,4 @@ namespace Beacon.Sdk.Core.Transport.P2P.Dto.Handshake
         string? AppUrl = null,
         string Type = "p2p-pairing-response",
         string Version = Constants.BeaconVersion);
-
-
-    // Todo: tzip-10??
-    // public record P2PPairingResponse(
-    //     string Name,
-    //     string? Icon,
-    //     string? AppUrl,
-    //     string PublicKey
-    // );
 }

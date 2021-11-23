@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
+namespace Beacon.Sdk.Core.Domain.P2P.ChannelOpening
 {
     public struct ChannelOpeningMessage
     {

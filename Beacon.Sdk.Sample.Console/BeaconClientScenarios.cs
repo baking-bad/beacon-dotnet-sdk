@@ -6,8 +6,6 @@ namespace Beacon.Sdk.Sample.Console
     using Base58Check;
     using Core.Domain;
     using Core.Infrastructure.Cryptography;
-    using Core.Transport.P2P.ChannelOpening;
-    using Core.Transport.P2P.Dto.Handshake;
     using Matrix.Sdk;
     using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;

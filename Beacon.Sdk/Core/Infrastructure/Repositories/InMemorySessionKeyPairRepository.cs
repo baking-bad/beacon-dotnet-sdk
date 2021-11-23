@@ -1,11 +1,11 @@
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
     using System.Collections.Concurrent;
-    using Domain.Interfaces;
-    using global::Beacon.Sdk.Core.Domain.Interfaces.Data;
     using Cryptography.Libsodium;
-    using Utils;
+    using Domain.Interfaces;
+    using Domain.Interfaces.Data;
     using Sodium;
+    using Utils;
 
     public class InMemorySessionKeyPairRepository : ISessionKeyPairRepository
     {
@@ -22,9 +22,10 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         public SessionKeyPair CreateOrReadClient(HexString clientHexPublicKey, KeyPair serverKeyPair) =>
             ClientSessionKeyPairs.TryGetValue(clientHexPublicKey, out SessionKeyPair sessionKeyPair)
                 ? sessionKeyPair
-                : ClientSessionKeyPairs[clientHexPublicKey] = 
-                    _cryptographyService.CreateClientSessionKeyPair(clientHexPublicKey.ToByteArray(), serverKeyPair.PrivateKey);
-        
+                : ClientSessionKeyPairs[clientHexPublicKey] =
+                    _cryptographyService.CreateClientSessionKeyPair(clientHexPublicKey.ToByteArray(),
+                        serverKeyPair.PrivateKey);
+
         public SessionKeyPair CreateOrReadServer(HexString clientHexPublicKey, KeyPair serverKeyPair) =>
             ServerSessionKeyPairs.TryGetValue(clientHexPublicKey, out SessionKeyPair sessionKeyPair)
                 ? sessionKeyPair

@@ -1,9 +1,9 @@
 namespace Beacon.Sdk.Core.Domain.Services
 {
     using System;
+    using Infrastructure.Repositories;
     using Interfaces;
     using Interfaces.Data;
-    using Infrastructure.Repositories;
     using Sodium;
 
     public class KeyPairService
@@ -25,8 +25,9 @@ namespace Beacon.Sdk.Core.Domain.Services
                 if (seed != null)
                     return _cryptographyService.GenerateEd25519KeyPair(seed);
 
-                string? newSeed = _seedRepository.TryCreate(Guid.NewGuid().ToString()).Result;
-                return _cryptographyService.GenerateEd25519KeyPair(newSeed ?? throw new ArgumentNullException(nameof(seed)));
+                string? newSeed = _seedRepository.Create(Guid.NewGuid().ToString()).Result;
+                return _cryptographyService.GenerateEd25519KeyPair(newSeed ??
+                                                                   throw new ArgumentNullException(nameof(seed)));
             }
         }
     }

@@ -2,7 +2,8 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Core.Transport.P2P;
+    using Core.Domain.Services;
+    using Core.Domain.Services.P2P;
     using Matrix.Sdk.Core.Domain.Services;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -33,7 +34,7 @@
 
             ILogger<Program> logger = host.Services.GetRequiredService<ILogger<Program>>();
             ILogger<RelayServerService> relayServerServiceLogger = host.Services.GetRequiredService<ILogger<RelayServerService>>();
-            ILogger<SessionCryptographyService> sessionCryptographyServiceLogger = host.Services.GetRequiredService<ILogger<SessionCryptographyService>>();
+            ILogger<MessageService> sessionCryptographyServiceLogger = host.Services.GetRequiredService<ILogger<MessageService>>();
             ILogger<PollingService> pollingServiceLogger = host.Services.GetRequiredService<ILogger<PollingService>>();
            
             logger.LogInformation("START");

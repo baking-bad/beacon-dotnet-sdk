@@ -1,7 +1,5 @@
 namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
 {
-    using System;
-
     // public static class SodiumCore
     // {
     //     private static bool s_isInit;

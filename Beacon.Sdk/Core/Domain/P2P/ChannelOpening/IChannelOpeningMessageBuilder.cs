@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
+namespace Beacon.Sdk.Core.Domain.P2P.ChannelOpening
 {
     using Utils;
 
@@ -13,7 +13,7 @@ namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
 
         void BuildRecipientId(string relayServer, HexString hexPublicKey);
 
-        void BuildPairingPayload(string pairingRequestId, int payloadVersion,
+        void BuildPairingPayload(string pairingRequestId, string payloadVersion,
             string senderRelayServer, string senderAppName);
 
         void BuildEncryptedPayload(HexString receiverHexPublicKey);

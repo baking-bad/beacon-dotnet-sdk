@@ -1,12 +1,10 @@
-namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
+namespace Beacon.Sdk.Core.Domain.P2P.ChannelOpening
 {
     using System;
-    using Domain;
-    using Domain.Interfaces;
-    using Domain.Interfaces.Data;
-    using Domain.Services;
     using Dto.Handshake;
-    using Infrastructure.Serialization;
+    using Infrastructure;
+    using Interfaces;
+    using Services;
     using Sodium;
     using Utils;
 
@@ -42,16 +40,16 @@ namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
             _message.RecipientId = $"@{hexHash}:{relayServer}";
         }
 
-        public void BuildPairingPayload(string pairingRequestId, int payloadVersion,
+        public void BuildPairingPayload(string pairingRequestId, string payloadVersion,
             string senderRelayServer, string senderAppName)
         {
             if (!HexString.TryParse(_keyPairService.KeyPair.PublicKey, out HexString senderHexPublicKey))
                 throw new InvalidOperationException("Can not parse sender public key.");
-            
+
             _message.Payload = payloadVersion switch
             {
-                1 => senderHexPublicKey.ToString(),
-                2 => BuildPairingPayloadV2(pairingRequestId, senderHexPublicKey, senderRelayServer, senderAppName),
+                "1" => senderHexPublicKey.ToString(),
+                "2" => BuildPairingPayloadV2(pairingRequestId, senderHexPublicKey, senderRelayServer, senderAppName),
                 _ => throw new ArgumentOutOfRangeException(nameof(payloadVersion))
             };
         }
@@ -65,7 +63,8 @@ namespace Beacon.Sdk.Core.Transport.P2P.ChannelOpening
             _message.Payload = _cryptographyService.EncryptMessageAsString(before, curve25519PublicKey);
         }
 
-        private string BuildPairingPayloadV2(string pairingRequestId, HexString senderHexPublicKey, string senderRelayServer, string senderAppName)
+        private string BuildPairingPayloadV2(string pairingRequestId, HexString senderHexPublicKey,
+            string senderRelayServer, string senderAppName)
         {
             var pairingResponse = new P2PPairingResponse(
                 pairingRequestId,

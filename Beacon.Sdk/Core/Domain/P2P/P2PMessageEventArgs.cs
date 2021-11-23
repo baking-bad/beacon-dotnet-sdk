@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core.Transport.P2P
+namespace Beacon.Sdk.Core.Domain.P2P
 {
     using System;
     using System.Collections.Generic;

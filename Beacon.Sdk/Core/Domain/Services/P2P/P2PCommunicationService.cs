@@ -1,11 +1,12 @@
-﻿namespace Beacon.Sdk.Core.Transport.P2P
+﻿namespace Beacon.Sdk.Core.Domain.Services.P2P
 {
     using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using ChannelOpening;
-    using Domain.Interfaces;
+    using Domain.P2P;
+    using Domain.P2P.ChannelOpening;
+    using Interfaces;
     using Matrix.Sdk;
     using Matrix.Sdk.Core.Domain.MatrixRoom;
     using Matrix.Sdk.Core.Domain.RoomEvent;
@@ -13,25 +14,30 @@
 
     public class P2PCommunicationService : IP2PCommunicationService
     {
-        public event EventHandler<P2PMessageEventArgs> OnP2PMessagesReceived;
-        private readonly SessionCryptographyService _sessionCryptographyService;
         private readonly IChannelOpeningMessageBuilder _channelOpeningMessageBuilder;
         private readonly IMatrixClient _matrixClient;
+        private readonly MessageService _messageService;
+        private readonly RelayServerService _relayServerService;
+
 
         public P2PCommunicationService(
-            SessionCryptographyService sessionCryptographyService,
+            MessageService messageService,
             IMatrixClient matrixClient,
-            IChannelOpeningMessageBuilder channelOpeningMessageBuilder)
+            IChannelOpeningMessageBuilder channelOpeningMessageBuilder,
+            RelayServerService relayServerService)
         {
-            _sessionCryptographyService = sessionCryptographyService;
+            _messageService = messageService;
             _matrixClient = matrixClient;
             _channelOpeningMessageBuilder = channelOpeningMessageBuilder;
+            _relayServerService = relayServerService;
         }
+
+        public event EventHandler<P2PMessageEventArgs> OnP2PMessagesReceived;
 
         public async Task LoginAsync()
         {
-            SessionCryptographyService.LoginRequest request = await _sessionCryptographyService.CreateLoginRequest();
-            
+            RelayServerService.LoginRequest request = await _relayServerService.CreateLoginRequest();
+
             await _matrixClient.LoginAsync(request.Address, request.Username, request.Password, request.DeviceId);
         }
 
@@ -41,25 +47,6 @@
             _matrixClient.Start();
         }
 
-        private void OnMatrixRoomEventsReceived(object? sender, MatrixRoomEventsEventArgs e)
-        {
-            if (sender is not IMatrixClient)
-                throw new ArgumentException("sender is not IMatrixClient");
-            
-            List<BaseRoomEvent> matrixRoomEvents = e.MatrixRoomEvents;
-            var messages = new List<string>();
-            
-            foreach (BaseRoomEvent matrixRoomEvent in matrixRoomEvents)
-            {
-                string? message = _sessionCryptographyService.TryDecryptMessageFromEvent(matrixRoomEvent);
-                
-                if (message != null)
-                    messages.Add(message);
-            }
-            
-            OnP2PMessagesReceived.Invoke(this, new P2PMessageEventArgs(messages));
-        }
-
         public void Stop()
         {
             _matrixClient.OnMatrixRoomEventsReceived -= OnMatrixRoomEventsReceived;
@@ -67,19 +54,21 @@
         }
 
         public async Task SendChannelOpeningMessageAsync(string id, HexString receiverHexPublicKey,
-            string receiverRelayServer, int version, string appName)
+            string receiverRelayServer, string version, string appName)
         {
             try
             {
-                var senderRelayServer =
-                    (_matrixClient.BaseAddress?.Host ?? throw new NullReferenceException("Provide P2PClient BaseAddress"));
+                string senderRelayServer =
+                    _matrixClient.BaseAddress?.Host ??
+                    throw new NullReferenceException("Provide P2PClient BaseAddress");
 
                 _channelOpeningMessageBuilder.Reset();
                 _channelOpeningMessageBuilder.BuildRecipientId(receiverRelayServer, receiverHexPublicKey);
-                _channelOpeningMessageBuilder.BuildPairingPayload(id, version, "beacon-node-0.papers.tech:8448", appName);
-                
-                var t =_channelOpeningMessageBuilder.Message;
-                
+                _channelOpeningMessageBuilder.BuildPairingPayload(id, version, "beacon-node-0.papers.tech:8448",
+                    appName);
+
+                ChannelOpeningMessage t = _channelOpeningMessageBuilder.Message;
+
                 _channelOpeningMessageBuilder.BuildEncryptedPayload(receiverHexPublicKey);
 
                 ChannelOpeningMessage channelOpeningMessage = _channelOpeningMessageBuilder.Message;
@@ -104,5 +93,24 @@
         }
 
         public Task SendMessageAsync() => throw new NotImplementedException();
+
+        private void OnMatrixRoomEventsReceived(object? sender, MatrixRoomEventsEventArgs e)
+        {
+            if (sender is not IMatrixClient)
+                throw new ArgumentException("sender is not IMatrixClient");
+
+            List<BaseRoomEvent> matrixRoomEvents = e.MatrixRoomEvents;
+            var messages = new List<string>();
+
+            foreach (BaseRoomEvent matrixRoomEvent in matrixRoomEvents)
+            {
+                string? message = _messageService.TryDecryptMessageFromEvent(matrixRoomEvent);
+
+                if (message != null)
+                    messages.Add(message);
+            }
+
+            OnP2PMessagesReceived.Invoke(this, new P2PMessageEventArgs(messages));
+        }
     }
 }

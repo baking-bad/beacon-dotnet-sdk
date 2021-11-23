@@ -10,14 +10,14 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     // Todo: Add secure storage
     public class LiteDbSeedRepository : ISeedRepository
     {
-        private readonly ILogger<LiteDbSeedRepository>? _logger;
+        private readonly ILogger<LiteDbSeedRepository> _logger;
         private readonly object _syncRoot = new();
-        
+
         public LiteDbSeedRepository(ILogger<LiteDbSeedRepository> logger)
         {
             _logger = logger;
         }
-        
+
         public Task<string?> TryRead()
         {
             try
@@ -25,48 +25,46 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 lock (_syncRoot)
                 {
                     using var db = new LiteDatabase(Constants.ConnectionString);
-                
+
                     ILiteCollection<SeedData>? col = db.GetCollection<SeedData>(nameof(SeedData));
 
                     SeedData seedData = col.Query().FirstOrDefault();
 
-                    return Task.FromResult(seedData?.Seed);    
+                    return Task.FromResult(seedData?.Seed);
                 }
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Error getting KeyPair");
+                _logger?.LogError(ex, "Error reading SeedData");
             }
 
-            return Task.FromResult((string?) null);
+            throw new Exception("Unknown exception");
         }
 
-        public Task<string?> TryCreate(string seed)
+        public Task<string> Create(string seed)
         {
             try
             {
                 lock (_syncRoot)
                 {
                     using var db = new LiteDatabase(Constants.ConnectionString);
-                
+
                     ILiteCollection<SeedData>? col = db.GetCollection<SeedData>(nameof(SeedData));
 
-                    var seedData = new SeedData
+                    col.Insert(new SeedData
                     {
                         Seed = seed
-                    };
-                    
-                    col.Insert(seedData);
+                    });
 
-                    return Task.FromResult(seedData.Seed)!;
+                    return Task.FromResult(seed);
                 }
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Error creating KeyPair");
+                _logger?.LogError(ex, "Error creating SeedData");
             }
 
-            return Task.FromResult((string?) null);
+            throw new Exception("Unknown exception");
         }
     }
 }

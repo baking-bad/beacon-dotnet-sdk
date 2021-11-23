@@ -3,7 +3,7 @@ namespace Beacon.Sdk
     using System;
     using System.Threading.Tasks;
     using Core.Beacon;
-    using Core.Transport.P2P.Dto.Handshake;
+    using Core.Domain.P2P.Dto.Handshake;
     using Core.Utils;
 
     public class MockWalletClient : IWalletBeaconClient
@@ -24,7 +24,7 @@ namespace Beacon.Sdk
         public Task InitAsync()
         {
             Console.WriteLine("Init");
-            
+
             return Task.CompletedTask;
         }
 
@@ -32,8 +32,8 @@ namespace Beacon.Sdk
         {
             await Task.Delay(100);
 
-            var eventArgs = new BeaconMessageEventArgs(new BeaconBaseMessage("type", "2", "id", "senderId")); 
-            OnBeaconMessageReceived?.Invoke(this,  eventArgs);
+            var eventArgs = new BeaconMessageEventArgs(new BeaconBaseMessage("type", "2", "id", "senderId"));
+            OnBeaconMessageReceived?.Invoke(this, eventArgs);
 
             await Task.CompletedTask;
         }
