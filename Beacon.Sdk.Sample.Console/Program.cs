@@ -43,8 +43,8 @@
 
             try
             {
-                // await sample.Run();
-                sample.TestRepositories();
+                await sample.Run();
+                // sample.TestRepositories();
 
             }
             catch (Exception ex)

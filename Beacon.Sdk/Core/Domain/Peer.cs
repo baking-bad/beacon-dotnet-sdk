@@ -6,12 +6,13 @@ namespace Beacon.Sdk.Core.Domain
 
     public class Peer
     {
-        public Peer(string name, HexString hexPublicKey, string version, string userId)
+        public Peer(string name, HexString hexPublicKey, string version, string userId, string relayServer)
         {
             Name = name;
             HexPublicKey = hexPublicKey;
             Version = version;
             UserId = userId;
+            RelayServer = relayServer;
         }
 
         public long Id { get; set; }
@@ -37,7 +38,7 @@ namespace Beacon.Sdk.Core.Domain
                 if (!HexString.TryParse(hash, out HexString hexHash))
                     throw new Exception();
 
-                return new Peer(name, hexPublicKey, version, $"@{hexHash}:{relayServer}");
+                return new Peer(name, hexPublicKey, version, $"@{hexHash}:{relayServer}", relayServer);
             }
         }
     }
