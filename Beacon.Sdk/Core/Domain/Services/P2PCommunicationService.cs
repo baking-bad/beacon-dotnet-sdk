@@ -5,6 +5,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Interfaces;
+    using Interfaces.Data;
     using Matrix.Sdk;
     using Matrix.Sdk.Core.Domain.MatrixRoom;
     using Matrix.Sdk.Core.Domain.RoomEvent;
@@ -16,19 +17,25 @@
     {
         private readonly IChannelOpeningMessageBuilder _channelOpeningMessageBuilder;
         private readonly IMatrixClient _matrixClient;
+        private readonly IP2PPeerRoomRepository _p2PPeerRoomRepository;
         private readonly P2PLoginRequestFactory _p2PLoginRequestFactory;
+        private readonly P2PPeerRoomFactory _p2PPeerRoomFactory;
         private readonly P2PMessageService _p2PMessageService;
 
         public P2PCommunicationService(
-            P2PMessageService p2PMessageService,
             IMatrixClient matrixClient,
             IChannelOpeningMessageBuilder channelOpeningMessageBuilder,
-            P2PLoginRequestFactory p2PLoginRequestFactory)
+            IP2PPeerRoomRepository p2PPeerRoomRepository,
+            P2PLoginRequestFactory p2PLoginRequestFactory,
+            P2PPeerRoomFactory p2PPeerRoomFactory,
+            P2PMessageService p2PMessageService)
         {
-            _p2PMessageService = p2PMessageService;
             _matrixClient = matrixClient;
             _channelOpeningMessageBuilder = channelOpeningMessageBuilder;
+            _p2PPeerRoomRepository = p2PPeerRoomRepository;
             _p2PLoginRequestFactory = p2PLoginRequestFactory;
+            _p2PPeerRoomFactory = p2PPeerRoomFactory;
+            _p2PMessageService = p2PMessageService;
         }
 
         public event TaskEventHandler<P2PMessageEventArgs> OnP2PMessagesReceived;
@@ -52,7 +59,7 @@
             _matrixClient.OnMatrixRoomEventsReceived -= OnMatrixRoomEventsReceived;
         }
 
-        public async Task<PeerRoom> SendChannelOpeningMessageAsync(Peer peer, string id, string appName)
+        public async Task<P2PPeerRoom> SendChannelOpeningMessageAsync(Peer peer, string id, string appName)
         {
             try
             {
@@ -82,11 +89,9 @@
 
                 _ = await _matrixClient.SendMessageAsync(matrixRoom.Id, channelOpeningMessage.ToString());
 
-                return new PeerRoom
-                {
-                    PeerHexPublicKey = peer.HexPublicKey,
-                    RoomId = matrixRoom.Id
-                };
+                P2PPeerRoom p2PPeerRoom = _p2PPeerRoomFactory.Create(peer.RelayServer, peer.HexPublicKey, matrixRoom.Id);
+
+                return _p2PPeerRoomRepository.CreateOrUpdate(p2PPeerRoom).Result;
             }
             catch (Exception ex)
             {
@@ -95,13 +100,16 @@
             }
         }
 
-        public async Task SendMessageAsync(Peer peer, string roomId, string message)
+        public async Task SendMessageAsync(Peer peer, string message)
         {
             try
             {
+                P2PPeerRoom p2PPeerRoom = _p2PPeerRoomRepository.TryReadByPeerHexPublicKey(peer.HexPublicKey).Result
+                                          ?? throw new NullReferenceException(nameof(P2PPeerRoom));
+                
                 string encryptedMessage = _p2PMessageService.EncryptMessage(peer.HexPublicKey, message);
             
-                _ = await _matrixClient.SendMessageAsync(roomId, encryptedMessage);
+                _ = await _matrixClient.SendMessageAsync(p2PPeerRoom.RoomId, encryptedMessage);
             }
             catch (Exception ex)
             {

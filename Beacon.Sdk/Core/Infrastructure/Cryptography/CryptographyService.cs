@@ -36,9 +36,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
                 clientPublicKeyCurve);
         }
 
-        public byte[] Hash(byte[] input, int length) => GenericHash.Hash(input, null, input.Length);
+        public byte[] Hash(byte[] input) => GenericHash.Hash(input, null, input.Length);
 
-        public byte[] Decrypt(byte[] encryptedBytes, byte[] sharedKey)
+        private byte[] Decrypt(byte[] encryptedBytes, byte[] sharedKey)
         {
             byte[] nonce = encryptedBytes[..NonceBytes];
             byte[] cipher = encryptedBytes[NonceBytes..];
@@ -46,7 +46,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             return SecretBox.Open(cipher, nonce, sharedKey);
         }
 
-        public byte[] Encrypt(byte[] message, byte[] recipientPublicKey)
+        private byte[] Encrypt(byte[] message, byte[] recipientPublicKey)
         {
             byte[] nonce = SodiumCore.GetRandomBytes(NonceBytes)!;
             byte[] result = SealedPublicKeyBox.Create(message, recipientPublicKey);

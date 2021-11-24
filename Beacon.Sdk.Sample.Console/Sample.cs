@@ -33,12 +33,12 @@ namespace Beacon.Sdk.Sample.Console
         }
 
         private const string QrCode = 
-                "BSdNU2tFbvqrkNr3R7P5gccbtDbC1b6iAxT1x3VDKhEWit6PRS8mHc3AqxsDx6a8SbExWNB1FsCXJWe8EQ8rfBi1GtVtuPFeYg4xfYJu8xn1PvriUHxqcNHHoxhRLmxeAHWkMRwQAseA2zesF18acQ1wAQm9SCCJ2NCe4NQRfB1Fg2B2rkF1rbHYtT3BQkoW5SrJitfqaKGRzWX9LmaR8QcLHDP8iCv6bnacpq9oo6KwwvmdNi5XL44pseRWub1uBDSr2g4tGFC4MR7RYFmfe224nh5LKndia55ZM1KKQZVmuAc4RtjSqZnFpcoXHgJi5zga8SuW"
+                "BSdNU2tFbvrH1Law9nwVfECYQmbhFWCDuTuSG2Zr2vLJiVEWggZAzBatkxW3M9ffVqvFdD1chKdocCZ4RhEbgfeJNrVWhwstCeVz7NnJgSRBep8CH3XREbRq8RnCTvsYD5HxhDVj1vd6GVqbRv4T4AzVutRTtVFmzDm6jBgKtpUzEifCKAJQEQcs93rEEGdhYrYi7C3sd3Re5FLJtTW7BVnGzxU8EPTwe8Msort3sGxd865APUS2Y4dFbCQVeqQrT1mKj9qHMpQhbuBgkz2QhMCZMUn2ErQdyxctvZcGRJ8EqdhQJhvJYiLAdHa62Zr6T55u5b4f"
             ;
 
         public async Task Run()
         {
-            const string path = "test.db";
+            const string path = "test1.db";
             File.Delete(path);
             
             var factory = new WalletClientFactory();

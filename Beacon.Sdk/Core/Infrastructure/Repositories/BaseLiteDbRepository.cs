@@ -12,10 +12,10 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
             ConnectionString = settings.ConnectionString;
             
-            BsonMapper.Global.RegisterType<HexString>
-            (
-                serialize: hexString => hexString.Value,
-                deserialize: bson => new HexString(bson.AsArray));
+            // BsonMapper.Global.RegisterType<HexString>
+            // (
+            //     serialize: hexString => hexString.Value,
+            //     deserialize: bson => new HexString(bson.AsArray));
         }
     }
 }

@@ -1,5 +1,6 @@
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
+    using System.Linq;
     using System.Threading.Tasks;
     using Domain;
     using Domain.Interfaces.Data;
@@ -17,7 +18,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             _logger = logger;
         }
 
-        //  BeaconPeer beaconPeer = BeaconPeer.Factory.Create(_cryptographyService, name, relayServer,hexPublicKey, version);
         public Task<Peer> Create(Peer peer)
         {
             lock (_syncRoot)
@@ -28,7 +28,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
                 col.Insert(peer);
 
-                col.EnsureIndex(x => x.UserId);
+                col.EnsureIndex(x => x.SenderUserId);
 
                 return Task.FromResult(peer);
             }
@@ -36,7 +36,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             // throw new Exception("Unknown exception");
         }
 
-        public Task<Peer?> TryReadByUserId(string userId)
+        public Task<Peer?> TryReadBySenderUserId(string senderUserId)
         {
             lock (_syncRoot)
             {
@@ -44,7 +44,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
                 ILiteCollection<Peer>? col = db.GetCollection<Peer>(nameof(Peer));
 
-                Peer? peer = col.Query().Where(x => x.UserId == userId).FirstOrDefault();
+                Peer? peer = col.Query().Where(x => x.SenderUserId == senderUserId).FirstOrDefault();
 
                 return Task.FromResult(peer);
             }

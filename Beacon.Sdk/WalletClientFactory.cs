@@ -1,5 +1,6 @@
 namespace Beacon.Sdk
 {
+    using Core.Domain;
     using Core.Domain.P2P;
     using Core.Domain.P2P.ChannelOpening;
     using Core.Domain.Services;
@@ -32,7 +33,7 @@ namespace Beacon.Sdk
 
             var repositorySettings = new RepositorySettings
             {
-                ConnectionString = "test.db"
+                ConnectionString = "test1.db"
             };
             var cryptographyService = new CryptographyService();
             var sessionKeyPairRepository = new InMemorySessionKeyPairRepository(cryptographyService);
@@ -40,17 +41,17 @@ namespace Beacon.Sdk
             var peerRepository =
                 new LiteDbPeerRepository(
                     new Logger<LiteDbPeerRepository>(
-                        loggerFactory ?? new NullLoggerFactory()), repositorySettings);
+                        loggerFactory ?? NullLoggerFactory.Instance), repositorySettings);
 
-            var peerRoomRepository =
-                new LiteDbPeerRoomRepository(
-                    new Logger<LiteDbPeerRoomRepository>(
-                        loggerFactory ?? new NullLoggerFactory()), repositorySettings);
+            var p2PPeerRoomRepository =
+                new LiteDbP2PPeerRoomRepository(
+                    new Logger<LiteDbP2PPeerRoomRepository>(
+                        loggerFactory ?? NullLoggerFactory.Instance), repositorySettings);
 
             var seedRepository =
                 new LiteDbSeedRepository(
                     new Logger<LiteDbSeedRepository>(
-                        loggerFactory ?? new NullLoggerFactory()), repositorySettings);
+                        loggerFactory ?? NullLoggerFactory.Instance), repositorySettings);
 
             var sdkStorage = new SdkStorage();
             var jsonSerializerService = new JsonSerializerService();
@@ -69,36 +70,41 @@ namespace Beacon.Sdk
                 new ChannelOpeningMessageBuilder(cryptographyService, jsonSerializerService, keyPairService);
 
             var p2PMessageService = new P2PMessageService(
-                new Logger<P2PMessageService>(loggerFactory),
+                new Logger<P2PMessageService>(loggerFactory ?? NullLoggerFactory.Instance),
+                p2PPeerRoomRepository,
                 cryptographyService,
-                peerRepository,
                 sessionKeyPairRepository,
                 keyPairService);
 
             var matrixClientService = new ClientService(SingletonHttpFactory);
-            var relayServerService = new P2PLoginRequestFactory(
-                new Logger<P2PLoginRequestFactory>(loggerFactory ?? new NullLoggerFactory()),
+            
+            var p2PLoginRequestFactory = new P2PLoginRequestFactory(
+                new Logger<P2PLoginRequestFactory>(loggerFactory ?? NullLoggerFactory.Instance),
                 matrixClientService,
                 sdkStorage,
                 cryptographyService,
                 keyPairService);
 
+            var p2PPeerRoomFactory = new P2PPeerRoomFactory(cryptographyService);
             var p2PCommunicationService = new P2PCommunicationService(
-                p2PMessageService,
                 MatrixClientFactory.Create(new Logger<PollingService>(loggerFactory ?? new NullLoggerFactory())),
                 channelOpeningMessageBuilder,
-                relayServerService);
+                p2PPeerRoomRepository,
+                p2PLoginRequestFactory,
+                p2PPeerRoomFactory,
+                p2PMessageService);
 
             #endregion
 
+            var peerFactory = new PeerFactory(cryptographyService);
             _client = new WalletClient.WalletClient(
                 new Logger<WalletClient.WalletClient>(loggerFactory ?? new NullLoggerFactory()),
-                peerRepository,
-                peerRoomRepository,
                 cryptographyService,
+                peerRepository,
                 p2PCommunicationService,
                 jsonSerializerService,
                 keyPairService,
+                peerFactory,
                 options);
 
             return _client;

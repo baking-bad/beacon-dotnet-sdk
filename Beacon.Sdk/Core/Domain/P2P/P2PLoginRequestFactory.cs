@@ -6,7 +6,6 @@ namespace Beacon.Sdk.Core.Domain.P2P
     using System.Threading.Tasks;
     using Dto;
     using Infrastructure;
-    using Infrastructure.Repositories;
     using Interfaces;
     using Matrix.Sdk.Core.Infrastructure.Services;
     using Microsoft.Extensions.Logging;

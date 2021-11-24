@@ -29,5 +29,10 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
 
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern int crypto_box_noncebytes();
+
+        [DllImport("libsodium", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern int crypto_generichash(byte[] buffer, int bufferLength, byte[] message,
+            long messageLength, byte[] key,
+            int keyLength);
     }
 }

@@ -7,48 +7,43 @@ namespace Beacon.Sdk.Core.Domain.Services
     using Interfaces.Data;
     using Matrix.Sdk.Core.Domain.RoomEvent;
     using Microsoft.Extensions.Logging;
-    using Sodium;
+    using P2P;
     using Utils;
 
     public class P2PMessageService
     {
-        private readonly IPeerRepository _peerRepository;
-
-        private readonly ICryptographyService _cryptographyService;
-
-        private readonly KeyPairService _keyPairService;
         private readonly ILogger<P2PMessageService> _logger;
+        private readonly IP2PPeerRoomRepository _p2PPeerRoomRepository;
+        private readonly ICryptographyService _cryptographyService;
         private readonly ISessionKeyPairRepository _sessionKeyPairRepository;
+        private readonly KeyPairService _keyPairService;
 
         public P2PMessageService(
-            ILogger<P2PMessageService> logger,
-            ICryptographyService cryptographyService,
-            IPeerRepository peerRepository,
-            ISessionKeyPairRepository sessionKeyPairRepository,
+            ILogger<P2PMessageService> logger, 
+            IP2PPeerRoomRepository p2PPeerRoomRepository,
+            ICryptographyService cryptographyService, 
+            ISessionKeyPairRepository sessionKeyPairRepository, 
             KeyPairService keyPairService)
         {
             _logger = logger;
+            _p2PPeerRoomRepository = p2PPeerRoomRepository;
             _cryptographyService = cryptographyService;
-            _peerRepository = peerRepository;
             _sessionKeyPairRepository = sessionKeyPairRepository;
             _keyPairService = keyPairService;
         }
-
 
         public string? TryDecryptMessageFromEvent(BaseRoomEvent matrixRoomEvent)
         {
             if (matrixRoomEvent is not TextMessageEvent textMessageEvent) return null;
 
             string senderUserId = textMessageEvent.SenderUserId;
-            Peer? peer = _peerRepository.TryReadByUserId(senderUserId).Result;
-
-            if (peer == null)
+            P2PPeerRoom? p2PPeerRoom = _p2PPeerRoomRepository.TryReadByP2PUserId(senderUserId).Result;
+            
+            if (p2PPeerRoom == null)
             {
                 _logger?.LogInformation("Unknown sender");
                 return null;
             }
-
-            if (!senderUserId.StartsWith(peer.UserId)) return null;
 
             if (!_cryptographyService.Validate(textMessageEvent.Message))
             {
@@ -56,7 +51,7 @@ namespace Beacon.Sdk.Core.Domain.Services
                 return null;
             }
 
-            SessionKeyPair server = _sessionKeyPairRepository.CreateOrReadServer(peer.HexPublicKey, _keyPairService.KeyPair);
+            SessionKeyPair server = _sessionKeyPairRepository.CreateOrReadServer(p2PPeerRoom.PeerHexPublicKey, _keyPairService.KeyPair);
 
             string decryptedMessage = _cryptographyService.DecryptAsString(textMessageEvent.Message, server.Rx);
 
@@ -72,3 +67,6 @@ namespace Beacon.Sdk.Core.Domain.Services
         }
     }
 }
+
+// Peer? peer = _peerRepository.TryReadBySenderUserId(senderUserId).Result;
+// if (!senderUserId.StartsWith(p2PPeerRoom.P2PUserId)) return null;

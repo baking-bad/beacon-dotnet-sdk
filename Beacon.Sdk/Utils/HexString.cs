@@ -7,8 +7,8 @@ namespace Beacon.Sdk.Utils
     public record HexString
     {
         private const string Prefix = "0x";
-        public readonly string Value;
-
+        // public readonly string Value;
+        public string Value { get; set; }
         public HexString(string value)
         {
             Value = value;

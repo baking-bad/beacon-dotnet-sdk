@@ -10,11 +10,7 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
 
         SessionKeyPair CreateServerSessionKeyPair(byte[] clientPublicKey, byte[] serverPrivateKey);
 
-        byte[] Hash(byte[] input, int length);
-
-        byte[] Decrypt(byte[] encryptedBytes, byte[] sharedKey);
-
-        byte[] Encrypt(byte[] message, byte[] recipientPublicKey);
+        byte[] Hash(byte[] input);
 
         KeyPair GenerateEd25519KeyPair(string seed);
 
