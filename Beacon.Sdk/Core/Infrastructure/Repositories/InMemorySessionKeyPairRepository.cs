@@ -19,17 +19,23 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             _cryptographyService = cryptographyService;
         }
 
-        public SessionKeyPair CreateOrReadClient(HexString clientHexPublicKey, KeyPair serverKeyPair) =>
-            ClientSessionKeyPairs.TryGetValue(clientHexPublicKey, out SessionKeyPair sessionKeyPair)
-                ? sessionKeyPair
-                : ClientSessionKeyPairs[clientHexPublicKey] =
-                    _cryptographyService.CreateClientSessionKeyPair(clientHexPublicKey.ToByteArray(),
-                        serverKeyPair.PrivateKey);
+        // public SessionKeyPair CreateOrReadClient(HexString clientHexPublicKey, KeyPair serverKeyPair) =>
+        //     ClientSessionKeyPairs.TryGetValue(clientHexPublicKey, out SessionKeyPair sessionKeyPair)
+        //         ? sessionKeyPair
+        //         : ClientSessionKeyPairs[clientHexPublicKey] =
+        //             _cryptographyService.CreateClientSessionKeyPair(clientHexPublicKey.ToByteArray(),
+        //                 serverKeyPair.PrivateKey);
 
+        public SessionKeyPair CreateOrReadClient(HexString clientHexPublicKey, KeyPair serverKeyPair) =>
+            _cryptographyService.CreateClientSessionKeyPair(clientHexPublicKey.ToByteArray(), serverKeyPair.PrivateKey);
+        
         public SessionKeyPair CreateOrReadServer(HexString clientHexPublicKey, KeyPair serverKeyPair) =>
-            ServerSessionKeyPairs.TryGetValue(clientHexPublicKey, out SessionKeyPair sessionKeyPair)
-                ? sessionKeyPair
-                : ServerSessionKeyPairs[clientHexPublicKey] = _cryptographyService
-                    .CreateServerSessionKeyPair(clientHexPublicKey.ToByteArray(), serverKeyPair.PrivateKey);
+            _cryptographyService.CreateServerSessionKeyPair(clientHexPublicKey.ToByteArray(), serverKeyPair.PrivateKey);
+        
+        // public SessionKeyPair CreateOrReadServer(HexString clientHexPublicKey, KeyPair serverKeyPair) =>
+        //     ServerSessionKeyPairs.TryGetValue(clientHexPublicKey, out SessionKeyPair sessionKeyPair)
+        //         ? sessionKeyPair
+        //         : ServerSessionKeyPairs[clientHexPublicKey] = _cryptographyService
+        //             .CreateServerSessionKeyPair(clientHexPublicKey.ToByteArray(), serverKeyPair.PrivateKey);
     }
 }

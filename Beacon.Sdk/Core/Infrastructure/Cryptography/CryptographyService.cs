@@ -38,22 +38,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
         public byte[] Hash(byte[] input) => GenericHash.Hash(input, null, input.Length);
 
-        private byte[] Decrypt(byte[] encryptedBytes, byte[] sharedKey)
-        {
-            byte[] nonce = encryptedBytes[..NonceBytes];
-            byte[] cipher = encryptedBytes[NonceBytes..];
-
-            return SecretBox.Open(cipher, nonce, sharedKey);
-        }
-
-        private byte[] Encrypt(byte[] message, byte[] recipientPublicKey)
-        {
-            byte[] nonce = SodiumCore.GetRandomBytes(NonceBytes)!;
-            byte[] result = SealedPublicKeyBox.Create(message, recipientPublicKey);
-
-            return nonce.Concat(result).ToArray();
-        }
-
         public KeyPair GenerateEd25519KeyPair(string seed)
         {
             byte[] hash = GenericHash.Hash(seed, (byte[]?) null, 32);
@@ -61,27 +45,20 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             return PublicKeyAuth.GenerateKeyPair(hash);
         }
 
-        public HexString EncryptAsHex(string message, byte[] recipientPublicKey)
+        public string Encrypt(string input, byte[] key)
         {
-            byte[] bytes = HexString.TryParse(message, out HexString hexString)
-                ? hexString.ToByteArray()
-                : Encoding.UTF8.GetBytes(message);
+            byte[] nonce = SodiumCore.GetRandomBytes(NonceBytes)!;
+            byte[] result = SealedPublicKeyBox.Create(String.Concat(nonce).ToString(), key); // SecretBox.Create(input, nonce, key);
 
-            byte[] encryptedBytes = Encrypt(bytes, recipientPublicKey);
-
-            if (!HexString.TryParse(encryptedBytes, out HexString result))
-                throw new InvalidOperationException("Can not parse encryptedBytes");
-
-            return result;
+            return Encoding.UTF8.GetString(result);
         }
 
-        public string DecryptAsString(string encryptedMessage, byte[] sharedKey)
+        public string Decrypt(string input, byte[] key)
         {
-            byte[] encryptedBytes = HexString.TryParse(encryptedMessage, out HexString hexString)
-                ? hexString.ToByteArray()
-                : Encoding.UTF8.GetBytes(encryptedMessage);
-
-            byte[] decryptedBytes = Decrypt(encryptedBytes, sharedKey);
+            byte[] encryptedBytes = Encoding.UTF8.GetBytes(input);
+            byte[] nonce = encryptedBytes[..NonceBytes];
+            byte[] cipher = encryptedBytes[NonceBytes..];
+            byte[] decryptedBytes = SecretBox.Open(cipher, nonce, key);
 
             return Encoding.UTF8.GetString(decryptedBytes);
         }

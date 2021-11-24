@@ -53,7 +53,7 @@ namespace Beacon.Sdk.Core.Domain.Services
 
             SessionKeyPair server = _sessionKeyPairRepository.CreateOrReadServer(p2PPeerRoom.PeerHexPublicKey, _keyPairService.KeyPair);
 
-            string decryptedMessage = _cryptographyService.DecryptAsString(textMessageEvent.Message, server.Rx);
+            string decryptedMessage = _cryptographyService.Decrypt(textMessageEvent.Message, server.Rx);
 
             byte[]? decodedBytes = Base58CheckEncoding.Decode(decryptedMessage);
             return Encoding.UTF8.GetString(decodedBytes);
@@ -63,7 +63,7 @@ namespace Beacon.Sdk.Core.Domain.Services
         {
             SessionKeyPair client = _sessionKeyPairRepository.CreateOrReadClient(peerHexPublicKey, _keyPairService.KeyPair);
 
-            return _cryptographyService.EncryptAsHex(message, client.Tx).Value;
+            return _cryptographyService.Encrypt(message, client.Tx);
         }
     }
 }

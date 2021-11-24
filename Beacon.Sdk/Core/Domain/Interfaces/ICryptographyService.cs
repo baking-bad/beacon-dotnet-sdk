@@ -14,9 +14,9 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
 
         KeyPair GenerateEd25519KeyPair(string seed);
 
-        HexString EncryptAsHex(string message, byte[] recipientPublicKey);
+        string Encrypt(string input, byte[] key);
 
-        string DecryptAsString(string encryptedMessage, byte[] sharedKey);
+        string Decrypt(string input, byte[] key);
 
         string ToHexString(byte[] input);
 

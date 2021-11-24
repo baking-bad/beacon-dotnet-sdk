@@ -33,7 +33,7 @@ namespace Beacon.Sdk.Sample.Console
         }
 
         private const string QrCode = 
-                "BSdNU2tFbvrH1Law9nwVfECYQmbhFWCDuTuSG2Zr2vLJiVEWggZAzBatkxW3M9ffVqvFdD1chKdocCZ4RhEbgfeJNrVWhwstCeVz7NnJgSRBep8CH3XREbRq8RnCTvsYD5HxhDVj1vd6GVqbRv4T4AzVutRTtVFmzDm6jBgKtpUzEifCKAJQEQcs93rEEGdhYrYi7C3sd3Re5FLJtTW7BVnGzxU8EPTwe8Msort3sGxd865APUS2Y4dFbCQVeqQrT1mKj9qHMpQhbuBgkz2QhMCZMUn2ErQdyxctvZcGRJ8EqdhQJhvJYiLAdHa62Zr6T55u5b4f"
+                "BSdNU2tFbwH7xnmJZc392jmwiR9FrX2KqgYLkuQQCNx8q3RT4Qe4hPQ4d7UJfVFuFMbyJsegzJXucZnWNmprZgGwp3qQcDqzwZSgeF33V8UQK8W9BF6ZxdTP9RxzfP3dViRvGSmGZnGXdmw1HW7JNUF25VJZYCKC81oDUh7MgoceDCKiAQ3WGiH7wGzYAgKK739p7QH7aMHxG4vsMzDP2697iRaZS8fXaWxkCdPypRR189zJt2RibpotFuJcUeeEZuzfTN1t8JwXmV9C882GvVS9bSGjqywpJgwtKeK9XK9evnpkhkNuYaQMKvUAp25bAcVrwhfQ"
             ;
 
         public async Task Run()
