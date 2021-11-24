@@ -1,26 +1,26 @@
-namespace Beacon.Sdk.Core.Domain.Services.P2P
+namespace Beacon.Sdk.Core.Domain.Services
 {
     using System.Text;
     using Base58Check;
-    using Infrastructure.Cryptography.Libsodium;
     using Interfaces;
     using Interfaces.Data;
+    using Infrastructure.Cryptography.Libsodium;
     using Matrix.Sdk.Core.Domain.RoomEvent;
     using Microsoft.Extensions.Logging;
     using Sodium;
 
-    public class MessageService
+    public class P2PMessageService
     {
         private readonly IBeaconPeerRepository _beaconPeerRepository;
 
         private readonly ICryptographyService _cryptographyService;
 
         private readonly KeyPairService _keyPairService;
-        private readonly ILogger<MessageService> _logger;
+        private readonly ILogger<P2PMessageService> _logger;
         private readonly ISessionKeyPairRepository _sessionKeyPairRepository;
 
-        public MessageService(
-            ILogger<MessageService> logger,
+        public P2PMessageService(
+            ILogger<P2PMessageService> logger,
             ICryptographyService cryptographyService,
             IBeaconPeerRepository beaconPeerRepository,
             ISessionKeyPairRepository sessionKeyPairRepository,

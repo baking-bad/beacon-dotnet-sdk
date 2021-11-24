@@ -37,10 +37,11 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Error creating BeaconPeerData");
+                throw;
+                // _logger?.LogError(ex, "Error creating BeaconPeerData");
             }
 
-            throw new Exception("Unknown exception");
+            // throw new Exception("Unknown exception");
         }
 
         public Task<BeaconPeer?> TryReadByUserId(string userId)
@@ -60,10 +61,11 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Error reading BeaconPeerData");
+                throw;
+                // _logger?.LogError(ex, "Error reading BeaconPeerData");
             }
 
-            throw new Exception("Unknown exception");
+            // throw new Exception("Unknown exception");
         }
     }
 }

@@ -1,8 +1,8 @@
 namespace Beacon.Sdk
 {
+    using Core.Domain.P2P;
     using Core.Domain.P2P.ChannelOpening;
     using Core.Domain.Services;
-    using Core.Domain.Services.P2P;
     using Core.Infrastructure;
     using Core.Infrastructure.Cryptography;
     using Core.Infrastructure.Repositories;
@@ -11,7 +11,7 @@ namespace Beacon.Sdk
     using Matrix.Sdk.Core.Infrastructure.Services;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Abstractions;
-
+    
     public class WalletBeaconClientFactory
     {
         private static readonly MatrixClientFactory MatrixClientFactory = new();
@@ -67,23 +67,23 @@ namespace Beacon.Sdk
             var channelOpeningMessageBuilder =
                 new ChannelOpeningMessageBuilder(cryptographyService, jsonSerializerService, keyPairService);
 
-            var messageService = new MessageService(
-                new NullLogger<MessageService>(),
+            var p2PMessageService = new P2PMessageService(
+                new Logger<P2PMessageService>(loggerFactory),
                 cryptographyService,
                 beaconPeerRepository,
                 sessionKeyPairRepository,
                 keyPairService);
 
             var matrixClientService = new ClientService(SingletonHttpFactory);
-            var relayServerService = new RelayServerService(
-                new Logger<RelayServerService>(loggerFactory ?? new NullLoggerFactory()),
+            var relayServerService = new P2PLoginRequestFactory(
+                new Logger<P2PLoginRequestFactory>(loggerFactory ?? new NullLoggerFactory()),
                 matrixClientService,
                 sdkStorage,
                 cryptographyService,
                 keyPairService);
 
             var p2PCommunicationService = new P2PCommunicationService(
-                messageService,
+                p2PMessageService,
                 MatrixClientFactory.Create(new Logger<PollingService>(loggerFactory ?? new NullLoggerFactory())),
                 channelOpeningMessageBuilder,
                 relayServerService);

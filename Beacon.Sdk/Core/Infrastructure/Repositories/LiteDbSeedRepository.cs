@@ -35,10 +35,11 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Error reading SeedData");
+                throw;
+                // _logger?.LogError(ex, "Error reading SeedData");
             }
 
-            throw new Exception("Unknown exception");
+            // throw new Exception("Unknown exception");
         }
 
         public Task<string> Create(string seed)
@@ -61,10 +62,11 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Error creating SeedData");
+                throw;
+                // _logger?.LogError(ex, "Error creating SeedData");
             }
 
-            throw new Exception("Unknown exception");
+            // throw new Exception("Unknown exception");
         }
     }
 }

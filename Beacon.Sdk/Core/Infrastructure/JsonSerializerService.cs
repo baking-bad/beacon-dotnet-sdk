@@ -1,9 +1,10 @@
 namespace Beacon.Sdk.Core.Infrastructure
 {
+    using Domain.Interfaces;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
 
-    public class JsonSerializerService
+    public class JsonSerializerService : IJsonSerializerService
     {
         private static JsonSerializerSettings JsonSettings =>
             new()

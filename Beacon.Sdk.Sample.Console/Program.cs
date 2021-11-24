@@ -2,8 +2,9 @@
 {
     using System;
     using System.Threading.Tasks;
+    using Core.Domain.P2P;
+    using Core.Domain.P2P.Dto;
     using Core.Domain.Services;
-    using Core.Domain.Services.P2P;
     using Matrix.Sdk.Core.Domain.Services;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -33,8 +34,8 @@
                 .CreateLogger();
 
             ILogger<Program> logger = host.Services.GetRequiredService<ILogger<Program>>();
-            ILogger<RelayServerService> relayServerServiceLogger = host.Services.GetRequiredService<ILogger<RelayServerService>>();
-            ILogger<MessageService> sessionCryptographyServiceLogger = host.Services.GetRequiredService<ILogger<MessageService>>();
+            ILogger<P2PLoginRequestFactory> relayServerServiceLogger = host.Services.GetRequiredService<ILogger<P2PLoginRequestFactory>>();
+            ILogger<P2PMessageService> sessionCryptographyServiceLogger = host.Services.GetRequiredService<ILogger<P2PMessageService>>();
             ILogger<PollingService> pollingServiceLogger = host.Services.GetRequiredService<ILogger<PollingService>>();
            
             logger.LogInformation("START");
@@ -48,7 +49,7 @@
             }
             catch (Exception ex)
             {
-                
+                throw;
             }
             
             

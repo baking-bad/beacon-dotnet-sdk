@@ -10,8 +10,8 @@ namespace Beacon.Sdk
     using Core.Domain.P2P;
     using Core.Domain.P2P.Dto.Handshake;
     using Core.Domain.Services;
-    using Core.Infrastructure;
     using Core.Utils;
+    using Microsoft.Extensions.Logging;
     using Sodium;
 
     /*
@@ -21,28 +21,33 @@ namespace Beacon.Sdk
      */
     public class WalletBeaconClient : IWalletBeaconClient
     {
+        private readonly ILogger<WalletBeaconClient> _logger;
         private readonly IBeaconPeerRepository _beaconPeerRepository;
+        private readonly IPeerRoomRepository _peerRoomRepository;
         private readonly ICryptographyService _cryptographyService;
-        private readonly JsonSerializerService _jsonSerializerService;
-        private readonly KeyPairService _keyPairService;
         private readonly IP2PCommunicationService _p2PCommunicationClient;
+        private readonly IJsonSerializerService _jsonSerializerService;
+        
+        private readonly KeyPairService _keyPairService;
 
         public WalletBeaconClient(
-            IP2PCommunicationService p2PCommunicationClient,
-            IBeaconPeerRepository beaconPeerRepository,
-            JsonSerializerService jsonSerializerService,
-            KeyPairService keyPairService,
-            ICryptographyService cryptographyService,
+            ILogger<WalletBeaconClient> logger, 
+            IBeaconPeerRepository beaconPeerRepository, 
+            IPeerRoomRepository peerRoomRepository, 
+            ICryptographyService cryptographyService, 
+            IP2PCommunicationService p2PCommunicationClient, 
+            IJsonSerializerService jsonSerializerService, 
             WalletBeaconClientOptions options)
         {
+            _logger = logger;
             _beaconPeerRepository = beaconPeerRepository;
+            _peerRoomRepository = peerRoomRepository;
+            _cryptographyService = cryptographyService;
             _p2PCommunicationClient = p2PCommunicationClient;
             _jsonSerializerService = jsonSerializerService;
-            _keyPairService = keyPairService;
-            _cryptographyService = cryptographyService;
-
             AppName = options.AppName;
         }
+
 
         public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
 
@@ -65,19 +70,22 @@ namespace Beacon.Sdk
         public async Task AddPeerAsync(P2PPairingRequest pairingRequest, bool sendPairingResponse = true)
         {
             if (!HexString.TryParse(pairingRequest.PublicKey, out HexString receiverHexPublicKey))
-                throw new InvalidOperationException("Can not parse receiver public key.");
+            {
+                _logger.LogError("Can not parse receiver public key");
+                return;
+            }
+            
+            BeaconPeer beaconPeer = BeaconPeer.Factory.Create(
+                _cryptographyService,
+                pairingRequest.Name,
+                pairingRequest.RelayServer, 
+                receiverHexPublicKey, 
+                pairingRequest.Version);
 
-            string pairingRequestId =
-                pairingRequest.Id ?? throw new NullReferenceException("Provide pairing request id.");
-
-            BeaconPeer beaconPeer = BeaconPeer.Factory.Create(_cryptographyService, pairingRequest.Name,
-                pairingRequest.RelayServer, receiverHexPublicKey, pairingRequest.Version);
-
-            await _beaconPeerRepository.Create(beaconPeer);
-
+            beaconPeer = _beaconPeerRepository.Create(beaconPeer).Result;
+            
             if (sendPairingResponse)
-                await _p2PCommunicationClient.SendChannelOpeningMessageAsync(pairingRequestId, receiverHexPublicKey,
-                    pairingRequest.RelayServer, pairingRequest.Version, AppName);
+                await _p2PCommunicationClient.SendChannelOpeningMessageAsync(pairingRequest.Id, beaconPeer, AppName);
         }
 
         public async Task RespondAsync(BeaconBaseMessage beaconBaseMessage)
@@ -91,7 +99,7 @@ namespace Beacon.Sdk
         {
             _p2PCommunicationClient.OnP2PMessagesReceived += OnP2PMessagesReceived;
             _p2PCommunicationClient.Start();
-        }
+        } 
 
         public void Disconnect()
         {
@@ -120,6 +128,16 @@ namespace Beacon.Sdk
         {
             var acknowledgeResponse =
                 new AcknowledgeResponse(BeaconConstants.BeaconVersion, beaconBaseMessage.Id, GetSenderId());
+
+            BeaconPeer beaconPeer = _beaconPeerRepository.TryReadByUserId(beaconBaseMessage.SenderId).Result 
+                                    ?? throw new NullReferenceException(nameof(BeaconPeer));
+
+            BeaconPeerRoom beaconPeerRoom = _peerRoomRepository.TryRead(beaconPeer.HexPublicKey).Result  
+                                            ?? throw new NullReferenceException(nameof(BeaconPeerRoom));;
+            
+            string message = _jsonSerializerService.Serialize(acknowledgeResponse);
+
+            await _p2PCommunicationClient.SendMessageAsync(beaconPeerRoom.RoomId, message);
         }
     }
 }

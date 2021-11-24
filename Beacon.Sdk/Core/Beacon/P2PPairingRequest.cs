@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core.Domain.P2P.Dto.Handshake
+namespace Beacon.Sdk.Core.Beacon
 {
     public record P2PPairingRequest(
         string Id,

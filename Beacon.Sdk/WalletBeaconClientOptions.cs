@@ -1,20 +1,20 @@
 namespace Beacon.Sdk
 {
-    public record WalletBeaconClientOptions(string AppName, string? IconUrl, string? AppUrl)
+    public class WalletBeaconClientOptions
     {
         /// <summary>
         ///     Name of the application
         /// </summary>
-        public string AppName { get; init; } = AppName;
+        public string AppName { get; set; }
 
         /// <summary>
         ///     A URL to the icon of the application
         /// </summary>
-        public string? IconUrl { get; init; } = IconUrl;
+        public string? IconUrl { get; set; }
 
         /// <summary>
         ///     A URL to the website of the application
         /// </summary>
-        public string? AppUrl { get; init; } = AppUrl;
+        public string? AppUrl { get; set; }
     }
 }

@@ -23,6 +23,8 @@ namespace Beacon.Sdk.Core.Domain
         public string Version { get; }
 
         public string UserId { get; }
+        
+        public string RelayServer { get; }
 
         internal static class Factory
         {

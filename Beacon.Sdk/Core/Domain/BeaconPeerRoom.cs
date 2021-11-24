@@ -2,11 +2,11 @@ namespace Beacon.Sdk.Core.Domain
 {
     using Utils;
 
-    public class PeerRoom
+    public class BeaconPeerRoom
     {
         public long Id { get; set; }
 
-        public HexString PeerHexPublicKey { get; set; }
+        public HexString BeaconPeerHexPublicKey { get; set; }
 
         public string RoomId { get; set; }
     }

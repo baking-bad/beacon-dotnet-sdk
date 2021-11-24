@@ -19,7 +19,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             _logger = logger;
         }
 
-        public Task<PeerRoom?> TryRead(HexString peerPublicKey)
+        public Task<BeaconPeerRoom?> TryRead(HexString peerPublicKey)
         {
             try
             {
@@ -27,9 +27,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 {
                     using var db = new LiteDatabase(ConnectionString);
 
-                    ILiteCollection<PeerRoom>? col = db.GetCollection<PeerRoom>(nameof(SeedData));
+                    ILiteCollection<BeaconPeerRoom>? col = db.GetCollection<BeaconPeerRoom>(nameof(SeedData));
 
-                    PeerRoom? peerRoom = col.Query().Where(x => x.PeerHexPublicKey.Value == peerPublicKey.Value)
+                    BeaconPeerRoom? peerRoom = col.Query().Where(x => x.BeaconPeerHexPublicKey.Value == peerPublicKey.Value)
                         .FirstOrDefault();
 
                     return Task.FromResult(peerRoom);
@@ -37,13 +37,14 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Error reading PeerRoom");
+                throw;
+                // _logger?.LogError(ex, "Error reading PeerRoom");
             }
 
-            throw new Exception("Unknown exception");
+            // throw new Exception("Unknown exception");
         }
 
-        public Task<PeerRoom> CreateOrUpdate(PeerRoom peerRoom)
+        public Task<BeaconPeerRoom> CreateOrUpdate(BeaconPeerRoom beaconPeerRoom)
         {
             try
             {
@@ -51,30 +52,29 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 {
                     using var db = new LiteDatabase(ConnectionString);
 
-                    ILiteCollection<PeerRoom>? col = db.GetCollection<PeerRoom>(nameof(SeedData));
+                    ILiteCollection<BeaconPeerRoom>? col = db.GetCollection<BeaconPeerRoom>(nameof(SeedData));
 
-                    PeerRoom? result = col.Query()
-                        .Where(x => x.PeerHexPublicKey.Value == peerRoom.PeerHexPublicKey.Value).FirstOrDefault();
+                    BeaconPeerRoom? result = col.Query()
+                        .Where(x => x.BeaconPeerHexPublicKey.Value == beaconPeerRoom.BeaconPeerHexPublicKey.Value).FirstOrDefault();
 
                     if (result != null)
                     {
-                        col.Update(peerRoom);
+                        col.Update(beaconPeerRoom);
                     }
                     else
                     {
-                        col.Insert(peerRoom);
-                        col.EnsureIndex(x => x.PeerHexPublicKey);
+                        col.Insert(beaconPeerRoom);
+                        col.EnsureIndex(x => x.BeaconPeerHexPublicKey);
                     }
 
-                    return Task.FromResult(peerRoom);
+                    return Task.FromResult(beaconPeerRoom);
                 }
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Error reading PeerRoom");
+                throw;
+                // _logger?.LogError(ex, "Error reading PeerRoom");
             }
-
-            throw new Exception("Unknown exception");
         }
     }
 }
