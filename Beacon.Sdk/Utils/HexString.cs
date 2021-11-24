@@ -9,7 +9,7 @@ namespace Beacon.Sdk.Utils
         private const string Prefix = "0x";
         public readonly string Value;
 
-        private HexString(string value)
+        public HexString(string value)
         {
             Value = value;
         }
