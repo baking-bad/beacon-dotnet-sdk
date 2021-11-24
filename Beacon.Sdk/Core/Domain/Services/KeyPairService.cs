@@ -10,6 +10,7 @@ namespace Beacon.Sdk.Core.Domain.Services
 
     public class KeyPairService
     {
+        private const int SeedBytes = 16;
         private readonly ICryptographyService _cryptographyService;
         private readonly ISeedRepository _seedRepository;
 
@@ -17,26 +18,6 @@ namespace Beacon.Sdk.Core.Domain.Services
         {
             _cryptographyService = cryptographyService;
             _seedRepository = seedRepository;
-        }
-        
-        private const int SeedBytes = 16;
-        
-        public static string CreateGuid()
-        {
-            // var generator = RandomNumberGenerator.Create();
-            // var bytes = new byte[SeedBytes]; 
-            // generator.GetBytes(bytes); 
-            
-            byte[] bytes = SodiumCore.GetRandomBytes(SeedBytes);
-            byte[][] b = {bytes[0..4], bytes[4..6], bytes[6..8], bytes[8..10], bytes[10..16]};
-
-            string[] hexStrings = b.Select(x =>
-            {
-                if (!HexString.TryParse(x, out HexString y)) throw new Exception("y");
-                return y.ToString();
-            }).ToArray();
-
-            return string.Join("-",hexStrings);
         }
 
         public KeyPair KeyPair
@@ -47,9 +28,28 @@ namespace Beacon.Sdk.Core.Domain.Services
                 if (seed != null)
                     return _cryptographyService.GenerateEd25519KeyPair(seed);
 
-                string newSeed = _seedRepository.Create(CreateGuid()).Result ?? throw new ArgumentNullException(nameof(seed));
+                string newSeed = _seedRepository.Create(CreateGuid()).Result ??
+                                 throw new ArgumentNullException(nameof(seed));
                 return _cryptographyService.GenerateEd25519KeyPair(newSeed);
             }
+        }
+
+        public static string CreateGuid()
+        {
+            // var generator = RandomNumberGenerator.Create();
+            // var bytes = new byte[SeedBytes]; 
+            // generator.GetBytes(bytes); 
+
+            byte[] bytes = SodiumCore.GetRandomBytes(SeedBytes);
+            byte[][] b = {bytes[..4], bytes[4..6], bytes[6..8], bytes[8..10], bytes[10..16]};
+
+            string[] hexStrings = b.Select(x =>
+            {
+                if (!HexString.TryParse(x, out HexString y)) throw new Exception("y");
+                return y.ToString();
+            }).ToArray();
+
+            return string.Join("-", hexStrings);
         }
     }
 }

@@ -1,13 +1,13 @@
 namespace Beacon.Sdk.Core.Domain.Interfaces
 {
-    using System;
     using System.Threading.Tasks;
     using P2P;
-    using Utils;
+
+    public delegate Task TaskEventHandler<TEventArgs>(object? sender, TEventArgs e);
 
     public interface IP2PCommunicationService
     {
-        event EventHandler<P2PMessageEventArgs> OnP2PMessagesReceived;
+        event TaskEventHandler<P2PMessageEventArgs> OnP2PMessagesReceived;
 
         Task LoginAsync();
 
@@ -15,8 +15,8 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
 
         void Stop();
 
-        Task<BeaconPeerRoom> SendChannelOpeningMessageAsync(string id, BeaconPeer beaconPeer, string appName);
-        
-        Task SendMessageAsync(string roomId, string message);
+        Task<PeerRoom> SendChannelOpeningMessageAsync(Peer peer, string id, string appName);
+
+        Task SendMessageAsync(Peer peer, string roomId, string message);
     }
 }

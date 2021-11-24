@@ -1,6 +1,6 @@
-namespace Beacon.Sdk
+namespace Beacon.Sdk.WalletClient
 {
-    public class WalletBeaconClientOptions
+    public class WalletClientOptions
     {
         /// <summary>
         ///     Name of the application

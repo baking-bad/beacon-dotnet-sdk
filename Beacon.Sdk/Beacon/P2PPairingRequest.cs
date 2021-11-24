@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core.Beacon
+namespace Beacon.Sdk.Beacon
 {
     public record P2PPairingRequest(
         string Id,
@@ -8,5 +8,5 @@ namespace Beacon.Sdk.Core.Beacon
         string? Icon = null,
         string? AppUrl = null,
         string Type = "p2p-pairing-request",
-        string Version = BeaconConstants.BeaconVersion);
+        string Version = Sdk.Constants.BeaconVersion);
 }

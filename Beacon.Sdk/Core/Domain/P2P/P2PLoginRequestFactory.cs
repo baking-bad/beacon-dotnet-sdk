@@ -5,26 +5,27 @@ namespace Beacon.Sdk.Core.Domain.P2P
     using System.Threading;
     using System.Threading.Tasks;
     using Dto;
-    using Interfaces;
-    using Services;
+    using Infrastructure;
     using Infrastructure.Repositories;
+    using Interfaces;
     using Matrix.Sdk.Core.Infrastructure.Services;
     using Microsoft.Extensions.Logging;
+    using Services;
     using Sodium;
 
     public class P2PLoginRequestFactory
     {
+        private readonly ICryptographyService _cryptographyService;
+        private readonly KeyPairService _keyPairService;
         private readonly ILogger<P2PLoginRequestFactory>? _logger;
         private readonly ClientService _matrixClientService;
         private readonly ISdkStorage _sdkStorage;
-        private readonly ICryptographyService _cryptographyService;
-        private readonly KeyPairService _keyPairService;
 
         public P2PLoginRequestFactory(
             ILogger<P2PLoginRequestFactory>? logger,
             ClientService matrixClientService,
-            ISdkStorage sdkStorage, 
-            ICryptographyService cryptographyService, 
+            ISdkStorage sdkStorage,
+            ICryptographyService cryptographyService,
             KeyPairService keyPairService)
         {
             _logger = logger;
@@ -33,7 +34,7 @@ namespace Beacon.Sdk.Core.Domain.P2P
             _cryptographyService = cryptographyService;
             _keyPairService = keyPairService;
         }
-        
+
         public async Task<P2PLoginRequest> Create()
         {
             KeyPair keyPair = _keyPairService.KeyPair;
@@ -64,13 +65,13 @@ namespace Beacon.Sdk.Core.Domain.P2P
             if (_sdkStorage.MatrixSelectedNode is {Length: > 0})
                 return _sdkStorage.MatrixSelectedNode;
 
-            int startIndex = PublicKeyToInt(publicKey, BeaconConstants.KnownRelayServers.Length);
+            int startIndex = PublicKeyToInt(publicKey, Constants.KnownRelayServers.Length);
             var offset = 0;
 
-            while (offset < BeaconConstants.KnownRelayServers.Length)
+            while (offset < Constants.KnownRelayServers.Length)
             {
-                int index = (startIndex + offset) % BeaconConstants.KnownRelayServers.Length;
-                string relayServer = BeaconConstants.KnownRelayServers[index];
+                int index = (startIndex + offset) % Constants.KnownRelayServers.Length;
+                string relayServer = Constants.KnownRelayServers[index];
 
                 try
                 {

@@ -5,8 +5,8 @@ namespace Beacon.Sdk.Core.Domain.Interfaces.Data
 
     public interface IPeerRoomRepository
     {
-        Task<BeaconPeerRoom?> TryRead(HexString peerPublicKey);
+        Task<PeerRoom?> TryRead(HexString peerPublicKey);
 
-        Task<BeaconPeerRoom> CreateOrUpdate(BeaconPeerRoom beaconPeerRoom);
+        Task<PeerRoom> CreateOrUpdate(PeerRoom peerRoom);
     }
 }

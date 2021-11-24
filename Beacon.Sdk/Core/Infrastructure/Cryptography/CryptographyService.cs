@@ -7,7 +7,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     using Libsodium;
     using Sodium;
     using Utils;
-    using SodiumLibrary = global::Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium.SodiumLibrary;
+    using SodiumLibrary = Libsodium.SodiumLibrary;
 
     public class CryptographyService : ICryptographyService
     {
@@ -36,7 +36,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
                 clientPublicKeyCurve);
         }
 
-        public byte[] Hash(byte[] input) => GenericHash.Hash(input, null, input.Length);
+        public byte[] Hash(byte[] input, int length) => GenericHash.Hash(input, null, input.Length);
 
         public byte[] Decrypt(byte[] encryptedBytes, byte[] sharedKey)
         {

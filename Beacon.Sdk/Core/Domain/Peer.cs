@@ -4,9 +4,9 @@ namespace Beacon.Sdk.Core.Domain
     using Interfaces;
     using Utils;
 
-    public class BeaconPeer
+    public class Peer
     {
-        public BeaconPeer(string name, HexString hexPublicKey, string version, string userId)
+        public Peer(string name, HexString hexPublicKey, string version, string userId)
         {
             Name = name;
             HexPublicKey = hexPublicKey;
@@ -23,20 +23,21 @@ namespace Beacon.Sdk.Core.Domain
         public string Version { get; }
 
         public string UserId { get; }
-        
+
         public string RelayServer { get; }
 
         internal static class Factory
         {
-            public static BeaconPeer Create(ICryptographyService cryptographyService, string name, string relayServer,
+            public static Peer Create(ICryptographyService cryptographyService, string name, string relayServer,
                 HexString hexPublicKey, string version)
             {
-                byte[] hash = cryptographyService.Hash(hexPublicKey.ToByteArray());
+                byte[] hexBytes = hexPublicKey.ToByteArray();
+                byte[] hash = cryptographyService.Hash(hexBytes, hexBytes.Length);
 
                 if (!HexString.TryParse(hash, out HexString hexHash))
                     throw new Exception();
 
-                return new BeaconPeer(name, hexPublicKey, version, $"@{hexHash}:{relayServer}");
+                return new Peer(name, hexPublicKey, version, $"@{hexHash}:{relayServer}");
             }
         }
     }

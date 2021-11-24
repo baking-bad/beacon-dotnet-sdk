@@ -1,6 +1,6 @@
 namespace Beacon.Sdk
 {
-    public static class BeaconConstants
+    public static class Constants
     {
         public const string BeaconVersion = "2";
 

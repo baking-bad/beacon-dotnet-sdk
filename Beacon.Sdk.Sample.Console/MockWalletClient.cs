@@ -2,11 +2,10 @@ namespace Beacon.Sdk
 {
     using System;
     using System.Threading.Tasks;
-    using Core.Beacon;
-    using Core.Domain.P2P.Dto.Handshake;
-    using Core.Utils;
+    using Beacon;
+    using Utils;
 
-    public class MockWalletClient : IWalletBeaconClient
+    public class MockWalletClient : IWalletClient
     {
         public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
 

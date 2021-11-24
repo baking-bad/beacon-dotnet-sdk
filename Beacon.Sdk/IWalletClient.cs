@@ -2,15 +2,15 @@ namespace Beacon.Sdk
 {
     using System;
     using System.Threading.Tasks;
-    using Core.Beacon;
-    using Core.Domain.P2P.Dto.Handshake;
-    using Core.Utils;
+    using Beacon;
+    using Utils;
 
-    public interface IWalletBeaconClient
+    public interface IWalletClient
     {
         HexString BeaconId { get; }
 
         string AppName { get; }
+        
         event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
 
         Task RespondAsync(BeaconBaseMessage beaconBaseMessage);

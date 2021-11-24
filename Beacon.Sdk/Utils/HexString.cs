@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core.Utils
+namespace Beacon.Sdk.Utils
 {
     using System;
     using System.Collections.Generic;

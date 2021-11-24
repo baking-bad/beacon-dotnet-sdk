@@ -11,16 +11,17 @@ namespace Beacon.Sdk
     using Matrix.Sdk.Core.Infrastructure.Services;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Abstractions;
-    
-    public class WalletBeaconClientFactory
+    using WalletClient;
+
+    public class WalletClientFactory
     {
         private static readonly MatrixClientFactory MatrixClientFactory = new();
         private static readonly SingletonHttpFactory SingletonHttpFactory = new();
 
-        private IWalletBeaconClient? _client;
+        private IWalletClient? _client;
 
-        public IWalletBeaconClient Create(
-            WalletBeaconClientOptions options,
+        public IWalletClient Create(
+            WalletClientOptions options,
             ILoggerFactory? loggerFactory = null)
 
         {
@@ -36,21 +37,21 @@ namespace Beacon.Sdk
             var cryptographyService = new CryptographyService();
             var sessionKeyPairRepository = new InMemorySessionKeyPairRepository(cryptographyService);
 
-            var beaconPeerRepository =
-                new LiteDbBeaconPeerRepository(
-                    new Logger<LiteDbBeaconPeerRepository>(
+            var peerRepository =
+                new LiteDbPeerRepository(
+                    new Logger<LiteDbPeerRepository>(
                         loggerFactory ?? new NullLoggerFactory()), repositorySettings);
-            
-            var peerRoomRepository = 
+
+            var peerRoomRepository =
                 new LiteDbPeerRoomRepository(
                     new Logger<LiteDbPeerRoomRepository>(
                         loggerFactory ?? new NullLoggerFactory()), repositorySettings);
-           
+
             var seedRepository =
                 new LiteDbSeedRepository(
                     new Logger<LiteDbSeedRepository>(
                         loggerFactory ?? new NullLoggerFactory()), repositorySettings);
-            
+
             var sdkStorage = new SdkStorage();
             var jsonSerializerService = new JsonSerializerService();
 
@@ -70,7 +71,7 @@ namespace Beacon.Sdk
             var p2PMessageService = new P2PMessageService(
                 new Logger<P2PMessageService>(loggerFactory),
                 cryptographyService,
-                beaconPeerRepository,
+                peerRepository,
                 sessionKeyPairRepository,
                 keyPairService);
 
@@ -90,12 +91,14 @@ namespace Beacon.Sdk
 
             #endregion
 
-            _client = new WalletBeaconClient(
+            _client = new WalletClient.WalletClient(
+                new Logger<WalletClient.WalletClient>(loggerFactory ?? new NullLoggerFactory()),
+                peerRepository,
+                peerRoomRepository,
+                cryptographyService,
                 p2PCommunicationService,
-                beaconPeerRepository,
                 jsonSerializerService,
                 keyPairService,
-                cryptographyService,
                 options);
 
             return _client;

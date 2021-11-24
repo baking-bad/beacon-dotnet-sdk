@@ -1,7 +1,7 @@
 namespace Beacon.Sdk
 {
     using System;
-    using Core.Beacon;
+    using Beacon;
 
     public class BeaconMessageEventArgs : EventArgs
     {

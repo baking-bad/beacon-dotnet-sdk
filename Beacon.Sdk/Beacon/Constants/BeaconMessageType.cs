@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core.Beacon.Constants
+namespace Beacon.Sdk.Beacon.Constants
 {
     public static class BeaconMessageType
     {

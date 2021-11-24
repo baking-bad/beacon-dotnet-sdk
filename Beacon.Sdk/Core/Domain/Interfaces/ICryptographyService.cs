@@ -10,7 +10,7 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
 
         SessionKeyPair CreateServerSessionKeyPair(byte[] clientPublicKey, byte[] serverPrivateKey);
 
-        byte[] Hash(byte[] input);
+        byte[] Hash(byte[] input, int length);
 
         byte[] Decrypt(byte[] encryptedBytes, byte[] sharedKey);
 

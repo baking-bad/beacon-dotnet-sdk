@@ -1,7 +1,7 @@
 namespace Beacon.Sdk.Tests
 {
-    using Core.Utils;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Utils;
 
     [TestClass]
     public class HexStringTests

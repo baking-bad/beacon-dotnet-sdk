@@ -2,16 +2,17 @@ namespace Beacon.Sdk.Core.Domain.Services
 {
     using System.Text;
     using Base58Check;
+    using Infrastructure.Cryptography.Libsodium;
     using Interfaces;
     using Interfaces.Data;
-    using Infrastructure.Cryptography.Libsodium;
     using Matrix.Sdk.Core.Domain.RoomEvent;
     using Microsoft.Extensions.Logging;
     using Sodium;
+    using Utils;
 
     public class P2PMessageService
     {
-        private readonly IBeaconPeerRepository _beaconPeerRepository;
+        private readonly IPeerRepository _peerRepository;
 
         private readonly ICryptographyService _cryptographyService;
 
@@ -22,13 +23,13 @@ namespace Beacon.Sdk.Core.Domain.Services
         public P2PMessageService(
             ILogger<P2PMessageService> logger,
             ICryptographyService cryptographyService,
-            IBeaconPeerRepository beaconPeerRepository,
+            IPeerRepository peerRepository,
             ISessionKeyPairRepository sessionKeyPairRepository,
             KeyPairService keyPairService)
         {
             _logger = logger;
             _cryptographyService = cryptographyService;
-            _beaconPeerRepository = beaconPeerRepository;
+            _peerRepository = peerRepository;
             _sessionKeyPairRepository = sessionKeyPairRepository;
             _keyPairService = keyPairService;
         }
@@ -39,7 +40,7 @@ namespace Beacon.Sdk.Core.Domain.Services
             if (matrixRoomEvent is not TextMessageEvent textMessageEvent) return null;
 
             string senderUserId = textMessageEvent.SenderUserId;
-            BeaconPeer? peer = _beaconPeerRepository.TryReadByUserId(senderUserId).Result;
+            Peer? peer = _peerRepository.TryReadByUserId(senderUserId).Result;
 
             if (peer == null)
             {
@@ -55,16 +56,19 @@ namespace Beacon.Sdk.Core.Domain.Services
                 return null;
             }
 
-            KeyPair keyPair = _keyPairService.KeyPair;
+            SessionKeyPair server = _sessionKeyPairRepository.CreateOrReadServer(peer.HexPublicKey, _keyPairService.KeyPair);
 
-            SessionKeyPair serverSessionKeyPair =
-                _sessionKeyPairRepository.CreateOrReadServer(peer.HexPublicKey, keyPair);
-
-            string decryptedMessage = _cryptographyService.DecryptAsString(textMessageEvent.Message,
-                serverSessionKeyPair.Rx);
+            string decryptedMessage = _cryptographyService.DecryptAsString(textMessageEvent.Message, server.Rx);
 
             byte[]? decodedBytes = Base58CheckEncoding.Decode(decryptedMessage);
             return Encoding.UTF8.GetString(decodedBytes);
+        }
+
+        public string EncryptMessage(HexString peerHexPublicKey, string message)
+        {
+            SessionKeyPair client = _sessionKeyPairRepository.CreateOrReadClient(peerHexPublicKey, _keyPairService.KeyPair);
+
+            return _cryptographyService.EncryptAsHex(message, client.Tx).Value;
         }
     }
 }

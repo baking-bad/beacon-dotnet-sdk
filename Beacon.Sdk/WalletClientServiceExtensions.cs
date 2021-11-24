@@ -1,6 +1,6 @@
 namespace Beacon.Sdk
 {
-    public static class BeaconClientServiceExtensions
+    public static class WalletClientServiceExtensions
     {
         // public static IServiceCollection AddBeaconClient(this IServiceCollection services, string AppName)
         // {

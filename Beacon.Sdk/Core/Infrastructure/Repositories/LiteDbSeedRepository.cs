@@ -1,6 +1,5 @@
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
-    using System;
     using System.Threading.Tasks;
     using Data;
     using Domain.Interfaces.Data;
@@ -8,7 +7,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     using Microsoft.Extensions.Logging;
 
     // Todo: Add secure storage
-    public class LiteDbSeedRepository : BaseLiteDbRepository,  ISeedRepository
+    public class LiteDbSeedRepository : BaseLiteDbRepository, ISeedRepository
     {
         private readonly ILogger<LiteDbSeedRepository> _logger;
         private readonly object _syncRoot = new();
@@ -20,23 +19,15 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
         public Task<string?> TryRead()
         {
-            try
+            lock (_syncRoot)
             {
-                lock (_syncRoot)
-                {
-                    using var db = new LiteDatabase(ConnectionString);
+                using var db = new LiteDatabase(ConnectionString);
 
-                    ILiteCollection<SeedData>? col = db.GetCollection<SeedData>(nameof(SeedData));
+                ILiteCollection<SeedData>? col = db.GetCollection<SeedData>(nameof(SeedData));
 
-                    SeedData seedData = col.Query().FirstOrDefault();
+                SeedData seedData = col.Query().FirstOrDefault();
 
-                    return Task.FromResult(seedData?.Seed);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-                // _logger?.LogError(ex, "Error reading SeedData");
+                return Task.FromResult(seedData?.Seed);
             }
 
             // throw new Exception("Unknown exception");
@@ -44,26 +35,18 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
         public Task<string> Create(string seed)
         {
-            try
+            lock (_syncRoot)
             {
-                lock (_syncRoot)
+                using var db = new LiteDatabase(ConnectionString);
+
+                ILiteCollection<SeedData>? col = db.GetCollection<SeedData>(nameof(SeedData));
+
+                col.Insert(new SeedData
                 {
-                    using var db = new LiteDatabase(ConnectionString);
+                    Seed = seed
+                });
 
-                    ILiteCollection<SeedData>? col = db.GetCollection<SeedData>(nameof(SeedData));
-
-                    col.Insert(new SeedData
-                    {
-                        Seed = seed
-                    });
-
-                    return Task.FromResult(seed);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-                // _logger?.LogError(ex, "Error creating SeedData");
+                return Task.FromResult(seed);
             }
 
             // throw new Exception("Unknown exception");

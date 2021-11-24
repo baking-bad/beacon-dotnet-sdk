@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core.Infrastructure.Repositories
+namespace Beacon.Sdk.Core.Infrastructure
 {
     public class SdkStorage : ISdkStorage
     {
