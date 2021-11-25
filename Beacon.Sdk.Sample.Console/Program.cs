@@ -33,12 +33,11 @@
                 .CreateLogger();
 
             ILogger<Program> logger = host.Services.GetRequiredService<ILogger<Program>>();
-            ILogger<P2PLoginRequestFactory> relayServerServiceLogger = host.Services.GetRequiredService<ILogger<P2PLoginRequestFactory>>();
-            ILogger<P2PMessageService> sessionCryptographyServiceLogger = host.Services.GetRequiredService<ILogger<P2PMessageService>>();
-            ILogger<PollingService> pollingServiceLogger = host.Services.GetRequiredService<ILogger<PollingService>>();
-           
+
             logger.LogInformation("START");
-            var sample = new Sample(relayServerServiceLogger, sessionCryptographyServiceLogger, pollingServiceLogger);
+            
+            
+            var sample = new Sample();
             try
             {
                 await sample.Run();

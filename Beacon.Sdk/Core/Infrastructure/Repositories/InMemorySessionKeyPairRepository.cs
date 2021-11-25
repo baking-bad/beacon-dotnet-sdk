@@ -31,7 +31,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         //
         // public SessionKeyPair CreateOrReadServer(HexString clientHexPublicKey, KeyPair serverKeyPair) =>
         //     _cryptographyService.CreateServerSessionKeyPair(clientHexPublicKey.ToByteArray(), serverKeyPair.PrivateKey);
-        
+
         public SessionKeyPair CreateOrReadServer(HexString clientHexPublicKey, KeyPair serverKeyPair) =>
             ServerSessionKeyPairs.TryGetValue(clientHexPublicKey, out SessionKeyPair sessionKeyPair)
                 ? sessionKeyPair

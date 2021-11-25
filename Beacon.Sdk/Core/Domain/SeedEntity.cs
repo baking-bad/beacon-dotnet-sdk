@@ -1,6 +1,6 @@
-namespace Beacon.Sdk.Core.Infrastructure.Data
+namespace Beacon.Sdk.Core.Domain
 {
-    public class SeedData
+    public class SeedEntity
     {
         public int Id { get; set; }
 

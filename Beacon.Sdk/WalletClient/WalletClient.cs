@@ -9,22 +9,22 @@ namespace Beacon.Sdk.WalletClient
     using Core.Domain.Interfaces.Data;
     using Core.Domain.P2P;
     using Core.Domain.Services;
-    using Utils;
     using Microsoft.Extensions.Logging;
+    using Utils;
 
     /*
      * Todo: add AppMetadataRepository
      */
-    public partial class WalletClient : IWalletClient
+    public class WalletClient : IWalletClient
     {
-        private readonly IPeerRepository _peerRepository;
+        private readonly ICryptographyService _cryptographyService;
         private readonly IJsonSerializerService _jsonSerializerService;
 
         private readonly KeyPairService _keyPairService;
-        private readonly PeerFactory _peerFactory;
         private readonly ILogger<WalletClient> _logger;
         private readonly IP2PCommunicationService _p2PCommunicationService;
-        private readonly ICryptographyService _cryptographyService;
+        private readonly PeerFactory _peerFactory;
+        private readonly IPeerRepository _peerRepository;
 
         public WalletClient(
             ILogger<WalletClient> logger,
@@ -46,6 +46,8 @@ namespace Beacon.Sdk.WalletClient
 
             AppName = options.AppName;
         }
+
+        private string SenderId => Base58CheckEncoding.Encode(PeerFactory.Hash(BeaconId.ToByteArray(), 5));
 
         public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
 
@@ -103,15 +105,13 @@ namespace Beacon.Sdk.WalletClient
             _p2PCommunicationService.Stop();
             _p2PCommunicationService.OnP2PMessagesReceived -= OnP2PMessagesReceived;
         }
-        
-        private string SenderId => Base58CheckEncoding.Encode(PeerFactory.Hash(BeaconId.ToByteArray(), 5));
 
         private async Task SendAcknowledgeResponseAsync(BeaconBaseMessage beaconBaseMessage)
         {
             var acknowledgeResponse =
                 new AcknowledgeResponse(Constants.BeaconVersion, beaconBaseMessage.Id, SenderId);
 
-            Peer peer = _peerRepository.TryReadBySenderUserId(beaconBaseMessage.SenderId).Result
+            Peer peer = _peerRepository.TryRead(beaconBaseMessage.SenderId).Result
                         ?? throw new NullReferenceException(nameof(Peer));
 
             string message = _jsonSerializerService.Serialize(acknowledgeResponse);

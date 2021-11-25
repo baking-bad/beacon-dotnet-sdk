@@ -7,7 +7,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     using Libsodium;
     using Sodium;
     using Utils;
-    using SodiumLibrary = Libsodium.SodiumLibrary;
+    using SodiumLibrary = global::Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium.SodiumLibrary;
 
     public class CryptographyService : ICryptographyService
     {
@@ -48,10 +48,12 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         public HexString Encrypt(string input, byte[] key)
         {
             byte[] nonce = SodiumCore.GetRandomBytes(NonceBytes)!;
-            byte[] e = SecretBox.Create(input, nonce, key); //SealedPublicKeyBox.Create(String.Concat(nonce).ToString(), key);
+            byte[]
+                e = SecretBox.Create(input, nonce,
+                    key); //SealedPublicKeyBox.Create(String.Concat(nonce).ToString(), key);
 
             byte[] payload = nonce.Concat(e).ToArray();
-            
+
             if (!HexString.TryParse(payload, out HexString hexPayload))
                 throw new ArgumentException(nameof(payload));
 
@@ -61,15 +63,15 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         public string Decrypt(HexString hexInput, byte[] key)
         {
             byte[] bytes = hexInput.ToByteArray();
-            
+
             byte[] nonce = bytes[..NonceBytes];
             byte[] cipher = bytes[NonceBytes..];
-            
+
             byte[] d = SecretBox.Open(cipher, nonce, key);
 
             return Encoding.UTF8.GetString(d);
         }
-        
+
         // private byte[] Decrypt2(byte[] encryptedBytes, byte[] sharedKey)
         // {
         //     byte[] nonce = encryptedBytes[..NonceBytes];
@@ -96,7 +98,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             if (!HexString.TryParse(result, out HexString k))
                 throw new Exception("HexString.TryParse(result, out var k)");
-            
+
             return k.Value;
         }
 

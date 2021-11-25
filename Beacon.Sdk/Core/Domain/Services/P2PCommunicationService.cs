@@ -17,14 +17,14 @@
 
     public class P2PCommunicationService : IP2PCommunicationService
     {
-        private readonly ILogger<P2PCommunicationService> _logger;
         private readonly IChannelOpeningMessageBuilder _channelOpeningMessageBuilder;
-        private readonly IMatrixClient _matrixClient;
-        private readonly IP2PPeerRoomRepository _p2PPeerRoomRepository;
         private readonly ICryptographyService _cryptographyService;
+        private readonly ILogger<P2PCommunicationService> _logger;
+        private readonly IMatrixClient _matrixClient;
         private readonly P2PLoginRequestFactory _p2PLoginRequestFactory;
-        private readonly P2PPeerRoomFactory _p2PPeerRoomFactory;
         private readonly P2PMessageService _p2PMessageService;
+        private readonly P2PPeerRoomFactory _p2PPeerRoomFactory;
+        private readonly IP2PPeerRoomRepository _p2PPeerRoomRepository;
 
         public P2PCommunicationService(
             ILogger<P2PCommunicationService> logger,
@@ -102,13 +102,13 @@
 
         public async Task SendMessageAsync(Peer peer, string message)
         {
-            P2PPeerRoom p2PPeerRoom = _p2PPeerRoomRepository.TryReadByPeerHexPublicKey(peer.HexPublicKey).Result
+            P2PPeerRoom p2PPeerRoom = _p2PPeerRoomRepository.TryRead(peer.HexPublicKey).Result
                                       ?? throw new NullReferenceException(nameof(P2PPeerRoom));
-            
+
             string encryptedMessage = _p2PMessageService.EncryptMessage(peer.HexPublicKey, message).Value;
-        
+
             _ = await _matrixClient.SendMessageAsync(p2PPeerRoom.RoomId, encryptedMessage);
-            
+
             // ToDo: Handle room not exist.
         }
 
@@ -117,13 +117,11 @@
             if (matrixRoomEvent is not TextMessageEvent textMessageEvent) return null;
 
             string senderUserId = textMessageEvent.SenderUserId;
-            P2PPeerRoom? p2PPeerRoom = _p2PPeerRoomRepository.TryReadByP2PUserId(senderUserId).Result;
-            
+            P2PPeerRoom? p2PPeerRoom = _p2PPeerRoomRepository.TryRead(senderUserId).Result;
+
             if (p2PPeerRoom == null)
-            {
                 // _logger.LogInformation("Unknown senderUserId");
                 return null;
-            }
 
             if (!_cryptographyService.Validate(textMessageEvent.Message))
             {
@@ -136,7 +134,7 @@
 
             return _p2PMessageService.DecryptMessage(p2PPeerRoom.PeerHexPublicKey, hexMessage);
         }
-        
+
         private void OnMatrixRoomEventsReceived(object? sender, MatrixRoomEventsEventArgs e)
         {
             if (sender is not IMatrixClient)

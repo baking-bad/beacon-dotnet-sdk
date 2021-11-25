@@ -1,40 +1,23 @@
 namespace Beacon.Sdk.Sample.Console
 {
-    using System.Threading.Tasks;
-    using Microsoft.Extensions.Logging;
     using System;
     using System.IO;
     using System.Text;
+    using System.Threading.Tasks;
     using Base58Check;
     using Beacon;
-    using Core.Domain.P2P;
     using Core.Domain.Services;
     using Core.Infrastructure.Cryptography;
     using Core.Infrastructure.Repositories;
-    using Matrix.Sdk.Core.Domain.Services;
+    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using Serilog.Extensions.Logging;
     using WalletClient;
 
     public class Sample
     {
-        private readonly ILogger<P2PLoginRequestFactory> _relayServerServiceLogger;
-        private readonly ILogger<P2PMessageService> _sessionCryptographyServiceLogger;
-        private readonly ILogger<PollingService> _pollingServiceLogger;
-
-        public Sample(
-            ILogger<P2PLoginRequestFactory> relayServerServiceLogger,
-            ILogger<P2PMessageService> sessionCryptographyServiceLogger,
-            ILogger<PollingService> pollingServiceLogger)
-        {
-            _relayServerServiceLogger = relayServerServiceLogger;
-            _sessionCryptographyServiceLogger = sessionCryptographyServiceLogger;
-            _pollingServiceLogger = pollingServiceLogger;
-        }
-
         private const string QrCode = 
-                "BSdNU2tFbwJ8gKbPkp7ui1RRLDkTaMVm9ngbP974VJbn7KXzzCDpzG7GqFHkqtuv1LY3KCxEtuJ4usTVdPN4xgE47NnTUP7nhPVCTkT2TVByj2FVnXYNZpBfTwGBXX9NixPMbKzfNp9jceYLxM3eFpJi5LotsSMbdM4vUv2eNRARwcCGS2REKftwd4nEB1nBrkhUYMhe1rPtaABdfd4Zk8WY53EJaMtHSgv8qHoqaszLaxgPy6PocEDfgP6oHAnsUgY8ncAEmqLqeGrcK4i4VnzxVGR56N1jiWmQGFiq4DSbCjGFLys4uGda9okzyM9rURXWnPYy"
-            ;
+                "BSdNU2tFbwHcZchafP24HAnC3enY5bMwP2o8b2hSZFEEEs1ur9pTKEbzmwbTHt7GVZH46yod8pY8P2BHNvUMprPFkqodpZVQz3EeKY9byWAbdxvkBKTXySRSFEPmuGpg5CJMw99UuhKJHCb1s2KfuUSBpq29EADrrho3KGqcyqdktkCzdKZodEpcmmCe7joAZsgDRM9tHcU3ijuG4yUcSnofLjGZA2QdKuToGVWcQZv6PtRjyhAj5tHN1doT463TLXhPYFeT6vFzmfqiRvMByvGU1e29CZuqH1TeWpdyXBkKXFgGc7kemhPFNMURGsxH418k77vL";
 
         public async Task Run()
         {

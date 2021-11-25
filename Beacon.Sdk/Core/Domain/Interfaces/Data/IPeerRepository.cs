@@ -6,6 +6,6 @@ namespace Beacon.Sdk.Core.Domain.Interfaces.Data
     {
         Task<Peer> Create(Peer peer);
 
-        Task<Peer?> TryReadBySenderUserId(string senderUserId);
+        Task<Peer?> TryRead(string senderUserId);
     }
 }

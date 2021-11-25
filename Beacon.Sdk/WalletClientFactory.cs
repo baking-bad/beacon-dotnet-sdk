@@ -75,7 +75,7 @@ namespace Beacon.Sdk
                 keyPairService);
 
             var matrixClientService = new ClientService(SingletonHttpFactory);
-            
+
             var p2PLoginRequestFactory = new P2PLoginRequestFactory(
                 new Logger<P2PLoginRequestFactory>(loggerFactory ?? NullLoggerFactory.Instance),
                 matrixClientService,

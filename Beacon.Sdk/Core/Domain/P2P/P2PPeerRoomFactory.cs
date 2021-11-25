@@ -4,7 +4,7 @@ namespace Beacon.Sdk.Core.Domain.P2P
     using Interfaces;
     using Utils;
 
-    public class P2PPeerRoomFactory 
+    public class P2PPeerRoomFactory
     {
         private readonly ICryptographyService _cryptographyService;
 
@@ -12,7 +12,7 @@ namespace Beacon.Sdk.Core.Domain.P2P
         {
             _cryptographyService = cryptographyService;
         }
-        
+
         public P2PPeerRoom Create(string relayServer, HexString peerHexPublicKey, string roomId)
         {
             byte[] hexBytes = peerHexPublicKey.ToByteArray();

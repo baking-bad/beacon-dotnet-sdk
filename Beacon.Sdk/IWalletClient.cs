@@ -10,7 +10,7 @@ namespace Beacon.Sdk
         HexString BeaconId { get; }
 
         string AppName { get; }
-        
+
         event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
 
         Task RespondAsync(BeaconBaseMessage beaconBaseMessage);

@@ -4,8 +4,8 @@ namespace Beacon.Sdk.Core.Domain.Interfaces.Data
 
     public interface ISeedRepository
     {
-        Task<string?> TryRead();
-
-        Task<string> Create(string seed);
+        Task<SeedEntity> Create(string seed);
+        
+        Task<SeedEntity?> TryRead();
     }
 }

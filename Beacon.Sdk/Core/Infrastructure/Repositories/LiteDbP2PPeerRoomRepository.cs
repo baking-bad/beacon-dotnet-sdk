@@ -1,67 +1,21 @@
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
     using System.Threading.Tasks;
-    using Data;
-    using Domain;
     using Domain.Interfaces.Data;
     using Domain.P2P;
-    using LiteDB;
     using Microsoft.Extensions.Logging;
     using Utils;
 
-    public class LiteDbP2PPeerRoomRepository : BaseLiteDbRepository, IP2PPeerRoomRepository
+    public class LiteDbP2PPeerRoomRepository : BaseLiteDbRepository<P2PPeerRoom>, IP2PPeerRoomRepository
     {
-        private readonly ILogger<LiteDbP2PPeerRoomRepository> _logger;
-        private readonly object _syncRoot = new();
-
         public LiteDbP2PPeerRoomRepository(ILogger<LiteDbP2PPeerRoomRepository> logger, RepositorySettings settings) :
-            base(settings)
+            base(logger, settings)
         {
-            _logger = logger;
         }
 
-        public Task<P2PPeerRoom?> TryReadByP2PUserId(string p2PUserId)
-        {
-            lock (_syncRoot)
+        public Task<P2PPeerRoom> CreateOrUpdate(P2PPeerRoom p2PPeerRoom) => 
+            InConnection(col =>
             {
-                using var db = new LiteDatabase(ConnectionString);
-
-                ILiteCollection<P2PPeerRoom>? col = db.GetCollection<P2PPeerRoom>(nameof(SeedData));
-
-                P2PPeerRoom? peerRoom = col.Query().Where(x => x.P2PUserId == p2PUserId)
-                    .FirstOrDefault();
-
-                return Task.FromResult(peerRoom);
-            }
-
-            // throw new Exception("Unknown exception");
-        }
-        
-        public Task<P2PPeerRoom?> TryReadByPeerHexPublicKey(HexString peerHexPublicKey)
-        {
-            lock (_syncRoot)
-            {
-                using var db = new LiteDatabase(ConnectionString);
-
-                ILiteCollection<P2PPeerRoom>? col = db.GetCollection<P2PPeerRoom>(nameof(SeedData));
-
-                P2PPeerRoom? peerRoom = col.Query().Where(x => x.PeerHexPublicKey.Value == peerHexPublicKey.Value)
-                    .FirstOrDefault();
-
-                return Task.FromResult(peerRoom);
-            }
-
-            // throw new Exception("Unknown exception");
-        }
-
-        public Task<P2PPeerRoom> CreateOrUpdate(P2PPeerRoom p2PPeerRoom)
-        {
-            lock (_syncRoot)
-            {
-                using var db = new LiteDatabase(ConnectionString);
-
-                ILiteCollection<P2PPeerRoom>? col = db.GetCollection<P2PPeerRoom>(nameof(SeedData));
-
                 P2PPeerRoom? result = col.Query()
                     .Where(x => x.PeerHexPublicKey.Value == p2PPeerRoom.PeerHexPublicKey.Value)
                     .FirstOrDefault();
@@ -73,10 +27,29 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                     col.EnsureIndex(x => x.PeerHexPublicKey);
                 }
                 else
+                {
                     col.Update(p2PPeerRoom);
+                }
 
                 return Task.FromResult(p2PPeerRoom);
-            }
-        }
+            });
+        
+        public Task<P2PPeerRoom?> TryRead(string p2PUserId) =>
+            InConnectionNullable(col =>
+            {
+                P2PPeerRoom? peerRoom = col.Query().Where(x => x.P2PUserId == p2PUserId)
+                    .FirstOrDefault();
+
+                return Task.FromResult(peerRoom ?? null);
+            });
+
+        public Task<P2PPeerRoom?> TryRead(HexString peerHexPublicKey) =>
+            InConnectionNullable(col =>
+            {
+                P2PPeerRoom? peerRoom = col.Query().Where(x => x.PeerHexPublicKey.Value == peerHexPublicKey.Value)
+                    .FirstOrDefault();
+
+                return Task.FromResult(peerRoom ?? null);
+            });
     }
 }

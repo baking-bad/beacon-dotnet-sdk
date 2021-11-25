@@ -17,23 +17,23 @@ namespace Beacon.Sdk.Core.Domain
 
         public static byte[] Hash(byte[] message, int bufferLength)
         {
-            byte[] buffer = new byte[bufferLength];
-            
+            var buffer = new byte[bufferLength];
+
             SodiumLibrary.crypto_generichash(buffer, bufferLength, message, message.Length, Array.Empty<byte>(), 0);
-            
+
             return buffer;
         }
-        
+
         public Peer Create(HexString hexPublicKey, string name, string version, string relayServer)
         {
             byte[] hash = Hash(hexPublicKey.ToByteArray(), 5);
             string senderUserId = Base58CheckEncoding.Encode(hash)!;
-                
+
             return new Peer
             {
                 SenderUserId = senderUserId,
                 HexPublicKey = hexPublicKey,
-                Name = name, 
+                Name = name,
                 Version = version,
                 RelayServer = relayServer
             };

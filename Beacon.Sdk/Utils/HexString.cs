@@ -7,12 +7,14 @@ namespace Beacon.Sdk.Utils
     public record HexString
     {
         private const string Prefix = "0x";
-        // public readonly string Value;
-        public string Value { get; set; }
+
         public HexString(string value)
         {
             Value = value;
         }
+
+        // public readonly string Value;
+        public string Value { get; set; }
 
         public static bool TryParse(byte[] input, out HexString result)
         {
