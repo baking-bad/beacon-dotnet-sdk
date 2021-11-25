@@ -70,8 +70,6 @@ namespace Beacon.Sdk
                 new ChannelOpeningMessageBuilder(cryptographyService, jsonSerializerService, keyPairService);
 
             var p2PMessageService = new P2PMessageService(
-                new Logger<P2PMessageService>(loggerFactory ?? NullLoggerFactory.Instance),
-                p2PPeerRoomRepository,
                 cryptographyService,
                 sessionKeyPairRepository,
                 keyPairService);
@@ -87,9 +85,11 @@ namespace Beacon.Sdk
 
             var p2PPeerRoomFactory = new P2PPeerRoomFactory(cryptographyService);
             var p2PCommunicationService = new P2PCommunicationService(
+                new Logger<P2PCommunicationService>(loggerFactory ?? new NullLoggerFactory()),
                 MatrixClientFactory.Create(new Logger<PollingService>(loggerFactory ?? new NullLoggerFactory())),
                 channelOpeningMessageBuilder,
                 p2PPeerRoomRepository,
+                cryptographyService,
                 p2PLoginRequestFactory,
                 p2PPeerRoomFactory,
                 p2PMessageService);

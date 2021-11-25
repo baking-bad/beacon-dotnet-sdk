@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Core.Domain.P2P;
-    using Core.Domain.P2P.Dto;
     using Core.Domain.Services;
     using Matrix.Sdk.Core.Domain.Services;
     using Microsoft.Extensions.DependencyInjection;
@@ -40,20 +39,19 @@
            
             logger.LogInformation("START");
             var sample = new Sample(relayServerServiceLogger, sessionCryptographyServiceLogger, pollingServiceLogger);
-
             try
             {
                 await sample.Run();
-                // sample.TestRepositories();
 
             }
             catch (Exception ex)
             {
-                throw;
+                
             }
-            
-            
-            logger.LogInformation("START");
+            // sample.TestRepositories();
+
+
+            logger.LogInformation("STOP");
 
             await RunAsync(host.Services);
 

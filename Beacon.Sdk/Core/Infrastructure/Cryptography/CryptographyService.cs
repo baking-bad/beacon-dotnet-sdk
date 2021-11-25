@@ -45,23 +45,38 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             return PublicKeyAuth.GenerateKeyPair(hash);
         }
 
-        public string Encrypt(string input, byte[] key)
+        public HexString Encrypt(string input, byte[] key)
         {
             byte[] nonce = SodiumCore.GetRandomBytes(NonceBytes)!;
-            byte[] result = SealedPublicKeyBox.Create(String.Concat(nonce).ToString(), key); // SecretBox.Create(input, nonce, key);
+            byte[] e = SecretBox.Create(input, nonce, key); //SealedPublicKeyBox.Create(String.Concat(nonce).ToString(), key);
 
-            return Encoding.UTF8.GetString(result);
+            byte[] payload = nonce.Concat(e).ToArray();
+            
+            if (!HexString.TryParse(payload, out HexString hexPayload))
+                throw new ArgumentException(nameof(payload));
+
+            return hexPayload;
         }
 
-        public string Decrypt(string input, byte[] key)
+        public string Decrypt(HexString hexInput, byte[] key)
         {
-            byte[] encryptedBytes = Encoding.UTF8.GetBytes(input);
-            byte[] nonce = encryptedBytes[..NonceBytes];
-            byte[] cipher = encryptedBytes[NonceBytes..];
-            byte[] decryptedBytes = SecretBox.Open(cipher, nonce, key);
+            byte[] bytes = hexInput.ToByteArray();
+            
+            byte[] nonce = bytes[..NonceBytes];
+            byte[] cipher = bytes[NonceBytes..];
+            
+            byte[] d = SecretBox.Open(cipher, nonce, key);
 
-            return Encoding.UTF8.GetString(decryptedBytes);
+            return Encoding.UTF8.GetString(d);
         }
+        
+        // private byte[] Decrypt2(byte[] encryptedBytes, byte[] sharedKey)
+        // {
+        //     byte[] nonce = encryptedBytes[..NonceBytes];
+        //     byte[] cipher = encryptedBytes[NonceBytes..];
+        //
+        //     return SecretBox.Open(cipher, nonce, sharedKey);
+        // }
 
         public string ToHexString(byte[] input)
         {
@@ -81,6 +96,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             if (!HexString.TryParse(result, out HexString k))
                 throw new Exception("HexString.TryParse(result, out var k)");
+            
             return k.Value;
         }
 
