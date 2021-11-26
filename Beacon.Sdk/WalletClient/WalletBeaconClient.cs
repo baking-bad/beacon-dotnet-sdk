@@ -24,6 +24,7 @@ namespace Beacon.Sdk.WalletClient
         private readonly IPeerRepository _peerRepository;
 
         private readonly IncomingMessageHandler _incomingMessageHandler;
+        private readonly OutgoingMessageHandler _outgoingMessageHandler;
 
         public WalletBeaconClient(
             ILogger<WalletBeaconClient> logger,
@@ -34,6 +35,7 @@ namespace Beacon.Sdk.WalletClient
             KeyPairService keyPairService,
             PeerFactory peerFactory,
             IncomingMessageHandler incomingMessageHandler,
+            OutgoingMessageHandler outgoingMessageHandler,
             BeaconOptions options) : base(keyPairService, appMetadataRepository, options)
         {
             _logger = logger;
@@ -41,6 +43,7 @@ namespace Beacon.Sdk.WalletClient
             _p2PCommunicationService = p2PCommunicationService;
             _jsonSerializerService = jsonSerializerService;
             _incomingMessageHandler = incomingMessageHandler;
+            _outgoingMessageHandler = outgoingMessageHandler;
             _peerFactory = peerFactory;
         }
 

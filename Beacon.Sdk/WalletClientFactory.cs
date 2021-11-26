@@ -101,7 +101,8 @@ namespace Beacon.Sdk
             #endregion
 
             var incomingMessageHandler = new IncomingMessageHandler(appMetadataRepository, jsonSerializerService);
-
+            var outgoingMessageHandler = new OutgoingMessageHandler(appMetadataRepository, jsonSerializerService);
+            
             var peerFactory = new PeerFactory(cryptographyService);
             _client = new WalletBeaconClient(
                 new Logger<WalletBeaconClient>(loggerFactory ?? new NullLoggerFactory()),
@@ -112,6 +113,7 @@ namespace Beacon.Sdk
                 keyPairService,
                 peerFactory,
                 incomingMessageHandler,
+                outgoingMessageHandler,
                 options);
 
             return _client;

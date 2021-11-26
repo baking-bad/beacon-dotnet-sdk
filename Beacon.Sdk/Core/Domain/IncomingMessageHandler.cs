@@ -1,13 +1,14 @@
 namespace Beacon.Sdk.Core.Domain
 {
     using Beacon;
-    using Beacon.Constants;
+    using Beacon.Permission;
     using Interfaces;
     
     public class IncomingMessageHandler
     {
         private readonly IAppMetadataRepository _appMetadataRepository;
         private readonly IJsonSerializerService _jsonSerializerService;
+        
         public IncomingMessageHandler(IAppMetadataRepository appMetadataRepository,
             IJsonSerializerService jsonSerializerService)
         {
@@ -29,19 +30,9 @@ namespace Beacon.Sdk.Core.Domain
 
         private PermissionRequest Handle(PermissionRequest permissionRequest)
         {
-            AppMetadata t = _appMetadataRepository.CreateOrUpdate(permissionRequest.AppMetadata).Result;
+            AppMetadata appMetadata = _appMetadataRepository.CreateOrUpdate(permissionRequest.AppMetadata).Result;
 
             return permissionRequest;
         }
-        
-        
-        // public PermissionRequest Handle(PermissionRequest permissionRequest)
-        // {
-        //     
-        //     AppMetadata appMetadata = _appMetadataRepository.TryRead(permissionRequest.SenderId).Result 
-        //                               ?? throw new Exception("AppMetadata not found");
-        //     
-        // }
-        
     }
 }

@@ -1,8 +1,7 @@
 // ReSharper disable InconsistentNaming
-namespace Beacon.Sdk.Beacon
+namespace Beacon.Sdk.Beacon.Permission
 {
     using System.Collections.Generic;
-    using Constants;
 
     public record PermissionRequest(
             string Version,
@@ -12,7 +11,7 @@ namespace Beacon.Sdk.Beacon
             Network Network,
             List<PermissionScope> Scopes)
         : BeaconBaseMessage(
-            BeaconMessageType.PermissionRequest,
+            BeaconMessageType.permission_request,
             Version,
             Id,
             SenderId)

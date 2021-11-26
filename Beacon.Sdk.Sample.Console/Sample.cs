@@ -6,6 +6,7 @@ namespace Beacon.Sdk.Sample.Console
     using System.Threading.Tasks;
     using Base58Check;
     using Beacon;
+    using Beacon.Permission;
     using Core.Domain.Services;
     using Core.Infrastructure.Cryptography;
     using Core.Infrastructure.Repositories;
@@ -38,6 +39,11 @@ namespace Beacon.Sdk.Sample.Console
             client.OnBeaconMessageReceived += (sender, args) =>
             {
                 BeaconBaseMessage beaconBaseMessage = args.BeaconBaseMessage;
+
+                if (beaconBaseMessage.Type == BeaconMessageType.permission_request)
+                {
+                    var response = new PermissionResponse()
+                }
             };
 
             await client.InitAsync();

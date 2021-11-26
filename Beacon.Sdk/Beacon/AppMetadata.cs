@@ -2,8 +2,6 @@ namespace Beacon.Sdk.Beacon
 {
     using LiteDB;
 
-    // public record AppMetadata(string SenderId, string Name, string? Icon);
-
     public class AppMetadata
     {
         [BsonId] public string SenderId { get; set; }

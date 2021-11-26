@@ -1,30 +1,39 @@
 namespace Beacon.Sdk.Core.Domain
 {
+    using System;
     using Beacon;
-    using Beacon.Constants;
+    using Beacon.Permission;
+    using Interfaces;
 
     public class OutgoingMessageHandler
     {
         private readonly IAppMetadataRepository _appMetadataRepository;
+        private readonly IJsonSerializerService _jsonSerializerService;
 
-        public OutgoingMessageHandler(IAppMetadataRepository appMetadataRepository)
+        public OutgoingMessageHandler(IAppMetadataRepository appMetadataRepository, IJsonSerializerService jsonSerializerService)
         {
             _appMetadataRepository = appMetadataRepository;
+            _jsonSerializerService = jsonSerializerService;
         }
         
-        public BeaconBaseMessage Handle(BeaconBaseMessage baseMessage)
+        public string Handle(BeaconBaseMessage baseMessage)
         {
-            if (baseMessage.Type == BeaconMessageType.PermissionRequest)
-                return Handle((baseMessage as PermissionRequest)!);
-            
-            return baseMessage;
+            if (baseMessage.Type == BeaconMessageType.PermissionResponse)
+                return Handle((baseMessage as PermissionResponse)!);
+
+            throw new Exception("Invalid beacon message type");
         }
 
-        private PermissionRequest Handle(PermissionRequest permissionRequest)
+        private string Handle(PermissionResponse permissionResponse, AppMetadata ownAppMetadata)
         {
-            _ = _appMetadataRepository.CreateOrUpdate(permissionRequest.AppMetadata).Result;
+            AppMetadata appMetadata = _appMetadataRepository.TryRead(permissionResponse.SenderId).Result ?? throw new Exception("AppMetadata not found");
+            
+            _ = _appMetadataRepository.CreateOrUpdate(permissionResponse.AppMetadata).Result;
 
-            return permissionRequest;
+            permissionResponse.AppMetadata = ownAppMetadata;
+            // permissionResponse.Network = new Network(String.Empty, ErrorType.Aborted);
+            // var newPermissionResponse = new PermissionResponse()
+            return _jsonSerializerService.Serialize(permissionResponse);
         }
     }
 }
