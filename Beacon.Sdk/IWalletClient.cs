@@ -3,13 +3,12 @@ namespace Beacon.Sdk
     using System;
     using System.Threading.Tasks;
     using Beacon;
-    using Utils;
 
     public interface IWalletClient
     {
-        HexString BeaconId { get; }
+        AppMetadata Metadata { get; }
 
-        string AppName { get; }
+        IAppMetadataRepository AppMetadataRepository { get; }
 
         event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
 

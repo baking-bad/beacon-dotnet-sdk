@@ -22,7 +22,7 @@ namespace Beacon.Sdk
         private IWalletClient? _client;
 
         public IWalletClient Create(
-            WalletClientOptions options,
+            ClientOptions options,
             ILoggerFactory? loggerFactory = null)
 
         {
@@ -52,6 +52,10 @@ namespace Beacon.Sdk
                 new LiteDbSeedRepository(
                     new Logger<LiteDbSeedRepository>(
                         loggerFactory ?? NullLoggerFactory.Instance), repositorySettings);
+
+            var appMetadataRepository = new LiteDbAppMetadataRepository(
+                new Logger<LiteDbAppMetadataRepository>(loggerFactory ?? NullLoggerFactory.Instance),
+                repositorySettings);
 
             var sdkStorage = new SdkStorage();
             var jsonSerializerService = new JsonSerializerService();
@@ -85,8 +89,8 @@ namespace Beacon.Sdk
 
             var p2PPeerRoomFactory = new P2PPeerRoomFactory(cryptographyService);
             var p2PCommunicationService = new P2PCommunicationService(
-                new Logger<P2PCommunicationService>(loggerFactory ?? new NullLoggerFactory()),
-                MatrixClientFactory.Create(new Logger<PollingService>(loggerFactory ?? new NullLoggerFactory())),
+                new Logger<P2PCommunicationService>(loggerFactory ?? NullLoggerFactory.Instance),
+                MatrixClientFactory.Create(new Logger<PollingService>(loggerFactory ?? NullLoggerFactory.Instance)),
                 channelOpeningMessageBuilder,
                 p2PPeerRoomRepository,
                 cryptographyService,
@@ -96,11 +100,12 @@ namespace Beacon.Sdk
 
             #endregion
 
+
             var peerFactory = new PeerFactory(cryptographyService);
             _client = new WalletClient.WalletClient(
                 new Logger<WalletClient.WalletClient>(loggerFactory ?? new NullLoggerFactory()),
-                cryptographyService,
                 peerRepository,
+                appMetadataRepository,
                 p2PCommunicationService,
                 jsonSerializerService,
                 keyPairService,

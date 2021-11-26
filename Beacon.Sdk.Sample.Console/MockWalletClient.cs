@@ -1,12 +1,16 @@
-namespace Beacon.Sdk
+namespace Beacon.Sdk.Sample.Console
 {
     using System;
     using System.Threading.Tasks;
-    using Beacon;
-    using Utils;
+    using global::Beacon.Sdk.Beacon;
+    using global::Beacon.Sdk.Utils;
 
     public class MockWalletClient : IWalletClient
     {
+        public AppMetadata Metadata { get; }
+        
+        public IAppMetadataRepository AppMetadataRepository { get; }
+        
         public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
 
         public HexString BeaconId { get; }

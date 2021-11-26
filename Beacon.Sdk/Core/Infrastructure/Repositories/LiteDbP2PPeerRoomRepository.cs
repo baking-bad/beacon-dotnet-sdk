@@ -13,7 +13,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
         }
 
-        public Task<P2PPeerRoom> CreateOrUpdate(P2PPeerRoom p2PPeerRoom) => 
+        public Task<P2PPeerRoom> CreateOrUpdate(P2PPeerRoom p2PPeerRoom) =>
             InConnection(col =>
             {
                 P2PPeerRoom? result = col.Query()
@@ -33,7 +33,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
                 return Task.FromResult(p2PPeerRoom);
             });
-        
+
         public Task<P2PPeerRoom?> TryRead(string p2PUserId) =>
             InConnectionNullable(col =>
             {

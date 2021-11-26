@@ -8,8 +8,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     public abstract class BaseLiteDbRepository<T>
     {
         private readonly string _connectionString;
-        private readonly object _syncRoot = new();
         private readonly ILogger<BaseLiteDbRepository<T>> _logger;
+        private readonly object _syncRoot = new();
 
         protected BaseLiteDbRepository(ILogger<BaseLiteDbRepository<T>> logger, RepositorySettings settings)
         {
@@ -62,8 +62,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
             return new Task<T?>(() => default);
         }
-        
-        
+
+
         protected Task<T[]?> InConnectionNullable(Func<ILiteCollection<T>, Task<T[]?>> func)
         {
             try

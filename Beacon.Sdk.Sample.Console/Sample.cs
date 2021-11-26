@@ -26,7 +26,7 @@ namespace Beacon.Sdk.Sample.Console
             
             var factory = new WalletClientFactory();
 
-            var options = new WalletClientOptions
+            var options = new ClientOptions
             {
                 AppName = "Atomex Mobile",
                 AppUrl = "", //string?

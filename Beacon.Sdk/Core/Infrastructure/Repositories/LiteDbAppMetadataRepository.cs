@@ -3,9 +3,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     using System.Threading.Tasks;
     using Beacon;
     using Microsoft.Extensions.Logging;
-    
-    
-    public class LiteDbAppMetadataRepository : BaseLiteDbRepository<AppMetadata>
+
+    public class LiteDbAppMetadataRepository : BaseLiteDbRepository<AppMetadata>, IAppMetadataRepository
     {
         public LiteDbAppMetadataRepository(ILogger<LiteDbAppMetadataRepository> logger, RepositorySettings settings)
             : base(logger, settings)
@@ -41,14 +40,14 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 return Task.FromResult(appMetadata ?? null);
             });
 
-        public Task<AppMetadata[]?> ReadAll(string senderId) => 
+        public Task<AppMetadata[]?> ReadAll(string senderId) =>
             InConnectionNullable(col =>
             {
                 AppMetadata[]? result = col.Query().ToArray();
 
                 return Task.FromResult(result ?? null);
             });
-        
+
         public Task Delete(string senderId) =>
             InConnection(col =>
             {

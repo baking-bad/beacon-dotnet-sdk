@@ -2,7 +2,6 @@ namespace Beacon.Sdk.WalletClient
 {
     using System;
     using System.Threading.Tasks;
-    using Base58Check;
     using Beacon;
     using Core.Domain;
     using Core.Domain.Interfaces;
@@ -13,14 +12,12 @@ namespace Beacon.Sdk.WalletClient
     using Utils;
 
     /*
-     * Todo: add AppMetadataRepository
+     * Todo: add PermissionRepository
      */
-    public class WalletClient : IWalletClient
-    {
-        private readonly ICryptographyService _cryptographyService;
-        private readonly IJsonSerializerService _jsonSerializerService;
 
-        private readonly KeyPairService _keyPairService;
+    public class WalletClient : BaseClient, IWalletClient
+    {
+        private readonly IJsonSerializerService _jsonSerializerService;
         private readonly ILogger<WalletClient> _logger;
         private readonly IP2PCommunicationService _p2PCommunicationService;
         private readonly PeerFactory _peerFactory;
@@ -28,41 +25,22 @@ namespace Beacon.Sdk.WalletClient
 
         public WalletClient(
             ILogger<WalletClient> logger,
-            ICryptographyService cryptographyService,
             IPeerRepository peerRepository,
+            IAppMetadataRepository appMetadataRepository,
             IP2PCommunicationService p2PCommunicationService,
             IJsonSerializerService jsonSerializerService,
             KeyPairService keyPairService,
             PeerFactory peerFactory,
-            WalletClientOptions options)
+            ClientOptions options) : base(keyPairService, appMetadataRepository, options)
         {
             _logger = logger;
-            _cryptographyService = cryptographyService;
             _peerRepository = peerRepository;
             _p2PCommunicationService = p2PCommunicationService;
             _jsonSerializerService = jsonSerializerService;
-            _keyPairService = keyPairService;
             _peerFactory = peerFactory;
-
-            AppName = options.AppName;
         }
-
-        private string SenderId => Base58CheckEncoding.Encode(PeerFactory.Hash(BeaconId.ToByteArray(), 5));
 
         public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
-
-        public HexString BeaconId
-        {
-            get
-            {
-                if (!HexString.TryParse(_keyPairService.KeyPair.PublicKey, out HexString beaconId))
-                    throw new InvalidOperationException("Can not parse publicKey");
-
-                return beaconId;
-            }
-        }
-
-        public string AppName { get; }
 
         public async Task InitAsync() => await _p2PCommunicationService.LoginAsync();
 

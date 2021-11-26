@@ -12,7 +12,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
         }
 
-        public Task<Peer> Create(Peer peer) => 
+        public Task<Peer> Create(Peer peer) =>
             InConnection(col =>
             {
                 col.Insert(peer);
@@ -21,7 +21,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 return Task.FromResult(peer);
             });
 
-        public Task<Peer?> TryRead(string senderUserId) => 
+        public Task<Peer?> TryRead(string senderUserId) =>
             InConnectionNullable(col =>
             {
                 Peer? peer = col.Query().Where(x => x.SenderUserId == senderUserId).FirstOrDefault();

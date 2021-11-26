@@ -25,13 +25,13 @@ namespace Beacon.Sdk.Core.Domain.Services
             get
             {
                 SeedEntity? data = _seedRepository.TryRead().Result;
-                
+
                 if (data != null)
                     return _cryptographyService.GenerateEd25519KeyPair(data.Seed);
 
                 SeedEntity newSeedEntity = _seedRepository.Create(CreateGuid()).Result ??
-                                 throw new ArgumentNullException(nameof(data));
-                
+                                           throw new ArgumentNullException(nameof(data));
+
                 return _cryptographyService.GenerateEd25519KeyPair(newSeedEntity.Seed);
             }
         }
