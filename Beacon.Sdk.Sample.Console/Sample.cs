@@ -17,7 +17,7 @@ namespace Beacon.Sdk.Sample.Console
     public class Sample
     {
         private const string QrCode = 
-                "BSdNU2tFbwHcZchafP24HAnC3enY5bMwP2o8b2hSZFEEEs1ur9pTKEbzmwbTHt7GVZH46yod8pY8P2BHNvUMprPFkqodpZVQz3EeKY9byWAbdxvkBKTXySRSFEPmuGpg5CJMw99UuhKJHCb1s2KfuUSBpq29EADrrho3KGqcyqdktkCzdKZodEpcmmCe7joAZsgDRM9tHcU3ijuG4yUcSnofLjGZA2QdKuToGVWcQZv6PtRjyhAj5tHN1doT463TLXhPYFeT6vFzmfqiRvMByvGU1e29CZuqH1TeWpdyXBkKXFgGc7kemhPFNMURGsxH418k77vL";
+                "BSdNU2tFbvpkRbsrwoi67AWq14RZVWFWf9GZ3616m2vhnAx6WZVPC6uZ2d8ekZ8WekY1VC52b5oNcJfZCgicKkQ7URc4ER7KLKiuDtcoCT8RkorBcWEsZweqJkDDaBzavNM8n29DCARRK1fKaRhERQgdMfzxx5KYRqJK5qXzL7XGBR7UGFhWh8UobMSq8Eg982AwPGdUgfPHfZZUsBez2YCBUuiySTSmDo4gSt6t68F5auzTNsNfLNCiqcemoCkYTShFFNTpXcCjqN52ywkMsHh5pM68QiWhFfhBoYBfnRRcDE4zbqdGrW24FB92suQnq7ZkMeuz";
 
         public async Task Run()
         {
@@ -26,7 +26,7 @@ namespace Beacon.Sdk.Sample.Console
             
             var factory = new WalletClientFactory();
 
-            var options = new ClientOptions
+            var options = new BeaconOptions
             {
                 AppName = "Atomex Mobile",
                 AppUrl = "", //string?

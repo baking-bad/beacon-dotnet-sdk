@@ -15,28 +15,32 @@ namespace Beacon.Sdk.WalletClient
      * Todo: add PermissionRepository
      */
 
-    public class WalletClient : BaseClient, IWalletClient
+    public class WalletBeaconClient : BaseBeaconClient, IWalletClient
     {
         private readonly IJsonSerializerService _jsonSerializerService;
-        private readonly ILogger<WalletClient> _logger;
+        private readonly ILogger<WalletBeaconClient> _logger;
         private readonly IP2PCommunicationService _p2PCommunicationService;
         private readonly PeerFactory _peerFactory;
         private readonly IPeerRepository _peerRepository;
 
-        public WalletClient(
-            ILogger<WalletClient> logger,
+        private readonly IncomingMessageHandler _incomingMessageHandler;
+
+        public WalletBeaconClient(
+            ILogger<WalletBeaconClient> logger,
             IPeerRepository peerRepository,
             IAppMetadataRepository appMetadataRepository,
             IP2PCommunicationService p2PCommunicationService,
             IJsonSerializerService jsonSerializerService,
             KeyPairService keyPairService,
             PeerFactory peerFactory,
-            ClientOptions options) : base(keyPairService, appMetadataRepository, options)
+            IncomingMessageHandler incomingMessageHandler,
+            BeaconOptions options) : base(keyPairService, appMetadataRepository, options)
         {
             _logger = logger;
             _peerRepository = peerRepository;
             _p2PCommunicationService = p2PCommunicationService;
             _jsonSerializerService = jsonSerializerService;
+            _incomingMessageHandler = incomingMessageHandler;
             _peerFactory = peerFactory;
         }
 
@@ -109,7 +113,9 @@ namespace Beacon.Sdk.WalletClient
                 if (beaconBaseMessage.Version != "1")
                     await SendAcknowledgeResponseAsync(beaconBaseMessage);
 
-                OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs(beaconBaseMessage));
+                BeaconBaseMessage handledMessage = _incomingMessageHandler.Handle(beaconBaseMessage, message); // Deserialize here a message
+                
+                OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs(handledMessage));
             }
         }
     }

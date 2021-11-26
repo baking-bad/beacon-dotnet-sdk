@@ -7,15 +7,15 @@ namespace Beacon.Sdk.WalletClient
     using Core.Domain.Services;
     using Utils;
 
-    public abstract class BaseClient
+    public abstract class BaseBeaconClient
     {
         private readonly string? _appUrl;
         private readonly string? _iconUrl;
         private readonly KeyPairService _keyPairService;
         protected readonly string AppName;
 
-        protected BaseClient(KeyPairService keyPairService, IAppMetadataRepository appMetadataRepository,
-            ClientOptions options)
+        protected BaseBeaconClient(KeyPairService keyPairService, IAppMetadataRepository appMetadataRepository,
+            BeaconOptions options)
         {
             _keyPairService = keyPairService;
             AppMetadataRepository = appMetadataRepository;

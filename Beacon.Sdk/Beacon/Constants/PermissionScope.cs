@@ -1,6 +1,6 @@
 namespace Beacon.Sdk.Beacon.Constants
 {
-    public static class PermissionScope
+    public static class PermissionScopeJson
     {
         public const string SIGN = "sign"; // Allows the DApp to send requests to sign arbitrary payload
 

@@ -24,9 +24,6 @@ namespace Beacon.Sdk.Utils
             return sb.ToString();
         }
 
-
-        // public static HexString FromByteArray(byte[] value) => new HexString(BitConverter.ToString(value));
-
         public static byte[] ToByteArray(this HexString hexString)
         {
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
@@ -47,39 +44,3 @@ namespace Beacon.Sdk.Utils
         }
     }
 }
-
-// ReSharper disable once InconsistentNaming
-// private static string ToASCII(string? hexString)
-// {
-//     if (string.IsNullOrEmpty(hexString))
-//         throw new ArgumentNullException(nameof(hexString));
-//
-//     var sb = new StringBuilder();
-//     for (var i = 0; i < hexString.Length; i += 2)
-//     {
-//         var hexChar = hexString.Substring(i, 2);
-//         sb.Append((char)Convert.ToByte(hexChar, 16));
-//     }
-//
-//     return sb.ToString();
-// }
-
-// private HexString()
-// {
-//     
-// }
-
-// public static bool TryParse(byte[] input)
-// {
-//     if (input.Length <= 1)
-//     BitConverter.ToString(input);
-//     
-// }
-
-// public override bool Equals(object obj)
-// {
-//     if (obj == null)
-//         return false;
-//
-//     var hex = (HexString) obj;
-// }

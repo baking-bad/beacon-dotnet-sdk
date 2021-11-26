@@ -22,7 +22,7 @@ namespace Beacon.Sdk
         private IWalletClient? _client;
 
         public IWalletClient Create(
-            ClientOptions options,
+            BeaconOptions options,
             ILoggerFactory? loggerFactory = null)
 
         {
@@ -100,16 +100,18 @@ namespace Beacon.Sdk
 
             #endregion
 
+            var incomingMessageHandler = new IncomingMessageHandler(appMetadataRepository, jsonSerializerService);
 
             var peerFactory = new PeerFactory(cryptographyService);
-            _client = new WalletClient.WalletClient(
-                new Logger<WalletClient.WalletClient>(loggerFactory ?? new NullLoggerFactory()),
+            _client = new WalletBeaconClient(
+                new Logger<WalletBeaconClient>(loggerFactory ?? new NullLoggerFactory()),
                 peerRepository,
                 appMetadataRepository,
                 p2PCommunicationService,
                 jsonSerializerService,
                 keyPairService,
                 peerFactory,
+                incomingMessageHandler,
                 options);
 
             return _client;
