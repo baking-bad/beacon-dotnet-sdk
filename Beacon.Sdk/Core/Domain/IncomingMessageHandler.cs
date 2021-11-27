@@ -1,6 +1,7 @@
 namespace Beacon.Sdk.Core.Domain
 {
     using Beacon;
+    using Beacon.Operation;
     using Beacon.Permission;
     using Interfaces;
     
@@ -16,23 +17,36 @@ namespace Beacon.Sdk.Core.Domain
             _jsonSerializerService = jsonSerializerService;
         }
 
-        public BeaconBaseMessage Handle(BeaconBaseMessage baseMessage, string message)
+        public (AcknowledgeResponse, BeaconBaseMessage) Handle(string message, string senderId)
         {
-            if (baseMessage.Type == BeaconMessageType.PermissionRequest)
+            BeaconBaseMessage beaconMessage = _jsonSerializerService.Deserialize<BeaconBaseMessage>(message);
+            var ack = new AcknowledgeResponse(beaconMessage.Id, senderId);
+
+            if (beaconMessage.Type == BeaconMessageType.permission_request)
             {
                 PermissionRequest permissionRequest = _jsonSerializerService.Deserialize<PermissionRequest>(message);
+
+                _ = _appMetadataRepository.CreateOrUpdate(permissionRequest.AppMetadata).Result;
                 
-                return Handle(permissionRequest);
+                return (ack, permissionRequest);
+            }
+            else if (beaconMessage.Type == BeaconMessageType.operation_request)
+            {
+                OperationRequest operationRequest = _jsonSerializerService.Deserialize<OperationRequest>(message);
+                // _appMetadataRepository.TryRead(beaconMessage.SenderId).Result;
+                
+                return (ack, operationRequest);
+            }
+            else if (beaconMessage.Type == BeaconMessageType.sign_payload_request)
+            {
+                
+            }
+            else
+            {
+                
             }
             
-            return baseMessage;
-        }
-
-        private PermissionRequest Handle(PermissionRequest permissionRequest)
-        {
-            AppMetadata appMetadata = _appMetadataRepository.CreateOrUpdate(permissionRequest.AppMetadata).Result;
-
-            return permissionRequest;
+            return (ack, beaconMessage);
         }
     }
 }

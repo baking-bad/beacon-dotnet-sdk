@@ -2,6 +2,7 @@ namespace Beacon.Sdk.Core.Infrastructure
 {
     using Domain.Interfaces;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
     using Newtonsoft.Json.Serialization;
 
     public class JsonSerializerService : IJsonSerializerService
@@ -10,7 +11,8 @@ namespace Beacon.Sdk.Core.Infrastructure
             new()
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                NullValueHandling = NullValueHandling.Ignore
+                NullValueHandling = NullValueHandling.Ignore,
+                Converters = new JsonConverter[] {new StringEnumConverter()}
             };
 
         public string Serialize(object model) => JsonConvert.SerializeObject(model, JsonSettings);

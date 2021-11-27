@@ -7,7 +7,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     using Libsodium;
     using Sodium;
     using Utils;
-    using SodiumLibrary = global::Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium.SodiumLibrary;
+    using SodiumLibrary = Libsodium.SodiumLibrary;
 
     public class CryptographyService : ICryptographyService
     {
@@ -37,6 +37,15 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         }
 
         public byte[] Hash(byte[] input) => GenericHash.Hash(input, null, input.Length);
+        
+        public byte[] Hash(byte[] message, int bufferLength)
+        {
+            var buffer = new byte[bufferLength];
+
+            SodiumLibrary.crypto_generichash(buffer, bufferLength, message, message.Length, Array.Empty<byte>(), 0);
+
+            return buffer;
+        }
 
         public KeyPair GenerateEd25519KeyPair(string seed)
         {
@@ -48,9 +57,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         public HexString Encrypt(string input, byte[] key)
         {
             byte[] nonce = SodiumCore.GetRandomBytes(NonceBytes)!;
-            byte[]
-                e = SecretBox.Create(input, nonce,
-                    key); //SealedPublicKeyBox.Create(String.Concat(nonce).ToString(), key);
+            byte[] e = SecretBox.Create(input, nonce, key); 
 
             byte[] payload = nonce.Concat(e).ToArray();
 
@@ -71,15 +78,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             return Encoding.UTF8.GetString(d);
         }
-
-        // private byte[] Decrypt2(byte[] encryptedBytes, byte[] sharedKey)
-        // {
-        //     byte[] nonce = encryptedBytes[..NonceBytes];
-        //     byte[] cipher = encryptedBytes[NonceBytes..];
-        //
-        //     return SecretBox.Open(cipher, nonce, sharedKey);
-        // }
-
+        
         public string ToHexString(byte[] input)
         {
             var hexString = BitConverter.ToString(input);

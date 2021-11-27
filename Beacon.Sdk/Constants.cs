@@ -3,7 +3,8 @@ namespace Beacon.Sdk
     public static class Constants
     {
         public const string BeaconVersion = "2";
-
+        public const string MessageVersion = BeaconVersion;
+        
         public static readonly string[] KnownRelayServers =
         {
             // "beacon-node-1.sky.papers.tech",

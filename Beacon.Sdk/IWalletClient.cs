@@ -12,7 +12,7 @@ namespace Beacon.Sdk
 
         event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
 
-        Task RespondAsync(BeaconBaseMessage beaconBaseMessage);
+        Task SendMessageAsync(string receiverId, BeaconBaseMessage baseMessage);
 
         Task InitAsync();
 

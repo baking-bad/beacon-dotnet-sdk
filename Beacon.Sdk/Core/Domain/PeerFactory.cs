@@ -26,7 +26,7 @@ namespace Beacon.Sdk.Core.Domain
 
         public Peer Create(HexString hexPublicKey, string name, string version, string relayServer)
         {
-            byte[] hash = Hash(hexPublicKey.ToByteArray(), 5);
+            byte[] hash = _cryptographyService.Hash(hexPublicKey.ToByteArray(), 5);
             string senderUserId = Base58CheckEncoding.Encode(hash)!;
 
             return new Peer

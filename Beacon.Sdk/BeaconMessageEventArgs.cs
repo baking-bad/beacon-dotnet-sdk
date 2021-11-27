@@ -5,10 +5,13 @@ namespace Beacon.Sdk
 
     public class BeaconMessageEventArgs : EventArgs
     {
-        public BeaconMessageEventArgs(BeaconBaseMessage beaconBaseMessage)
+        public BeaconMessageEventArgs(string senderId, BeaconBaseMessage beaconBaseMessage)
         {
+            SenderId = senderId;
             BeaconBaseMessage = beaconBaseMessage;
         }
+
+        public string SenderId { get; }
 
         public BeaconBaseMessage BeaconBaseMessage { get; }
     }

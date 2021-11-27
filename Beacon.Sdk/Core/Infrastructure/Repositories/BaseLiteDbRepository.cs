@@ -21,6 +21,20 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             //     serialize: hexString => hexString.Value,
             //     deserialize: bson => new HexString(bson.AsArray));
             // }
+            
+            BsonMapper.Global.RegisterType<DateTimeOffset>
+            (
+                serialize: obj =>
+                {
+                    var doc = new BsonDocument
+                    {
+                        ["DateTime"] = obj.DateTime.Ticks,
+                        ["Offset"] = obj.Offset.Ticks
+                    };
+                    return doc;
+                },
+                deserialize: doc => new DateTimeOffset(doc["DateTime"].AsInt64, new TimeSpan(doc["Offset"].AsInt64))
+            );
         }
 
         protected Task<T> InConnection(Func<ILiteCollection<T>, Task<T>> func)

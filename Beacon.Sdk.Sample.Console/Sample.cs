@@ -1,3 +1,4 @@
+// ReSharper disable ArgumentsStyleNamedExpression
 namespace Beacon.Sdk.Sample.Console
 {
     using System;
@@ -18,7 +19,7 @@ namespace Beacon.Sdk.Sample.Console
     public class Sample
     {
         private const string QrCode = 
-                "BSdNU2tFbvpkRbsrwoi67AWq14RZVWFWf9GZ3616m2vhnAx6WZVPC6uZ2d8ekZ8WekY1VC52b5oNcJfZCgicKkQ7URc4ER7KLKiuDtcoCT8RkorBcWEsZweqJkDDaBzavNM8n29DCARRK1fKaRhERQgdMfzxx5KYRqJK5qXzL7XGBR7UGFhWh8UobMSq8Eg982AwPGdUgfPHfZZUsBez2YCBUuiySTSmDo4gSt6t68F5auzTNsNfLNCiqcemoCkYTShFFNTpXcCjqN52ywkMsHh5pM68QiWhFfhBoYBfnRRcDE4zbqdGrW24FB92suQnq7ZkMeuz";
+                "BSdNU2tFbwJ8DZffivKRbRkKSQo81QRMdoUn32MZVgwYBWUrYZHhGDWP2fUrLsSBrD4YxNKchwjrsLwTJJB9Kt3iNzBoqPhcM8S8WFcueydCghDeiHvVo98qhpqjUKny5bCzcdsJTcKLLQCVUpjCdZ6mek9RDX2z3u7atRn8UNG2amibHB9HoPBsWRvrCrjLRSnRQLquKwLUBJxHErkFS2Yn2TR2SbKWNSMYDAjNrrTPeMtLxauDSRNbWm5Uxu45dKDYC4cBpCStSUCcmUnCbVwxgBHxjiCZEFKxLpo8Cx66R3CrP6CC6aRKZdGw3CoHvKzHdHjm";
 
         public async Task Run()
         {
@@ -38,11 +39,17 @@ namespace Beacon.Sdk.Sample.Console
 
             client.OnBeaconMessageReceived += (sender, args) =>
             {
-                BeaconBaseMessage beaconBaseMessage = args.BeaconBaseMessage;
-
-                if (beaconBaseMessage.Type == BeaconMessageType.permission_request)
+                BeaconBaseMessage message = args.BeaconBaseMessage;
+                
+                if (message is PermissionRequest request)
                 {
-                    var response = new PermissionResponse()
+                    var response = new PermissionResponse( 
+                        id: request!.Id, 
+                        network: request.Network, 
+                        scopes: request.Scopes, 
+                        publicKey: "3b92229274683b311cf8b040cf91ac0f8e19e410f06eda5537ef077e718e0024");
+                    
+                    client.SendMessageAsync(args.SenderId, response);
                 }
             };
 

@@ -24,6 +24,9 @@ namespace Beacon.Sdk.Sample.Console
             return Task.CompletedTask;
         }
 
+
+        public Task SendMessageAsync(string receiverId, BeaconBaseMessage baseMessage) => throw new NotImplementedException();
+
         public Task InitAsync()
         {
             Console.WriteLine("Init");
@@ -35,7 +38,7 @@ namespace Beacon.Sdk.Sample.Console
         {
             await Task.Delay(100);
 
-            var eventArgs = new BeaconMessageEventArgs(new BeaconBaseMessage("type", "2", "id", "senderId"));
+            var eventArgs = new BeaconMessageEventArgs("", new BeaconBaseMessage(BeaconMessageType.acknowledge, "2", "id", "senderId"));
             OnBeaconMessageReceived?.Invoke(this, eventArgs);
 
             await Task.CompletedTask;

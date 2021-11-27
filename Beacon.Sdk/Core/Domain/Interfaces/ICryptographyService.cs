@@ -12,6 +12,8 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
 
         byte[] Hash(byte[] input);
 
+        byte[] Hash(byte[] message, int bufferLength);
+
         KeyPair GenerateEd25519KeyPair(string seed);
 
         HexString Encrypt(string input, byte[] key);

@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\matrix-dotnet-sdk\Matrix.Sdk\Matrix.Sdk.csproj" />
       <ProjectReference Include="..\Beacon.Sdk\Beacon.Sdk.csproj" />
     </ItemGroup>
 

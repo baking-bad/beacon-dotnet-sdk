@@ -109,7 +109,6 @@ namespace Beacon.Sdk
                 peerRepository,
                 appMetadataRepository,
                 p2PCommunicationService,
-                jsonSerializerService,
                 keyPairService,
                 peerFactory,
                 incomingMessageHandler,
