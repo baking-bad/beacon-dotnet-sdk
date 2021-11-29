@@ -20,7 +20,7 @@ namespace Beacon.Sdk.Sample.Console
     public class Sample
     {
         private const string QrCode = 
-                "BSdNU2tFbwHdGhmPXFnNTMMTh8C3Vnu37QT1az1vvjZYaeBpU5NLuNXLrWCWX4yAq24R6PPVNQNo5r8cdZRYjjaGpihgbpc6bd4mBztAychGKGod17w74G5Qrz7XF8Z1XHC9F9JnprT2HVaLJauaqX861scw25jV4zMey3LsWz2ugyfYgHrsk4f8kbAXybJcNz1U2NmXyR1y73WixzsM3Gz7kBFStEaANkWqc97FMudfY6aSuN5uXV64Cexkn1XGiZhNToAr7XGHZsnxwJP6HD3eFjcpCVq3V1GwfC1NpWZA41Y4epd1RAMXHFKYYpHWw3ryv8GS";
+                "BSdNU2tFbwJ8ZaNtN1VsweZceQm1NMinmCWdf5NeKo3WxdJctMqjZABFrgb9aG7nJEa5tQzaDLKzvKZXUabukZhpFhDDEckxCVjK125uxVnjPVZG4XPgNTEgHD5DuqNLDNZaRbk9Jhj5WY4s9PvpUBcHUxHJCJELRi31A8KRmw9nbmepnRjDyiWJiMpKXmQq87w2oCNba2nAvcmggT8qjSsE1VUV3726MKG62kpj6Pz1MRu4HyxqeQ1jBHH9SMuzvhvYzx6KRECa2x8w6vEH2aDGEwQKu9Bi7csmzK43jEgbBpne5raZuBUGvJRzMnrF7t5W4ypX";
 
         public async Task Run()
         {
@@ -89,25 +89,3 @@ namespace Beacon.Sdk.Sample.Console
         }
     }
 }
-
-// string path = "test.db";
-// File.Delete(path);
-// var repositorySettings = new RepositorySettings
-// {
-//     ConnectionString = path
-// };
-// var loggerFactory = new SerilogLoggerFactory();
-// var seedRepository = new LiteDbSeedRepository(new Logger<LiteDbSeedRepository>(loggerFactory), repositorySettings);
-//
-// var generator = RandomNumberGenerator.Create();
-//
-// var bytes = new byte[SeedBytes]; 
-// generator.GetBytes(bytes);
-//
-// // KeyPairService
-//
-// string seed = seedRepository.Create(Guid.NewGuid().ToString()).Result;
-// seed = seedRepository.TryRead().Result;
-//
-// // seed = seedRepository.Create(Guid.NewGuid().ToString()).Result;
-// seed = seedRepository.TryRead().Result;

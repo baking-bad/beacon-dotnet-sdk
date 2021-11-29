@@ -5,6 +5,7 @@ namespace Beacon.Sdk.Core.Domain
     using Beacon.Permission;
     using Entities;
     using Interfaces;
+    using Interfaces.Data;
 
     public class ResponseMessageHandler
     {
@@ -58,7 +59,7 @@ namespace Beacon.Sdk.Core.Domain
             AppMetadata receiverAppMetadata = _appMetadataRepository.TryRead(receiverId).Result ??
                                               throw new Exception("AppMetadata not found");
 
-            PermissionInfo info = _permissionInfoFactory.Create(senderId, receiverAppMetadata, newResponse.PublicKey,
+            PermissionInfo info = _permissionInfoFactory.Create(receiverId, receiverAppMetadata, newResponse.PublicKey,
                 newResponse.Network, newResponse.Scopes);
 
             info = _permissionInfoRepository.Create(info).Result;

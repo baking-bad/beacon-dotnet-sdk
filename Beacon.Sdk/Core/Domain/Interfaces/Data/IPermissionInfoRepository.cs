@@ -1,7 +1,7 @@
-namespace Beacon.Sdk.Core.Domain.Interfaces
+namespace Beacon.Sdk.Core.Domain.Interfaces.Data
 {
     using System.Threading.Tasks;
-    using Entities;
+    using global::Beacon.Sdk.Core.Domain.Entities;
 
     public interface IPermissionInfoRepository
     {

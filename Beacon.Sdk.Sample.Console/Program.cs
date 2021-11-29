@@ -2,9 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Core.Domain.P2P;
-    using Core.Domain.Services;
-    using Matrix.Sdk.Core.Domain.Services;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -48,7 +45,6 @@
                 
             }
             // sample.TestRepositories();
-
 
             logger.LogInformation("STOP");
 

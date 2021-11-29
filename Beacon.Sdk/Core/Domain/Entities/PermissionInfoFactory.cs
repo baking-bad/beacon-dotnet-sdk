@@ -15,7 +15,7 @@ namespace Beacon.Sdk.Core.Domain.Entities
             _accountService = accountService;
         }
 
-        public PermissionInfo Create(string senderId, AppMetadata metadata, string publicKey, Network network,
+        public PermissionInfo Create(string receiverId, AppMetadata metadata, string publicKey, Network network,
             List<PermissionScope> scopes)
         {
             string address = _accountService.GetAddressFromPublicKey(publicKey);
@@ -24,7 +24,7 @@ namespace Beacon.Sdk.Core.Domain.Entities
             return new PermissionInfo
             {
                 AccountIdentifier = accountId,
-                SenderId = senderId,
+                SenderId = receiverId,
                 AppMetadata = metadata,
                 Website = "",
                 Address = address,
