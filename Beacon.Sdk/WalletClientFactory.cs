@@ -14,6 +14,8 @@ namespace Beacon.Sdk
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Abstractions;
     using WalletClient;
+    
+    
 
     public class WalletClientFactory
     {
@@ -71,7 +73,7 @@ namespace Beacon.Sdk
 
             var keyPairService = new KeyPairService(cryptographyService, seedRepository);
             var accountService = new AccountService(cryptographyService);
-            
+
             var peerFactory = new PeerFactory(cryptographyService);
             var permissionInfoFactory = new PermissionInfoFactory(accountService);
 

@@ -10,7 +10,7 @@ namespace Beacon.Sdk.Tests
         [TestMethod]
         public void Test()
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory);
+            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory);
         }
     }
 }

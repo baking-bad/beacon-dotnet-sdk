@@ -2,8 +2,8 @@ namespace Beacon.Sdk.Sample.Console
 {
     using System;
     using System.Threading.Tasks;
-    using Core.Domain;
     using Beacon;
+    using Core.Domain;
     using Utils;
 
     public class MockRequest : IBeaconRequest
@@ -13,26 +13,20 @@ namespace Beacon.Sdk.Sample.Console
         public string Version { get; }
         public BeaconMessageType Type { get; }
     }
+
     public class MockWalletClient : IWalletClient
     {
-        public AppMetadata Metadata { get; }
-        
-        public IAppMetadataRepository AppMetadataRepository { get; }
-        
-        public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
-
         public HexString BeaconId { get; }
 
         public string AppName { get; }
+        public AppMetadata Metadata { get; }
 
-        public Task RespondAsync(BeaconBaseMessage beaconBaseMessage)
-        {
-            Console.WriteLine("Respond");
+        public IAppMetadataRepository AppMetadataRepository { get; }
 
-            return Task.CompletedTask;
-        }
+        public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
 
-        public Task SendResponseAsync(string receiverId, IBeaconResponse response) => throw new NotImplementedException();
+        public Task SendResponseAsync(string receiverId, IBeaconResponse response) =>
+            throw new NotImplementedException();
 
         public Task InitAsync()
         {
@@ -54,5 +48,12 @@ namespace Beacon.Sdk.Sample.Console
         public void Connect() => Console.WriteLine("Connect");
 
         public void Disconnect() => Console.WriteLine("Disconnect");
+
+        public Task RespondAsync(BeaconBaseMessage beaconBaseMessage)
+        {
+            Console.WriteLine("Respond");
+
+            return Task.CompletedTask;
+        }
     }
 }

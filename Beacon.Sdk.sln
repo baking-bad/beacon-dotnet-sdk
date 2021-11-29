@@ -6,8 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Beacon.Sdk.Tests", "Beacon.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Beacon.Sdk.Sample.Console", "Beacon.Sdk.Sample.Console\Beacon.Sdk.Sample.Console.csproj", "{81B0EB43-48E8-4FD7-B99A-EF98420B60A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Matrix.Sdk", "..\matrix-dotnet-sdk\Matrix.Sdk\Matrix.Sdk.csproj", "{DD82B56E-E35F-42CD-8A23-05706634E8C3}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,9 +24,5 @@ Global
 		{81B0EB43-48E8-4FD7-B99A-EF98420B60A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81B0EB43-48E8-4FD7-B99A-EF98420B60A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81B0EB43-48E8-4FD7-B99A-EF98420B60A1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DD82B56E-E35F-42CD-8A23-05706634E8C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DD82B56E-E35F-42CD-8A23-05706634E8C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DD82B56E-E35F-42CD-8A23-05706634E8C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DD82B56E-E35F-42CD-8A23-05706634E8C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

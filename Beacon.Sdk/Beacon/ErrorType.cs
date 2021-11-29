@@ -57,6 +57,6 @@ namespace Beacon.Sdk.Beacon
         /// <summary>
         ///     Indicates that an unexpected error occurred.
         /// </summary>
-        UNKNOWN_ERROR,
+        UNKNOWN_ERROR
     }
 }

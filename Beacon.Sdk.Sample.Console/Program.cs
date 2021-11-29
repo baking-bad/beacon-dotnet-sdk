@@ -13,7 +13,7 @@
         private static IHostBuilder CreateHostBuilder() => new HostBuilder()
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddLogging(loggingBuilder => 
+                services.AddLogging(loggingBuilder =>
                     loggingBuilder.AddSerilog(dispose: true));
                 // services.AddBeaconClient();
                 // services.AddConsoleApp();
@@ -32,30 +32,22 @@
             ILogger<Program> logger = host.Services.GetRequiredService<ILogger<Program>>();
 
             logger.LogInformation("START");
-            
-            
+
+
             var sample = new Sample();
             try
             {
                 await sample.Run();
-
             }
             catch (Exception ex)
             {
-                
             }
             // sample.TestRepositories();
 
             logger.LogInformation("STOP");
 
-            await RunAsync(host.Services);
 
             return 0;
-        }
-
-        private static async Task RunAsync(IServiceProvider serviceProvider)
-        {
-            await BeaconClientScenarios.Setup(serviceProvider);
         }
     }
 }

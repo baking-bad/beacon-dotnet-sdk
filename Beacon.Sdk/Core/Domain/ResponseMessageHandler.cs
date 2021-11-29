@@ -44,7 +44,8 @@ namespace Beacon.Sdk.Core.Domain
             return _jsonSerializerService.Serialize(ack!);
         }
 
-        private string HandlePermissionResponse(IBeaconResponse beaconResponse, AppMetadata ownAppMetadata, string senderId,
+        private string HandlePermissionResponse(IBeaconResponse beaconResponse, AppMetadata ownAppMetadata,
+            string senderId,
             string receiverId)
         {
             var response = beaconResponse as PermissionResponse;
