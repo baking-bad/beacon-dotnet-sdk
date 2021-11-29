@@ -1,5 +1,6 @@
 namespace Beacon.Sdk.Beacon.Operation
 {
+    using System.Collections.Generic;
     using Core.Domain;
     using Permission;
 
@@ -9,6 +10,7 @@ namespace Beacon.Sdk.Beacon.Operation
             string Id,
             string SenderId,
             Network Network,
+            List<TezosTransactionOperation> OperationDetails,
             string SourceAddress)
         : BeaconBaseMessage(
             Type,
@@ -24,3 +26,4 @@ namespace Beacon.Sdk.Beacon.Operation
         public string SourceAddress { get; } = SourceAddress;
     }
 }
+

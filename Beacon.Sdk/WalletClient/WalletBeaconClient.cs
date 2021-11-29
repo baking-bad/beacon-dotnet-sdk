@@ -11,11 +11,7 @@ namespace Beacon.Sdk.WalletClient
     using Core.Domain.Services;
     using Microsoft.Extensions.Logging;
     using Utils;
-
-    /*
-     * Todo: add PermissionRepository
-     */
-
+    
     public class WalletBeaconClient : BaseBeaconClient, IWalletClient
     {
         private readonly ILogger<WalletBeaconClient> _logger;
