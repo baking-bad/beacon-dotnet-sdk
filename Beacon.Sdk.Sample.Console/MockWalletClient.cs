@@ -2,9 +2,17 @@ namespace Beacon.Sdk.Sample.Console
 {
     using System;
     using System.Threading.Tasks;
-    using global::Beacon.Sdk.Beacon;
-    using global::Beacon.Sdk.Utils;
+    using Core.Domain;
+    using Beacon;
+    using Utils;
 
+    public class MockRequest : IBeaconRequest
+    {
+        public string Id { get; }
+        public string SenderId { get; }
+        public string Version { get; }
+        public BeaconMessageType Type { get; }
+    }
     public class MockWalletClient : IWalletClient
     {
         public AppMetadata Metadata { get; }
@@ -24,8 +32,7 @@ namespace Beacon.Sdk.Sample.Console
             return Task.CompletedTask;
         }
 
-
-        public Task SendMessageAsync(string receiverId, BeaconBaseMessage baseMessage) => throw new NotImplementedException();
+        public Task SendResponseAsync(string receiverId, IBeaconResponse response) => throw new NotImplementedException();
 
         public Task InitAsync()
         {
@@ -38,8 +45,8 @@ namespace Beacon.Sdk.Sample.Console
         {
             await Task.Delay(100);
 
-            var eventArgs = new BeaconMessageEventArgs("", new BeaconBaseMessage(BeaconMessageType.acknowledge, "2", "id", "senderId"));
-            OnBeaconMessageReceived?.Invoke(this, eventArgs);
+            // var eventArgs = new BeaconMessageEventArgs("", new BeaconBaseMessage(BeaconMessageType.acknowledge, "2", "id", "senderId"));
+            OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs("", new MockRequest()));
 
             await Task.CompletedTask;
         }

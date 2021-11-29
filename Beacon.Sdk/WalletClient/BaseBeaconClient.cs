@@ -3,7 +3,7 @@ namespace Beacon.Sdk.WalletClient
     using System;
     using Base58Check;
     using Beacon;
-    using Core.Domain;
+    using Core.Domain.Entities;
     using Core.Domain.Services;
     using Utils;
 

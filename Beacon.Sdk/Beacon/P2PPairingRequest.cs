@@ -8,5 +8,5 @@ namespace Beacon.Sdk.Beacon
         string? Icon = null,
         string? AppUrl = null,
         string Type = "p2p-pairing-request",
-        string Version = Sdk.Constants.BeaconVersion);
+        string Version = Constants.BeaconVersion);
 }

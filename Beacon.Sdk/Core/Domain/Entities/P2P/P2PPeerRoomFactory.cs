@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core.Domain.P2P
+namespace Beacon.Sdk.Core.Domain.Entities.P2P
 {
     using System;
     using Interfaces;

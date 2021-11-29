@@ -1,6 +1,7 @@
 // ReSharper disable InconsistentNaming
+
 namespace Beacon.Sdk.Beacon.Permission
-{ 
+{
     public enum NetworkType
     {
         mainnet,
@@ -10,6 +11,6 @@ namespace Beacon.Sdk.Beacon.Permission
         granadanet,
         hangzhounet,
         idiazabalnet,
-        custom,
+        custom
     }
 }

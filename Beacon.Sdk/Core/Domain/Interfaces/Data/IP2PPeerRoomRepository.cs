@@ -1,7 +1,7 @@
 namespace Beacon.Sdk.Core.Domain.Interfaces.Data
 {
     using System.Threading.Tasks;
-    using P2P;
+    using Entities.P2P;
     using Utils;
 
     public interface IP2PPeerRoomRepository

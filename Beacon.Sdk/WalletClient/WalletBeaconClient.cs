@@ -4,6 +4,7 @@ namespace Beacon.Sdk.WalletClient
     using System.Threading.Tasks;
     using Beacon;
     using Core.Domain;
+    using Core.Domain.Entities;
     using Core.Domain.Interfaces;
     using Core.Domain.Interfaces.Data;
     using Core.Domain.P2P;
@@ -22,8 +23,8 @@ namespace Beacon.Sdk.WalletClient
         private readonly PeerFactory _peerFactory;
         private readonly IPeerRepository _peerRepository;
 
-        private readonly IncomingMessageHandler _incomingMessageHandler;
-        private readonly OutgoingMessageHandler _outgoingMessageHandler;
+        private readonly RequestMessageHandler _requestMessageHandler;
+        private readonly ResponseMessageHandler _responseMessageHandler;
 
         public WalletBeaconClient(
             ILogger<WalletBeaconClient> logger,
@@ -32,16 +33,16 @@ namespace Beacon.Sdk.WalletClient
             IP2PCommunicationService p2PCommunicationService,
             KeyPairService keyPairService,
             PeerFactory peerFactory,
-            IncomingMessageHandler incomingMessageHandler,
-            OutgoingMessageHandler outgoingMessageHandler,
-            BeaconOptions options) 
+            RequestMessageHandler requestMessageHandler,
+            ResponseMessageHandler responseMessageHandler,
+            BeaconOptions options)
             : base(keyPairService, appMetadataRepository, options)
         {
             _logger = logger;
             _peerRepository = peerRepository;
             _p2PCommunicationService = p2PCommunicationService;
-            _incomingMessageHandler = incomingMessageHandler;
-            _outgoingMessageHandler = outgoingMessageHandler;
+            _requestMessageHandler = requestMessageHandler;
+            _responseMessageHandler = responseMessageHandler;
             _peerFactory = peerFactory;
         }
 
@@ -69,8 +70,8 @@ namespace Beacon.Sdk.WalletClient
             if (sendPairingResponse)
                 _ = await _p2PCommunicationService.SendChannelOpeningMessageAsync(peer, pairingRequest.Id, AppName);
         }
-        
-        
+
+
         public void Connect()
         {
             _p2PCommunicationService.OnP2PMessagesReceived += OnP2PMessagesReceived;
@@ -82,7 +83,17 @@ namespace Beacon.Sdk.WalletClient
             _p2PCommunicationService.Stop();
             _p2PCommunicationService.OnP2PMessagesReceived -= OnP2PMessagesReceived;
         }
-        
+
+        public async Task SendResponseAsync(string receiverId, IBeaconResponse beaconResponse)
+        {
+            Peer peer = _peerRepository.TryRead(receiverId).Result
+                        ?? throw new NullReferenceException(nameof(Peer));
+
+            string message = _responseMessageHandler.Handle(beaconResponse, Metadata, SenderId, receiverId);
+
+            await _p2PCommunicationService.SendMessageAsync(peer, message);
+        }
+
         private async Task OnP2PMessagesReceived(object? sender, P2PMessageEventArgs e)
         {
             if (sender is not IP2PCommunicationService)
@@ -90,23 +101,15 @@ namespace Beacon.Sdk.WalletClient
 
             foreach (string message in e.Messages)
             {
-                (AcknowledgeResponse ack, BeaconBaseMessage incomingMessage) = _incomingMessageHandler.Handle(message, SenderId);
-                
-                if (incomingMessage.Version != "1")
-                    await SendMessageAsync(incomingMessage.SenderId, ack);
-                
-                OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs(incomingMessage.SenderId, incomingMessage));
+                (AcknowledgeBeaconResponse ack, IBeaconRequest requestMessage) =
+                    _requestMessageHandler.Handle(message, SenderId);
+
+                if (requestMessage.Version != "1")
+                    await SendResponseAsync(requestMessage.SenderId, ack);
+
+                OnBeaconMessageReceived?.Invoke(this,
+                    new BeaconMessageEventArgs(requestMessage.SenderId, requestMessage));
             }
-        }
-
-        public async Task SendMessageAsync(string receiverId, BeaconBaseMessage baseMessage)
-        {
-            Peer peer = _peerRepository.TryRead(receiverId).Result
-                        ?? throw new NullReferenceException(nameof(Peer));
-
-            string message = _outgoingMessageHandler.Handle(baseMessage, Metadata, SenderId, receiverId);
-            
-            await _p2PCommunicationService.SendMessageAsync(peer, message);
         }
     }
 }

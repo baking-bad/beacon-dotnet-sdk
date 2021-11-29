@@ -2,6 +2,7 @@ namespace Beacon.Sdk.Core.Domain.Services
 {
     using System;
     using System.Linq;
+    using Entities;
     using Infrastructure.Repositories;
     using Interfaces;
     using Interfaces.Data;

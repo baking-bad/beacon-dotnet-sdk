@@ -1,10 +1,9 @@
-namespace Beacon.Sdk.Core.Domain.P2P
+namespace Beacon.Sdk.Core.Domain.Entities.P2P
 {
     using System;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Dto;
     using Infrastructure;
     using Interfaces;
     using Matrix.Sdk.Core.Infrastructure.Services;

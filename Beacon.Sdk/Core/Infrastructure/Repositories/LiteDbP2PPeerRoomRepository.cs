@@ -1,8 +1,8 @@
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
     using System.Threading.Tasks;
+    using Domain.Entities.P2P;
     using Domain.Interfaces.Data;
-    using Domain.P2P;
     using Microsoft.Extensions.Logging;
     using Utils;
 

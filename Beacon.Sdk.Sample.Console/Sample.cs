@@ -8,6 +8,7 @@ namespace Beacon.Sdk.Sample.Console
     using Base58Check;
     using Beacon;
     using Beacon.Permission;
+    using Core.Domain;
     using Core.Domain.Services;
     using Core.Infrastructure.Cryptography;
     using Core.Infrastructure.Repositories;
@@ -19,7 +20,7 @@ namespace Beacon.Sdk.Sample.Console
     public class Sample
     {
         private const string QrCode = 
-                "BSdNU2tFbwJ8DZffivKRbRkKSQo81QRMdoUn32MZVgwYBWUrYZHhGDWP2fUrLsSBrD4YxNKchwjrsLwTJJB9Kt3iNzBoqPhcM8S8WFcueydCghDeiHvVo98qhpqjUKny5bCzcdsJTcKLLQCVUpjCdZ6mek9RDX2z3u7atRn8UNG2amibHB9HoPBsWRvrCrjLRSnRQLquKwLUBJxHErkFS2Yn2TR2SbKWNSMYDAjNrrTPeMtLxauDSRNbWm5Uxu45dKDYC4cBpCStSUCcmUnCbVwxgBHxjiCZEFKxLpo8Cx66R3CrP6CC6aRKZdGw3CoHvKzHdHjm";
+                "BSdNU2tFbwHdGhmPXFnNTMMTh8C3Vnu37QT1az1vvjZYaeBpU5NLuNXLrWCWX4yAq24R6PPVNQNo5r8cdZRYjjaGpihgbpc6bd4mBztAychGKGod17w74G5Qrz7XF8Z1XHC9F9JnprT2HVaLJauaqX861scw25jV4zMey3LsWz2ugyfYgHrsk4f8kbAXybJcNz1U2NmXyR1y73WixzsM3Gz7kBFStEaANkWqc97FMudfY6aSuN5uXV64Cexkn1XGiZhNToAr7XGHZsnxwJP6HD3eFjcpCVq3V1GwfC1NpWZA41Y4epd1RAMXHFKYYpHWw3ryv8GS";
 
         public async Task Run()
         {
@@ -39,7 +40,7 @@ namespace Beacon.Sdk.Sample.Console
 
             client.OnBeaconMessageReceived += (sender, args) =>
             {
-                BeaconBaseMessage message = args.BeaconBaseMessage;
+                IBeaconRequest message = args.Request;
                 
                 if (message is PermissionRequest request)
                 {
@@ -49,7 +50,7 @@ namespace Beacon.Sdk.Sample.Console
                         scopes: request.Scopes, 
                         publicKey: "3b92229274683b311cf8b040cf91ac0f8e19e410f06eda5537ef077e718e0024");
                     
-                    client.SendMessageAsync(args.SenderId, response);
+                    client.SendResponseAsync(args.SenderId, response);
                 }
             };
 

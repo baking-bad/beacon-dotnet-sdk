@@ -1,18 +1,18 @@
 namespace Beacon.Sdk
 {
     using System;
-    using Beacon;
+    using Core.Domain;
 
     public class BeaconMessageEventArgs : EventArgs
     {
-        public BeaconMessageEventArgs(string senderId, BeaconBaseMessage beaconBaseMessage)
+        public BeaconMessageEventArgs(string senderId, IBeaconRequest request)
         {
             SenderId = senderId;
-            BeaconBaseMessage = beaconBaseMessage;
+            Request = request;
         }
 
         public string SenderId { get; }
 
-        public BeaconBaseMessage BeaconBaseMessage { get; }
+        public IBeaconRequest Request { get; }
     }
 }

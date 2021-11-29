@@ -3,6 +3,7 @@ namespace Beacon.Sdk
     using System;
     using System.Threading.Tasks;
     using Beacon;
+    using Core.Domain;
 
     public interface IWalletClient
     {
@@ -12,7 +13,7 @@ namespace Beacon.Sdk
 
         event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
 
-        Task SendMessageAsync(string receiverId, BeaconBaseMessage baseMessage);
+        Task SendResponseAsync(string receiverId, IBeaconResponse response);
 
         Task InitAsync();
 

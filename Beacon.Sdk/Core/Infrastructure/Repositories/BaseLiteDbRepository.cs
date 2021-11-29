@@ -21,10 +21,10 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             //     serialize: hexString => hexString.Value,
             //     deserialize: bson => new HexString(bson.AsArray));
             // }
-            
-            BsonMapper.Global.RegisterType<DateTimeOffset>
+
+            BsonMapper.Global.RegisterType
             (
-                serialize: obj =>
+                obj =>
                 {
                     var doc = new BsonDocument
                     {
@@ -33,7 +33,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                     };
                     return doc;
                 },
-                deserialize: doc => new DateTimeOffset(doc["DateTime"].AsInt64, new TimeSpan(doc["Offset"].AsInt64))
+                doc => new DateTimeOffset(doc["DateTime"].AsInt64, new TimeSpan(doc["Offset"].AsInt64))
             );
         }
 

@@ -1,13 +1,14 @@
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
     using System.Threading.Tasks;
-    using Domain;
+    using Domain.Entities;
     using Domain.Interfaces;
     using Microsoft.Extensions.Logging;
-    
+
     public class LiteDbPermissionInfoRepository : BaseLiteDbRepository<PermissionInfo>, IPermissionInfoRepository
     {
-        public LiteDbPermissionInfoRepository(ILogger<LiteDbPermissionInfoRepository> logger, RepositorySettings settings) : base(logger, settings)
+        public LiteDbPermissionInfoRepository(ILogger<LiteDbPermissionInfoRepository> logger,
+            RepositorySettings settings) : base(logger, settings)
         {
         }
 
@@ -21,10 +22,10 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
         public Task<PermissionInfo?> TryRead(string accountIdentifier) => InConnectionNullable(col =>
         {
-            PermissionInfo? permissionInfo = col.Query().Where(x => x.AccountIdentifier == accountIdentifier).FirstOrDefault();
-            
+            PermissionInfo? permissionInfo =
+                col.Query().Where(x => x.AccountIdentifier == accountIdentifier).FirstOrDefault();
+
             return Task.FromResult(permissionInfo ?? null);
         });
-
     }
 }

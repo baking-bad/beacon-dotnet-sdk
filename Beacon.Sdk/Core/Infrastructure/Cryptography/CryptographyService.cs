@@ -7,7 +7,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     using Libsodium;
     using Sodium;
     using Utils;
-    using SodiumLibrary = Libsodium.SodiumLibrary;
+    using SodiumLibrary = global::Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium.SodiumLibrary;
 
     public class CryptographyService : ICryptographyService
     {
@@ -37,7 +37,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         }
 
         public byte[] Hash(byte[] input) => GenericHash.Hash(input, null, input.Length);
-        
+
         public byte[] Hash(byte[] message, int bufferLength)
         {
             var buffer = new byte[bufferLength];
@@ -57,7 +57,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         public HexString Encrypt(string input, byte[] key)
         {
             byte[] nonce = SodiumCore.GetRandomBytes(NonceBytes)!;
-            byte[] e = SecretBox.Create(input, nonce, key); 
+            byte[] e = SecretBox.Create(input, nonce, key);
 
             byte[] payload = nonce.Concat(e).ToArray();
 
@@ -78,7 +78,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             return Encoding.UTF8.GetString(d);
         }
-        
+
         public string ToHexString(byte[] input)
         {
             var hexString = BitConverter.ToString(input);

@@ -1,7 +1,8 @@
 namespace Beacon.Sdk
 {
     using Core.Domain;
-    using Core.Domain.P2P;
+    using Core.Domain.Entities;
+    using Core.Domain.Entities.P2P;
     using Core.Domain.P2P.ChannelOpening;
     using Core.Domain.Services;
     using Core.Infrastructure;
@@ -57,6 +58,10 @@ namespace Beacon.Sdk
                 new Logger<LiteDbAppMetadataRepository>(loggerFactory ?? NullLoggerFactory.Instance),
                 repositorySettings);
 
+            var permissionInfoRepository = new LiteDbPermissionInfoRepository(
+                new Logger<LiteDbPermissionInfoRepository>(loggerFactory ?? NullLoggerFactory.Instance),
+                repositorySettings);
+
             var sdkStorage = new SdkStorage();
             var jsonSerializerService = new JsonSerializerService();
 
@@ -65,6 +70,14 @@ namespace Beacon.Sdk
             #region Domain
 
             var keyPairService = new KeyPairService(cryptographyService, seedRepository);
+            var accountService = new AccountService(cryptographyService);
+            
+            var peerFactory = new PeerFactory(cryptographyService);
+            var permissionInfoFactory = new PermissionInfoFactory(accountService);
+
+            var incomingMessageHandler = new RequestMessageHandler(appMetadataRepository, jsonSerializerService);
+            var outgoingMessageHandler = new ResponseMessageHandler(appMetadataRepository, permissionInfoRepository,
+                jsonSerializerService, permissionInfoFactory);
 
             #endregion
 
@@ -100,10 +113,6 @@ namespace Beacon.Sdk
 
             #endregion
 
-            var incomingMessageHandler = new IncomingMessageHandler(appMetadataRepository, jsonSerializerService);
-            var outgoingMessageHandler = new OutgoingMessageHandler(appMetadataRepository, jsonSerializerService);
-            
-            var peerFactory = new PeerFactory(cryptographyService);
             _client = new WalletBeaconClient(
                 new Logger<WalletBeaconClient>(loggerFactory ?? new NullLoggerFactory()),
                 peerRepository,

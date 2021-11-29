@@ -1,6 +1,7 @@
 namespace Beacon.Sdk.Core.Domain.Interfaces.Data
 {
     using System.Threading.Tasks;
+    using Entities;
 
     public interface ISeedRepository
     {

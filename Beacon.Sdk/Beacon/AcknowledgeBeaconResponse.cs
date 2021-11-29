@@ -1,7 +1,9 @@
 namespace Beacon.Sdk.Beacon
 {
-    public record AcknowledgeResponse(string Id, string SenderId) 
-        : BeaconBaseMessage(BeaconMessageType.acknowledge, Constants.MessageVersion, Id, SenderId);
+    using Core.Domain;
+
+    public record AcknowledgeBeaconResponse(string Id, string SenderId)
+        : BeaconBaseMessage(BeaconMessageType.acknowledge, Constants.MessageVersion, Id, SenderId), IBeaconResponse;
 
     // public class AcknowledgeResponse : BeaconBaseMessage
     // {

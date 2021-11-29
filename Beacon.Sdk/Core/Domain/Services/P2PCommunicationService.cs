@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Entities;
+    using Entities.P2P;
     using Interfaces;
     using Interfaces.Data;
     using Matrix.Sdk;
@@ -12,7 +14,6 @@
     using Microsoft.Extensions.Logging;
     using P2P;
     using P2P.ChannelOpening;
-    using P2P.Dto;
     using Utils;
 
     public class P2PCommunicationService : IP2PCommunicationService

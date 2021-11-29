@@ -1,4 +1,5 @@
 // ReSharper disable InconsistentNaming
+
 namespace Beacon.Sdk.Beacon
 {
     public enum BeaconMessageType

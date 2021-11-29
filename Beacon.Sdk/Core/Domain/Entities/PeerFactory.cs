@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core.Domain
+namespace Beacon.Sdk.Core.Domain.Entities
 {
     using System;
     using Base58Check;
