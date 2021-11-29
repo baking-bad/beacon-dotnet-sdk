@@ -3,24 +3,33 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     using System;
     using System.Linq;
     using System.Text;
-    using Domain.Interfaces.Data;
+    using Domain.Interfaces;
     using Libsodium;
     using Sodium;
     using Utils;
-    using SodiumCore = Sodium.SodiumCore;
-    using SodiumLibrary = Libsodium.SodiumLibrary;
+    using SodiumLibrary = global::Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium.SodiumLibrary;
 
-    public class CryptographyService //: ICryptographyService
-        : ICryptographyService
+    public class CryptographyService : ICryptographyService
     {
         private static readonly int MacBytes = SodiumLibrary.crypto_box_macbytes();
         private static readonly int NonceBytes = SodiumLibrary.crypto_box_noncebytes();
 
-        public SessionKeyPair CreateServerSessionKeyPair(byte[] clientPublicKey, byte[] serverSecretKey)
+        public SessionKeyPair CreateClientSessionKeyPair(byte[] clientPublicKey, byte[] serverPrivateKey)
         {
             byte[] serverPublicKeyCurve =
-                PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(serverSecretKey[32..64])!;
-            byte[] serverSecretKeyCurve = PublicKeyAuth.ConvertEd25519SecretKeyToCurve25519SecretKey(serverSecretKey)!;
+                PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(serverPrivateKey[32..64])!;
+            byte[] serverSecretKeyCurve = PublicKeyAuth.ConvertEd25519SecretKeyToCurve25519SecretKey(serverPrivateKey)!;
+            byte[] clientPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(clientPublicKey)!;
+
+            return KeyExchange.CreateClientSessionKeyPair(serverPublicKeyCurve, serverSecretKeyCurve,
+                clientPublicKeyCurve);
+        }
+
+        public SessionKeyPair CreateServerSessionKeyPair(byte[] clientPublicKey, byte[] serverPrivateKey)
+        {
+            byte[] serverPublicKeyCurve =
+                PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(serverPrivateKey[32..64])!;
+            byte[] serverSecretKeyCurve = PublicKeyAuth.ConvertEd25519SecretKeyToCurve25519SecretKey(serverPrivateKey)!;
             byte[] clientPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(clientPublicKey)!;
 
             return KeyExchange.CreateServerSessionKeyPair(serverPublicKeyCurve, serverSecretKeyCurve,
@@ -29,21 +38,13 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
         public byte[] Hash(byte[] input) => GenericHash.Hash(input, null, input.Length);
 
-        public byte[] Decrypt(byte[] encryptedBytes, byte[] sharedKey)
+        public byte[] Hash(byte[] message, int bufferLength)
         {
-            byte[] nonce = encryptedBytes[..NonceBytes];
-            byte[] cipher = encryptedBytes[NonceBytes..];
+            var buffer = new byte[bufferLength];
 
-            return SecretBox.Open(cipher, nonce, sharedKey);
-        }
+            SodiumLibrary.crypto_generichash(buffer, bufferLength, message, message.Length, Array.Empty<byte>(), 0);
 
-
-        public byte[] Encrypt(byte[] message, byte[] recipientPublicKey)
-        {
-            byte[] nonce = SodiumCore.GetRandomBytes(NonceBytes)!;
-            byte[] result = SealedPublicKeyBox.Create(message, recipientPublicKey);
-
-            return nonce.Concat(result).ToArray();
+            return buffer;
         }
 
         public KeyPair GenerateEd25519KeyPair(string seed)
@@ -53,29 +54,29 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             return PublicKeyAuth.GenerateKeyPair(hash);
         }
 
-        public HexString EncryptAsHex(string message, byte[] recipientPublicKey)
+        public HexString Encrypt(string input, byte[] key)
         {
-            byte[] bytes = HexString.TryParse(message, out HexString hexString)
-                ? hexString.ToByteArray()
-                : Encoding.UTF8.GetBytes(message);
+            byte[] nonce = SodiumCore.GetRandomBytes(NonceBytes)!;
+            byte[] e = SecretBox.Create(input, nonce, key);
 
-            byte[] encryptedBytes = Encrypt(bytes, recipientPublicKey);
+            byte[] payload = nonce.Concat(e).ToArray();
 
-            if (!HexString.TryParse(encryptedBytes, out HexString result))
-                throw new InvalidOperationException("Can not parse encryptedBytes");
+            if (!HexString.TryParse(payload, out HexString hexPayload))
+                throw new ArgumentException(nameof(payload));
 
-            return result;
+            return hexPayload;
         }
 
-        public string DecryptAsString(string encryptedMessage, byte[] sharedKey)
+        public string Decrypt(HexString hexInput, byte[] key)
         {
-            byte[] encryptedBytes = HexString.TryParse(encryptedMessage, out HexString hexString)
-                ? hexString.ToByteArray()
-                : Encoding.UTF8.GetBytes(encryptedMessage);
+            byte[] bytes = hexInput.ToByteArray();
 
-            byte[] decryptedBytes = Decrypt(encryptedBytes, sharedKey);
+            byte[] nonce = bytes[..NonceBytes];
+            byte[] cipher = bytes[NonceBytes..];
 
-            return Encoding.UTF8.GetString(decryptedBytes);
+            byte[] d = SecretBox.Open(cipher, nonce, key);
+
+            return Encoding.UTF8.GetString(d);
         }
 
         public string ToHexString(byte[] input)
@@ -94,23 +95,16 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         {
             byte[]? result = SealedPublicKeyBox.Create(message, publicKey);
 
-            return Encoding.UTF8.GetString(result);
+            if (!HexString.TryParse(result, out HexString k))
+                throw new Exception("HexString.TryParse(result, out var k)");
+
+            return k.Value;
         }
 
         public bool Validate(string input) =>
             HexString.TryParse(input,
                 out HexString hexString) && // content can be non-hex if it's a connection open request
             hexString.ToString().Length >= NonceBytes + MacBytes;
-        
-        
-        // public string ToHexString(byte[] input)
-        // {
-        //     var hexString = BitConverter.ToString(input);
-        //
-        //     string result = hexString.Replace("-", "");
-        //
-        //     return result.ToLower();
-        // }
 
         public byte[] GenerateLoginDigest()
         {
@@ -119,13 +113,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             return GenericHash.Hash(message, (byte[]?) null, 32);
         }
-
-        // public KeyPair GenerateEd25519KeyPair(string seed)
-        // {
-        //     byte[] hash = GenericHash.Hash(seed, (byte[]?) null, 32);
-        //
-        //     return PublicKeyAuth.GenerateKeyPair(hash);
-        // }
 
         public string GenerateHexSignature(byte[] loginDigest, byte[] secretKey)
         {
