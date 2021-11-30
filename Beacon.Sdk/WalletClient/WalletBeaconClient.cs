@@ -97,7 +97,7 @@ namespace Beacon.Sdk.WalletClient
 
             foreach (string message in e.Messages)
             {
-                (AcknowledgeBeaconResponse ack, IBeaconRequest requestMessage) =
+                (AcknowledgeResponse ack, IBeaconRequest requestMessage) =
                     _requestMessageHandler.Handle(message, SenderId);
 
                 if (requestMessage.Version != "1")

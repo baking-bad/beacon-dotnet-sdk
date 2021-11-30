@@ -18,10 +18,10 @@ namespace Beacon.Sdk.Core.Domain
             _jsonSerializerService = jsonSerializerService;
         }
 
-        public (AcknowledgeBeaconResponse, IBeaconRequest) Handle(string message, string senderId)
+        public (AcknowledgeResponse, IBeaconRequest) Handle(string message, string senderId)
         {
             BeaconBaseMessage beaconMessage = _jsonSerializerService.Deserialize<BeaconBaseMessage>(message);
-            var ack = new AcknowledgeBeaconResponse(beaconMessage.Id, senderId);
+            var ack = new AcknowledgeResponse(beaconMessage.Id, senderId);
 
             return beaconMessage.Type switch
             {

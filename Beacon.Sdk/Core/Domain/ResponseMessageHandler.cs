@@ -39,7 +39,7 @@ namespace Beacon.Sdk.Core.Domain
 
         private string HandleAcknowledge(IBeaconResponse response)
         {
-            var ack = response as AcknowledgeBeaconResponse;
+            var ack = response as AcknowledgeResponse;
 
             return _jsonSerializerService.Serialize(ack!);
         }
