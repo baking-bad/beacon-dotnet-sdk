@@ -4,7 +4,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     using System.Threading.Tasks;
     using LiteDB;
     using Microsoft.Extensions.Logging;
-
+    
     public abstract class BaseLiteDbRepository<T>
     {
         private readonly string _connectionString;
@@ -15,26 +15,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
             _logger = logger;
             _connectionString = settings.ConnectionString;
-
-            // BsonMapper.Global.RegisterType<HexString>
-            // (
-            //     serialize: hexString => hexString.Value,
-            //     deserialize: bson => new HexString(bson.AsArray));
-            // }
-
-            BsonMapper.Global.RegisterType
-            (
-                obj =>
-                {
-                    var doc = new BsonDocument
-                    {
-                        ["DateTime"] = obj.DateTime.Ticks,
-                        ["Offset"] = obj.Offset.Ticks
-                    };
-                    return doc;
-                },
-                doc => new DateTimeOffset(doc["DateTime"].AsInt64, new TimeSpan(doc["Offset"].AsInt64))
-            );
         }
 
         protected Task<T> InConnection(Func<ILiteCollection<T>, Task<T>> func)
