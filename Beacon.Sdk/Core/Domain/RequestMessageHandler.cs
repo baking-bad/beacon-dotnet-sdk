@@ -1,5 +1,6 @@
 namespace Beacon.Sdk.Core.Domain
 {
+    using System;
     using Beacon;
     using Beacon.Operation;
     using Beacon.Permission;
@@ -17,10 +18,10 @@ namespace Beacon.Sdk.Core.Domain
             _jsonSerializerService = jsonSerializerService;
         }
 
-        public (AcknowledgeBeaconResponse, IBeaconRequest) Handle(string message, string senderId)
+        public (AcknowledgeResponse, IBeaconRequest) Handle(string message, string senderId)
         {
             BeaconBaseMessage beaconMessage = _jsonSerializerService.Deserialize<BeaconBaseMessage>(message);
-            var ack = new AcknowledgeBeaconResponse(beaconMessage.Id, senderId);
+            var ack = new AcknowledgeResponse(beaconMessage.Id, senderId);
 
             return beaconMessage.Type switch
             {
@@ -41,11 +42,24 @@ namespace Beacon.Sdk.Core.Domain
 
         public IBeaconRequest HandleOperationRequest(string message)
         {
-            OperationRequest request = _jsonSerializerService.Deserialize<OperationRequest>(message);
+            try
+            {
+                OperationRequest request = _jsonSerializerService.Deserialize<OperationRequest>(message);
 
-            // _appMetadataRepository.TryRead(beaconMessage.SenderId).Result;
+                // _appMetadataRepository.TryRead(beaconMessage.SenderId).Result;
 
-            return request;
+                return request;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            // OperationRequest request = _jsonSerializerService.Deserialize<OperationRequest>(message);
+            //
+            // // _appMetadataRepository.TryRead(beaconMessage.SenderId).Result;
+            //
+            // return request;
         }
     }
 }

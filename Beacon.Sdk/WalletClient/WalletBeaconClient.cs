@@ -11,11 +11,7 @@ namespace Beacon.Sdk.WalletClient
     using Core.Domain.Services;
     using Microsoft.Extensions.Logging;
     using Utils;
-
-    /*
-     * Todo: add PermissionRepository
-     */
-
+    
     public class WalletBeaconClient : BaseBeaconClient, IWalletClient
     {
         private readonly ILogger<WalletBeaconClient> _logger;
@@ -101,7 +97,7 @@ namespace Beacon.Sdk.WalletClient
 
             foreach (string message in e.Messages)
             {
-                (AcknowledgeBeaconResponse ack, IBeaconRequest requestMessage) =
+                (AcknowledgeResponse ack, IBeaconRequest requestMessage) =
                     _requestMessageHandler.Handle(message, SenderId);
 
                 if (requestMessage.Version != "1")

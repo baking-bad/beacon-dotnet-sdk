@@ -4,9 +4,9 @@ namespace Beacon.Sdk.Core.Domain.Services
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using Base58Check;
     using Beacon.Permission;
     using Interfaces;
+    using Netezos.Encoding;
     using Utils;
 
     public class AccountService
@@ -45,7 +45,7 @@ namespace Beacon.Sdk.Core.Domain.Services
                     if (publicKey.StartsWith(p) && publicKey.Length == v.Length)
                     {
                         prefix = v.Prefix;
-                        byte[] decoded = Base58CheckEncoding.Decode(publicKey)!;
+                        byte[] decoded = Base58.Parse(publicKey)!;
 
                         plainPublicKey = Encoding.UTF8.GetString(decoded[p.Length..decoded.Length]);
                         break;
@@ -63,7 +63,7 @@ namespace Beacon.Sdk.Core.Domain.Services
             byte[] payload = _cryptographyService.Hash(plainHexPublicKey.ToByteArray(), 20);
             byte[] b = prefix.Concat(payload).ToArray();
 
-            return Base58CheckEncoding.Encode(b);
+            return Base58.Convert(b);
         }
 
         public string GetAccountIdentifier(string address, Network network)
@@ -76,11 +76,11 @@ namespace Beacon.Sdk.Core.Domain.Services
             if (network.RpcUrl != null)
                 data.Add($"rpc:{network.RpcUrl}");
 
-            var m = string.Join('-', data);
+            var m = string.Join("-", data); //string.Join('-', data);
 
             byte[] h = _cryptographyService.Hash(Encoding.UTF8.GetBytes(m), 10);
 
-            return Base58CheckEncoding.Encode(h);
+            return Base58.Convert(h);
         }
 
         private record keyCurve(int Length, byte[] Prefix);

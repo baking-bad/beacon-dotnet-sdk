@@ -8,6 +8,7 @@ namespace Beacon.Sdk.Sample.Console
     using System.Threading.Tasks;
     using Base58Check;
     using Beacon;
+    using Beacon.Operation;
     using Beacon.Permission;
     using Core.Domain;
     using Core.Domain.Services;
@@ -21,7 +22,7 @@ namespace Beacon.Sdk.Sample.Console
     public class Sample
     {
         private const string QrCode =
-            "BSdNU2tFbvstFmyNhcxBCCChMTEMTP5Lq6Ze6W5xF7y4DhCXnwqXwKCGjfwcNgWkmEaEA5o9Uv6wjSpFvydbxkP8jc1qjqfghrT6U2PYKrVu1e54WMqnNWcEpVc9sTRTmGfaHe1gc2VmCHddXUZmSCSDk8hnLatDm8GMwMXKgz366NbHpDe82TQRnHdCi7Abh1SqbgRgfDSU3xEsrwWrT49uJKWNL655RwyMhb7VJaeZKmr6k8gcs8SddM1675zAMJhgKZk1Bi434SrH8c9jURwS2zqagtBc7fzzPnPNAqRTJM2KSB6RyebmsYQgo1RtqZXuS8d2";
+            "BSdNU2tFbvsnyHrxTiB2arfFPW5hvAbPAw2fbWLZnpa2DFGxgdN3CMf4jVmdn4YxNhbeEe8fm7bdv9nxwRYwvEQim4t6VXgjiDRcExAuiiUkSXSn2poNn4hH2kacNyPTSYywqAzMDgtibKFEtp3WPE6JzoCtttfx6LH65sRZj54m4GzgeNtmkd83rMNhXXUkf5FnDhEv16iKGbZj62pG9sdMdWRxADtZCWo41cBPrsRVtbfJWVURBbMzeMLupAoV1pozRUhdCcDWiKPVwhdQgtrZMSnhzngsAygYAojt4PajG4xBrsyH7bECeX2P7uaKVHNjV2LV";
 
         public async Task Run()
         {
@@ -43,8 +44,10 @@ namespace Beacon.Sdk.Sample.Console
             {
                 IBeaconRequest message = args.Request;
 
-                if (message is PermissionRequest request)
+                if (message.Type == BeaconMessageType.permission_request)
                 {
+                    var request = message as PermissionRequest;
+                    
                     var response = new PermissionResponse(
                         id: request!.Id,
                         network: request.Network,
@@ -52,6 +55,13 @@ namespace Beacon.Sdk.Sample.Console
                         "3b92229274683b311cf8b040cf91ac0f8e19e410f06eda5537ef077e718e0024");
 
                     client.SendResponseAsync(args.SenderId, response);
+                }
+
+                if (message.Type == BeaconMessageType.operation_request)
+                {
+                    var request = message as OperationRequest;
+                    
+                    
                 }
             };
 

@@ -1,10 +1,10 @@
 namespace Beacon.Sdk.WalletClient
 {
     using System;
-    using Base58Check;
     using Beacon;
     using Core.Domain.Entities;
     using Core.Domain.Services;
+    using Netezos.Encoding;
     using Utils;
 
     public abstract class BaseBeaconClient
@@ -35,7 +35,7 @@ namespace Beacon.Sdk.WalletClient
             }
         }
 
-        protected string SenderId => Base58CheckEncoding.Encode(PeerFactory.Hash(BeaconId.ToByteArray(), 5));
+        protected string SenderId => Base58.Convert(PeerFactory.Hash(BeaconId.ToByteArray(), 5));
 
         public IAppMetadataRepository AppMetadataRepository { get; }
 

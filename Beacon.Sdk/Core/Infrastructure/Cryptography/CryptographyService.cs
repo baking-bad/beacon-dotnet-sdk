@@ -67,6 +67,14 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             return hexPayload;
         }
 
+        // public static class ArrayExtensions
+        // {
+        //     public byte this[Range input]
+        //     {
+        //         get;
+        //         set;
+        //     }
+        // }
         public string Decrypt(HexString hexInput, byte[] key)
         {
             byte[] bytes = hexInput.ToByteArray();
