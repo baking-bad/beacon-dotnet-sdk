@@ -18,7 +18,7 @@ namespace Beacon.Sdk.Core.Domain.Entities
 
         public string PublicKey { get; set; }
 
-        public DateTimeOffset ConnectedAt { get; set; }
+        public DateTime ConnectedAt { get; set; }
 
         public string Address { get; set; }
 

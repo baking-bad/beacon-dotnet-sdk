@@ -22,7 +22,7 @@ namespace Beacon.Sdk.Sample.Console
     public class Sample
     {
         private const string QrCode =
-            "BSdNU2tFbvsnyHrxTiB2arfFPW5hvAbPAw2fbWLZnpa2DFGxgdN3CMf4jVmdn4YxNhbeEe8fm7bdv9nxwRYwvEQim4t6VXgjiDRcExAuiiUkSXSn2poNn4hH2kacNyPTSYywqAzMDgtibKFEtp3WPE6JzoCtttfx6LH65sRZj54m4GzgeNtmkd83rMNhXXUkf5FnDhEv16iKGbZj62pG9sdMdWRxADtZCWo41cBPrsRVtbfJWVURBbMzeMLupAoV1pozRUhdCcDWiKPVwhdQgtrZMSnhzngsAygYAojt4PajG4xBrsyH7bECeX2P7uaKVHNjV2LV";
+            "BSdNU2tFbvrGQoe9zMh8XXYEf3geBM237D9WVrsCxPSPctGMfCznJByJyoinpNcU6AQWasVADB7WwWBuS8kJtzHASXGF8n69A7xLvcU2HiR7ZqZx6xQUdyVkGFVTWYgd9HKwDW2bfr3veddXPqfkc2LtxK5jUcMKebDsGRM19TdxE1gkpujDf19vpu1syAVkdzSHqxAJMwnTiMYQ22UusCq6YctJkwFpiPyoms3fSCv298ntN5A9QkHxbNVDLZqnB3quKhUDW8sWECtVrxWEuSDTosmUaHwWefQQ7pDprj1gX44Kt3qoGeRne4FVkeFqQnK8hER5";
 
         public async Task Run()
         {

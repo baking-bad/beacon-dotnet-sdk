@@ -8,6 +8,10 @@ namespace Beacon.Sdk.Utils
     {
         private const string Prefix = "0x";
 
+        public HexString()
+        {
+            
+        }
         public HexString(string value)
         {
             Value = value;

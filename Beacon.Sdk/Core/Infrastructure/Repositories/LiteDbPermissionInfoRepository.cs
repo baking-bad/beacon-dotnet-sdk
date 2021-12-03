@@ -22,9 +22,11 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
         public Task<PermissionInfo?> TryRead(string accountIdentifier) => InConnectionNullable(col =>
         {
-            PermissionInfo? permissionInfo =
-                col.Query().Where(x => x.AccountIdentifier == accountIdentifier).FirstOrDefault();
+            // PermissionInfo? permissionInfo =
+            //     col.Query().Where(x => x.AccountIdentifier == accountIdentifier).FirstOrDefault();
 
+            PermissionInfo? permissionInfo = col.FindOne(x => x.AccountIdentifier == accountIdentifier);
+                
             return Task.FromResult(permissionInfo ?? null);
         });
     }
