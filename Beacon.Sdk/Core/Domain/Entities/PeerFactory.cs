@@ -1,9 +1,9 @@
 namespace Beacon.Sdk.Core.Domain.Entities
 {
     using System;
-    using Base58Check;
     using Infrastructure.Cryptography.Libsodium;
     using Interfaces;
+    using Netezos.Encoding;
     using Utils;
 
     public class PeerFactory
@@ -27,7 +27,7 @@ namespace Beacon.Sdk.Core.Domain.Entities
         public Peer Create(HexString hexPublicKey, string name, string version, string relayServer)
         {
             byte[] hash = _cryptographyService.Hash(hexPublicKey.ToByteArray(), 5);
-            string senderUserId = Base58CheckEncoding.Encode(hash)!;
+            string senderUserId = Base58.Convert(hash); 
 
             return new Peer
             {

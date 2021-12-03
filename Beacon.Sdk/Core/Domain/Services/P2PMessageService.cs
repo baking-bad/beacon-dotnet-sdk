@@ -1,10 +1,10 @@
 namespace Beacon.Sdk.Core.Domain.Services
 {
     using System.Text;
-    using Base58Check;
     using Infrastructure.Cryptography.Libsodium;
     using Interfaces;
     using Interfaces.Data;
+    using Netezos.Encoding;
     using Utils;
 
     public class P2PMessageService
@@ -28,7 +28,7 @@ namespace Beacon.Sdk.Core.Domain.Services
                 _sessionKeyPairRepository.CreateOrReadServer(peerHexPublicKey, _keyPairService.KeyPair);
 
             string decrypt = _cryptographyService.Decrypt(hexMessage, server.Rx);
-            byte[] decode = Base58CheckEncoding.Decode(decrypt)!;
+            byte[] decode = Base58.Parse(decrypt);
 
             return Encoding.UTF8.GetString(decode);
         }
@@ -39,7 +39,7 @@ namespace Beacon.Sdk.Core.Domain.Services
                 _sessionKeyPairRepository.CreateOrReadClient(peerHexPublicKey, _keyPairService.KeyPair);
 
             byte[] bytes = Encoding.UTF8.GetBytes(message);
-            string encode = Base58CheckEncoding.Encode(bytes);
+            string encode = Base58.Convert(bytes);
 
             return _cryptographyService.Encrypt(encode, client.Tx);
         }
