@@ -17,14 +17,14 @@ namespace Beacon.Sdk
     
     
 
-    public class WalletClientFactory
+    public class WalletBeaconClientFactory
     {
         private static readonly MatrixClientFactory MatrixClientFactory = new();
         private static readonly SingletonHttpFactory SingletonHttpFactory = new();
 
-        private IWalletClient? _client;
+        private IWalletBeaconClient? _client;
 
-        public IWalletClient Create(
+        public IWalletBeaconClient Create(
             BeaconOptions options,
             ILoggerFactory? loggerFactory = null)
 

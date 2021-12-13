@@ -11,6 +11,10 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
     {
         event TaskEventHandler<P2PMessageEventArgs> OnP2PMessagesReceived;
 
+        bool LoggedIn { get; }
+        
+        bool Syncing { get; }
+        
         Task LoginAsync();
 
         void Start();

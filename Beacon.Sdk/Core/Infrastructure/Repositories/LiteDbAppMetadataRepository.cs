@@ -40,7 +40,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 return Task.FromResult(appMetadata ?? null);
             });
 
-        public Task<AppMetadata[]?> ReadAll(string senderId) =>
+        public Task<AppMetadata[]?> ReadAll() =>
             InConnectionNullable(col =>
             {
                 AppMetadata[]? result = col.Query().ToArray();

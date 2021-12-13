@@ -5,8 +5,12 @@ namespace Beacon.Sdk
     using Beacon;
     using Core.Domain;
 
-    public interface IWalletClient
+    public interface IWalletBeaconClient
     {
+        bool LoggedIn { get; }
+        
+        bool Connected { get; }
+        
         AppMetadata Metadata { get; }
 
         IAppMetadataRepository AppMetadataRepository { get; }

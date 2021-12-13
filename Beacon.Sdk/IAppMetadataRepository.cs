@@ -9,7 +9,7 @@ namespace Beacon.Sdk
 
         Task<AppMetadata?> TryRead(string senderId);
 
-        Task<AppMetadata[]?> ReadAll(string senderId);
+        Task<AppMetadata[]?> ReadAll();
 
         Task Delete(string senderId);
     }

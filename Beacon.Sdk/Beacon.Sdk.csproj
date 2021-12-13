@@ -22,7 +22,7 @@
     <ItemGroup>
         <PackageReference Include="Base58Check" Version="0.2.0" />
         <PackageReference Include="LiteDB" Version="5.0.11" />
-        <PackageReference Include="Matrix.Sdk" Version="0.0.3" />
+        <PackageReference Include="Matrix.Sdk" Version="0.0.5" />
         <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
         <PackageReference Include="Netezos" Version="2.4.6" />

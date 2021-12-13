@@ -49,23 +49,33 @@
 
         public event TaskEventHandler<P2PMessageEventArgs> OnP2PMessagesReceived;
 
+        public bool LoggedIn { get; private set; }
+        
+        public bool Syncing { get; private set; }
+
         public async Task LoginAsync()
         {
             P2PLoginRequest request = await _p2PLoginRequestFactory.Create();
 
             await _matrixClient.LoginAsync(request.Address, request.Username, request.Password, request.DeviceId);
+
+            LoggedIn = true;
         }
 
         public void Start()
         {
             _matrixClient.OnMatrixRoomEventsReceived += OnMatrixRoomEventsReceived;
             _matrixClient.Start();
+
+            Syncing = _matrixClient.IsSyncing;
         }
 
         public void Stop()
         {
             _matrixClient.Stop();
             _matrixClient.OnMatrixRoomEventsReceived -= OnMatrixRoomEventsReceived;
+
+            Syncing = _matrixClient.IsSyncing;
         }
 
         public async Task<P2PPeerRoom> SendChannelOpeningMessageAsync(Peer peer, string id, string appName)

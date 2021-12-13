@@ -11,8 +11,8 @@ namespace Beacon.Sdk.WalletClient
     using Core.Domain.Services;
     using Microsoft.Extensions.Logging;
     using Utils;
-    
-    public class WalletBeaconClient : BaseBeaconClient, IWalletClient
+
+    public class WalletBeaconClient : BaseBeaconClient, IWalletBeaconClient
     {
         private readonly ILogger<WalletBeaconClient> _logger;
         private readonly IP2PCommunicationService _p2PCommunicationService;
@@ -42,9 +42,17 @@ namespace Beacon.Sdk.WalletClient
             _peerFactory = peerFactory;
         }
 
+        public bool LoggedIn { get; private set; }
+        
+        public bool Connected { get; private set; }
         public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
 
-        public async Task InitAsync() => await _p2PCommunicationService.LoginAsync();
+        public async Task InitAsync()
+        {
+            await _p2PCommunicationService.LoginAsync();
+
+            LoggedIn = _p2PCommunicationService.LoggedIn;
+        }
 
         public async Task AddPeerAsync(P2PPairingRequest pairingRequest, bool sendPairingResponse = true)
         {
@@ -72,12 +80,16 @@ namespace Beacon.Sdk.WalletClient
         {
             _p2PCommunicationService.OnP2PMessagesReceived += OnP2PMessagesReceived;
             _p2PCommunicationService.Start();
+
+            Connected = _p2PCommunicationService.Syncing;
         }
 
         public void Disconnect()
         {
             _p2PCommunicationService.Stop();
             _p2PCommunicationService.OnP2PMessagesReceived -= OnP2PMessagesReceived;
+            
+            Connected = _p2PCommunicationService.Syncing;
         }
 
         public async Task SendResponseAsync(string receiverId, IBeaconResponse beaconResponse)
