@@ -14,7 +14,7 @@ namespace Beacon.Sdk.Sample.Console
         public BeaconMessageType Type { get; }
     }
 
-    public class MockWalletClient : IWalletClient
+    public class MockWalletBeaconClient : IWalletBeaconClient
     {
         public HexString BeaconId { get; }
 
