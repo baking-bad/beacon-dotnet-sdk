@@ -19,6 +19,8 @@ namespace Beacon.Sdk.Sample.Console
         public HexString BeaconId { get; }
 
         public string AppName { get; }
+        public bool LoggedIn { get; }
+        public bool Connected { get; }
         public AppMetadata Metadata { get; }
 
         public IAppMetadataRepository AppMetadataRepository { get; }
