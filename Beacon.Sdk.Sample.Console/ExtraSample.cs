@@ -16,7 +16,7 @@ namespace Beacon.Sdk.Sample.Console
 
     public class ExtraSample
     {
-         public void TestRepositories()
+        public void TestRepositories()
         {
             var path = "test.db";
             File.Delete(path);
@@ -35,24 +35,24 @@ namespace Beacon.Sdk.Sample.Console
             var guid = Guid.NewGuid().ToString();
             string g = KeyPairService.CreateGuid();
         }
-        
+
         public async Task TestTransaction()
         {
             // or use existing one
             var key = Key.FromBase58("edsk35n2ruX2r92SdtWzP87mEUqxWSwM14hG6GRhEvU6kfdH8Ut6SW");
 
             // use this address to receive some tez
-            var address = key.PubKey.Address;
-            
+            string address = key.PubKey.Address;
+
             // using var rpc = new TezosRpc("https://mainnet-tezos.giganode.io/");
             using var rpc = new TezosRpc("https://hangzhounet.api.tez.ie/");
 
             // get a head block
-            var head = await rpc.Blocks.Head.Hash.GetAsync<string>();
+            string head = await rpc.Blocks.Head.Hash.GetAsync<string>();
 
             // get account's counter
-            var counter = await rpc.Blocks.Head.Context.Contracts[key.Address].Counter.GetAsync<int>();
-            
+            int counter = await rpc.Blocks.Head.Context.Contracts[key.Address].Counter.GetAsync<int>();
+
             var content = new ManagerOperationContent[]
             {
                 // new RevealContent
@@ -74,21 +74,21 @@ namespace Beacon.Sdk.Sample.Console
                 }
             };
 
-            var bytes = await new LocalForge().ForgeOperationGroupAsync(head, content);
-            
+            byte[] bytes = await new LocalForge().ForgeOperationGroupAsync(head, content);
+
             // sign the operation bytes
             byte[] signature = key.SignOperation(bytes);
 
             // inject the operation and get its id (operation hash)
-            var result = await rpc.Inject.Operation.PostAsync(bytes.Concat(signature));
+            dynamic result = await rpc.Inject.Operation.PostAsync(bytes.Concat(signature));
         }
-        
+
         public async void TestPublicKey()
         {
             // var accountService = new AccountService(new CryptographyService());
             // var key = new Key();
             // string pubKey = key.PubKey.ToString();
-            
+
             // var address = key.PubKey.Address;
             // var k = Key.FromBase58(key.PubKey);
 

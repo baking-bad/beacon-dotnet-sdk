@@ -10,8 +10,8 @@ namespace Beacon.Sdk.Core.Domain
 
     public class PermissionHandler
     {
-        private readonly IPermissionInfoRepository _permissionInfoRepository;
         private readonly AccountService _accountService;
+        private readonly IPermissionInfoRepository _permissionInfoRepository;
 
         public PermissionHandler(IPermissionInfoRepository permissionInfoRepository, AccountService accountService)
         {
@@ -31,10 +31,11 @@ namespace Beacon.Sdk.Core.Domain
         private async Task<bool> HandleOperationRequest(IBeaconRequest request)
         {
             var operationRequest = request as OperationRequest;
-            string accountIdentifier = _accountService.GetAccountIdentifier(operationRequest!.SourceAddress, operationRequest.Network);
+            string accountIdentifier =
+                _accountService.GetAccountIdentifier(operationRequest!.SourceAddress, operationRequest.Network);
 
             PermissionInfo? permissionInfo = await _permissionInfoRepository.TryRead(accountIdentifier);
-            
+
             return permissionInfo != null && permissionInfo.Scopes.Contains(PermissionScope.operation_request);
         }
     }

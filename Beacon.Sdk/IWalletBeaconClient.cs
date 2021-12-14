@@ -8,9 +8,9 @@ namespace Beacon.Sdk
     public interface IWalletBeaconClient
     {
         bool LoggedIn { get; }
-        
+
         bool Connected { get; }
-        
+
         AppMetadata Metadata { get; }
 
         IAppMetadataRepository AppMetadataRepository { get; }

@@ -50,7 +50,7 @@
         public event TaskEventHandler<P2PMessageEventArgs> OnP2PMessagesReceived;
 
         public bool LoggedIn { get; private set; }
-        
+
         public bool Syncing { get; private set; }
 
         public async Task LoginAsync()

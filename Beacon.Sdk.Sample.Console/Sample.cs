@@ -12,11 +12,6 @@ namespace Beacon.Sdk.Sample.Console
     using Beacon.Operation;
     using Beacon.Permission;
     using Core.Domain;
-    using Core.Domain.Services;
-    using Core.Infrastructure.Cryptography;
-    using Core.Infrastructure.Repositories;
-    using Microsoft.Extensions.Logging;
-    using Netezos.Encoding;
     using Netezos.Forging;
     using Netezos.Forging.Models;
     using Netezos.Keys;
@@ -40,7 +35,7 @@ namespace Beacon.Sdk.Sample.Console
 
             // use this address to receive some tez
             string address = walletKey.PubKey.Address;
-            
+
             var factory = new WalletBeaconClientFactory();
 
             var options = new BeaconOptions
@@ -62,7 +57,8 @@ namespace Beacon.Sdk.Sample.Console
 
                     var response = new PermissionResponse(
                         id: request!.Id,
-                        network: new Network(NetworkType.hangzhounet, "Hangzhounet", "https://hangzhounet.tezblock.io"),// request.Network,
+                        new Network(NetworkType.hangzhounet, "Hangzhounet",
+                            "https://hangzhounet.tezblock.io"), // request.Network,
                         scopes: request.Scopes,
                         walletKey.PubKey.ToString());
 
@@ -95,19 +91,19 @@ namespace Beacon.Sdk.Sample.Console
 
             client.Disconnect();
         }
-        
+
         private async Task<string> MakeTransaction(Key key)
         {
             string address = key.PubKey.Address;
-            
+
             using var rpc = new TezosRpc("https://hangzhounet.api.tez.ie/");
 
             // get a head block
-            var head = await rpc.Blocks.Head.Hash.GetAsync<string>();
+            string head = await rpc.Blocks.Head.Hash.GetAsync<string>();
 
             // get account's counter
-            var counter = await rpc.Blocks.Head.Context.Contracts[key.Address].Counter.GetAsync<int>();
-            
+            int counter = await rpc.Blocks.Head.Context.Contracts[key.Address].Counter.GetAsync<int>();
+
             var content = new ManagerOperationContent[]
             {
                 new TransactionContent
@@ -121,13 +117,13 @@ namespace Beacon.Sdk.Sample.Console
                 }
             };
 
-            var bytes = await new LocalForge().ForgeOperationGroupAsync(head, content);
-            
+            byte[] bytes = await new LocalForge().ForgeOperationGroupAsync(head, content);
+
             // sign the operation bytes
             byte[] signature = key.SignOperation(bytes);
 
             // inject the operation and get its id (operation hash)
-            return  await rpc.Inject.Operation.PostAsync(bytes.Concat(signature));
+            return await rpc.Inject.Operation.PostAsync(bytes.Concat(signature));
         }
     }
 }

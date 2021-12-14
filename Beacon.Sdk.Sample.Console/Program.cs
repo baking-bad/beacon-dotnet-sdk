@@ -1,6 +1,5 @@
 ﻿namespace Beacon.Sdk.Sample.Console
 {
-    using System;
     using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -33,11 +32,10 @@
 
             logger.LogInformation("START");
 
-
             var sample = new Sample();
             await sample.Run();
+            
             // await sample.TestTransaction();
-           
             // sample.TestPublicKey();
             // sample.TestRepositories();
 

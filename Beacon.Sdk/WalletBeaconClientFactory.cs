@@ -14,8 +14,6 @@ namespace Beacon.Sdk
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Abstractions;
     using WalletClient;
-    
-    
 
     public class WalletBeaconClientFactory
     {
@@ -124,7 +122,7 @@ namespace Beacon.Sdk
                 keyPairService,
                 peerFactory,
                 incomingMessageHandler,
-                outgoingMessageHandler, 
+                outgoingMessageHandler,
                 permissionHandler,
                 options);
 

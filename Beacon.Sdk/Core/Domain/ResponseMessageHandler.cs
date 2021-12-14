@@ -63,7 +63,8 @@ namespace Beacon.Sdk.Core.Domain
             AppMetadata receiverAppMetadata = _appMetadataRepository.TryRead(receiverId).Result ??
                                               throw new Exception("AppMetadata not found");
 
-            PermissionInfo info = _permissionInfoFactory.Create(receiverId, receiverAppMetadata, PubKey.FromBase58(newResponse.PublicKey),
+            PermissionInfo info = _permissionInfoFactory.Create(receiverId, receiverAppMetadata,
+                PubKey.FromBase58(newResponse.PublicKey),
                 newResponse.Network, newResponse.Scopes);
 
             info = _permissionInfoRepository.Create(info).Result;

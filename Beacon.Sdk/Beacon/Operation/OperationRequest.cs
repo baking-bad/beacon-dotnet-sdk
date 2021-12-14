@@ -2,7 +2,6 @@ namespace Beacon.Sdk.Beacon.Operation
 {
     using System.Collections.Generic;
     using Core.Domain;
-    using Netezos.Forging.Models;
     using Permission;
 
     public record OperationRequest(
@@ -27,4 +26,3 @@ namespace Beacon.Sdk.Beacon.Operation
         public string SourceAddress { get; } = SourceAddress;
     }
 }
-
