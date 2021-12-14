@@ -4,9 +4,9 @@ namespace Beacon.Sdk.Core.Domain.Services
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using Base58Check;
     using Beacon.Permission;
     using Interfaces;
+    using Netezos.Encoding;
     using Utils;
 
     public class AccountService
@@ -21,13 +21,13 @@ namespace Beacon.Sdk.Core.Domain.Services
         public string GetAddressFromPublicKey(string publicKey)
         {
             // tz1
-            var edpk = new keyCurve(54, new byte[] {6, 161, 159});
+            var edpk = new KeyCurve(54, new byte[] {6, 161, 159});
 
             // tz2
-            var sppk = new keyCurve(55, new byte[] {6, 161, 161});
+            var sppk = new KeyCurve(55, new byte[] {6, 161, 161});
 
             // tz3
-            var p2pk = new keyCurve(55, new byte[] {6, 161, 164});
+            var p2pk = new KeyCurve(55, new byte[] {6, 161, 164});
 
             byte[]? prefix = null;
             string? plainPublicKey = null;
@@ -39,13 +39,13 @@ namespace Beacon.Sdk.Core.Domain.Services
             }
             else
             {
-                foreach (keyCurve v in new List<keyCurve> {edpk, sppk, p2pk})
+                foreach (KeyCurve v in new List<KeyCurve> {edpk, sppk, p2pk})
                 {
                     string p = Encoding.UTF8.GetString(v.Prefix);
                     if (publicKey.StartsWith(p) && publicKey.Length == v.Length)
                     {
                         prefix = v.Prefix;
-                        byte[] decoded = Base58CheckEncoding.Decode(publicKey)!;
+                        byte[] decoded = Base58.Parse(publicKey);
 
                         plainPublicKey = Encoding.UTF8.GetString(decoded[p.Length..decoded.Length]);
                         break;
@@ -63,7 +63,7 @@ namespace Beacon.Sdk.Core.Domain.Services
             byte[] payload = _cryptographyService.Hash(plainHexPublicKey.ToByteArray(), 20);
             byte[] b = prefix.Concat(payload).ToArray();
 
-            return Base58CheckEncoding.Encode(b);
+            return Base58.Convert(b);
         }
 
         public string GetAccountIdentifier(string address, Network network)
@@ -80,9 +80,9 @@ namespace Beacon.Sdk.Core.Domain.Services
 
             byte[] h = _cryptographyService.Hash(Encoding.UTF8.GetBytes(m), 10);
 
-            return Base58CheckEncoding.Encode(h);
+            return Base58.Convert(h);
         }
 
-        private record keyCurve(int Length, byte[] Prefix);
+        private record KeyCurve(int Length, byte[] Prefix);
     }
 }
