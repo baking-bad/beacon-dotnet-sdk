@@ -4,6 +4,7 @@ namespace Beacon.Sdk.Sample.Console
 {
     using System;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
     using Base58Check;
@@ -15,6 +16,11 @@ namespace Beacon.Sdk.Sample.Console
     using Core.Infrastructure.Cryptography;
     using Core.Infrastructure.Repositories;
     using Microsoft.Extensions.Logging;
+    using Netezos.Encoding;
+    using Netezos.Forging;
+    using Netezos.Forging.Models;
+    using Netezos.Keys;
+    using Netezos.Rpc;
     using Newtonsoft.Json;
     using Serilog.Extensions.Logging;
     using WalletClient;
@@ -22,14 +28,20 @@ namespace Beacon.Sdk.Sample.Console
     public class Sample
     {
         private const string QrCode =
-            "BSdNU2tFbvsnyHrxTiB2arfFPW5hvAbPAw2fbWLZnpa2DFGxgdN3CMf4jVmdn4YxNhbeEe8fm7bdv9nxwRYwvEQim4t6VXgjiDRcExAuiiUkSXSn2poNn4hH2kacNyPTSYywqAzMDgtibKFEtp3WPE6JzoCtttfx6LH65sRZj54m4GzgeNtmkd83rMNhXXUkf5FnDhEv16iKGbZj62pG9sdMdWRxADtZCWo41cBPrsRVtbfJWVURBbMzeMLupAoV1pozRUhdCcDWiKPVwhdQgtrZMSnhzngsAygYAojt4PajG4xBrsyH7bECeX2P7uaKVHNjV2LV";
+            "BSdNU2tFbvtHv5DMWmY5SHUj1P1DhQ3uH4GrU7x63SpDRWcHaJ7xpshSErQNQ9utuBVxsQ8X1UtGUeZxv6vrLsu6A5k7MAhiUdn5KELPxLP5RiRwJhscwuWNymG93Zf9Pnm1H48K7EwvGqLWsy8J1vpzXgqnDbDKa63baa8DahKcmWJogycFUpDVEtzTtCFMDdXaGGgtx687s28wqFmjoWbwepEkzaqs8fuuBuxmPy4U8N2U3dTxGsrVMXf9Skj9gFg1FQmbtbdaTJp6qzgcHktbUHHWV4MXiC4PQ4Ng3kyvBZgNgYn1vvTa8Kb15VtydMic6cqt";
 
         public async Task Run()
         {
             const string path = "test1.db";
             File.Delete(path);
 
-            var factory = new WalletClientFactory();
+            // Existing account in TESTNET
+            var walletKey = Key.FromBase58("edsk35n2ruX2r92SdtWzP87mEUqxWSwM14hG6GRhEvU6kfdH8Ut6SW");
+
+            // use this address to receive some tez
+            string address = walletKey.PubKey.Address;
+            
+            var factory = new WalletBeaconClientFactory();
 
             var options = new BeaconOptions
             {
@@ -38,30 +50,34 @@ namespace Beacon.Sdk.Sample.Console
                 IconUrl = "" // string?
             };
 
-            IWalletClient client = factory.Create(options, new SerilogLoggerFactory());
+            IWalletBeaconClient client = factory.Create(options, new SerilogLoggerFactory());
 
-            client.OnBeaconMessageReceived += (sender, args) =>
+            client.OnBeaconMessageReceived += async (sender, args) =>
             {
                 IBeaconRequest message = args.Request;
 
                 if (message.Type == BeaconMessageType.permission_request)
                 {
                     var request = message as PermissionRequest;
-                    
+
                     var response = new PermissionResponse(
                         id: request!.Id,
-                        network: request.Network,
+                        network: new Network(NetworkType.hangzhounet, "Hangzhounet", "https://hangzhounet.tezblock.io"),// request.Network,
                         scopes: request.Scopes,
-                        "3b92229274683b311cf8b040cf91ac0f8e19e410f06eda5537ef077e718e0024");
+                        walletKey.PubKey.ToString());
 
-                    client.SendResponseAsync(args.SenderId, response);
+                    await client.SendResponseAsync(args.SenderId, response);
                 }
-
-                if (message.Type == BeaconMessageType.operation_request)
+                else if (message.Type == BeaconMessageType.operation_request)
                 {
                     var request = message as OperationRequest;
-                    
-                    
+
+                    string transactionHash = await MakeTransaction(walletKey);
+                    var response = new OperationResponse(
+                        id: request!.Id,
+                        transactionHash: transactionHash);
+
+                    await client.SendResponseAsync(args.SenderId, response);
                 }
             };
 
@@ -79,25 +95,39 @@ namespace Beacon.Sdk.Sample.Console
 
             client.Disconnect();
         }
-
-        public void TestRepositories()
+        
+        private async Task<string> MakeTransaction(Key key)
         {
-            var path = "test.db";
-            File.Delete(path);
-            var repositorySettings = new RepositorySettings
+            string address = key.PubKey.Address;
+            
+            using var rpc = new TezosRpc("https://hangzhounet.api.tez.ie/");
+
+            // get a head block
+            var head = await rpc.Blocks.Head.Hash.GetAsync<string>();
+
+            // get account's counter
+            var counter = await rpc.Blocks.Head.Context.Contracts[key.Address].Counter.GetAsync<int>();
+            
+            var content = new ManagerOperationContent[]
             {
-                ConnectionString = path
+                new TransactionContent
+                {
+                    Source = address,
+                    Counter = ++counter,
+                    Amount = 5000000, // 1 tez
+                    Destination = "tz1KhnTgwoRRALBX6vRHRnydDGSBFsWtcJxc",
+                    GasLimit = 1500,
+                    Fee = 1000 // 0.001 tez
+                }
             };
 
-            var cryptographyService = new CryptographyService();
-            var loggerFactory = new SerilogLoggerFactory();
-            var seedRepository =
-                new LiteDbSeedRepository(new Logger<LiteDbSeedRepository>(loggerFactory), repositorySettings);
+            var bytes = await new LocalForge().ForgeOperationGroupAsync(head, content);
+            
+            // sign the operation bytes
+            byte[] signature = key.SignOperation(bytes);
 
-            var keyPairService = new KeyPairService(cryptographyService, seedRepository);
-
-            var guid = Guid.NewGuid().ToString();
-            string g = KeyPairService.CreateGuid();
+            // inject the operation and get its id (operation hash)
+            return  await rpc.Inject.Operation.PostAsync(bytes.Concat(signature));
         }
     }
 }

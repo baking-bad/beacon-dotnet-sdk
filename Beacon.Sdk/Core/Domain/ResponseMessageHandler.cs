@@ -2,10 +2,12 @@ namespace Beacon.Sdk.Core.Domain
 {
     using System;
     using Beacon;
+    using Beacon.Operation;
     using Beacon.Permission;
     using Entities;
     using Interfaces;
     using Interfaces.Data;
+    using Netezos.Keys;
 
     public class ResponseMessageHandler
     {
@@ -34,6 +36,7 @@ namespace Beacon.Sdk.Core.Domain
                 BeaconMessageType.acknowledge => HandleAcknowledge(response),
                 BeaconMessageType.permission_response => HandlePermissionResponse(response, ownAppMetadata, senderId,
                     receiverId),
+                BeaconMessageType.operation_response => HandleOperationResponse(response, senderId),
                 _ => throw new Exception("Invalid beacon message type")
             };
 
@@ -60,10 +63,21 @@ namespace Beacon.Sdk.Core.Domain
             AppMetadata receiverAppMetadata = _appMetadataRepository.TryRead(receiverId).Result ??
                                               throw new Exception("AppMetadata not found");
 
-            PermissionInfo info = _permissionInfoFactory.Create(receiverId, receiverAppMetadata, newResponse.PublicKey,
+            PermissionInfo info = _permissionInfoFactory.Create(receiverId, receiverAppMetadata, PubKey.FromBase58(newResponse.PublicKey),
                 newResponse.Network, newResponse.Scopes);
 
             info = _permissionInfoRepository.Create(info).Result;
+
+            return _jsonSerializerService.Serialize(newResponse);
+        }
+
+        private string HandleOperationResponse(IBeaconResponse beaconResponse, string senderId)
+        {
+            var response = beaconResponse as OperationResponse;
+            var newResponse = new OperationResponse(
+                response!.Id,
+                senderId,
+                response.TransactionHash);
 
             return _jsonSerializerService.Serialize(newResponse);
         }

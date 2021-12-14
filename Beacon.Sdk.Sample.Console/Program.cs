@@ -35,13 +35,10 @@
 
 
             var sample = new Sample();
-            try
-            {
-                await sample.Run();
-            }
-            catch (Exception ex)
-            {
-            }
+            await sample.Run();
+            // await sample.TestTransaction();
+           
+            // sample.TestPublicKey();
             // sample.TestRepositories();
 
             logger.LogInformation("STOP");

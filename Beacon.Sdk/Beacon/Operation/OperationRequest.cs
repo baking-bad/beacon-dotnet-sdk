@@ -2,6 +2,7 @@ namespace Beacon.Sdk.Beacon.Operation
 {
     using System.Collections.Generic;
     using Core.Domain;
+    using Netezos.Forging.Models;
     using Permission;
 
     public record OperationRequest(
@@ -10,7 +11,7 @@ namespace Beacon.Sdk.Beacon.Operation
             string Id,
             string SenderId,
             Network Network,
-            List<TezosTransactionOperation> OperationDetails,
+            List<PartialTezosTransactionOperation> OperationDetails,
             string SourceAddress)
         : BeaconBaseMessage(
             Type,

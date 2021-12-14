@@ -1,10 +1,14 @@
 namespace Beacon.Sdk.Core.Domain
 {
     using System;
+    using System.IO;
+    using System.Text.Json;
     using Beacon;
     using Beacon.Operation;
     using Beacon.Permission;
+    using Dynamic.Json;
     using Interfaces;
+    using Netezos.Forging.Models;
 
     public class RequestMessageHandler
     {
@@ -44,6 +48,11 @@ namespace Beacon.Sdk.Core.Domain
         {
             try
             {
+                var options = new JsonSerializerOptions { MaxDepth = 100_000 };
+
+                // var op = (Operation)DJson.Read($"{directory}/unsigned.json", options);
+                var k = DJson.Parse(message, options);
+                // var d = (OperationContent) DJson.Parse(message, options);
                 OperationRequest request = _jsonSerializerService.Deserialize<OperationRequest>(message);
 
                 // _appMetadataRepository.TryRead(beaconMessage.SenderId).Result;

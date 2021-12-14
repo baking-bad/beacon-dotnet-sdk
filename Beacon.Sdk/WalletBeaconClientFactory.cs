@@ -77,6 +77,7 @@ namespace Beacon.Sdk
             var peerFactory = new PeerFactory(cryptographyService);
             var permissionInfoFactory = new PermissionInfoFactory(accountService);
 
+            var permissionHandler = new PermissionHandler(permissionInfoRepository, accountService);
             var incomingMessageHandler = new RequestMessageHandler(appMetadataRepository, jsonSerializerService);
             var outgoingMessageHandler = new ResponseMessageHandler(appMetadataRepository, permissionInfoRepository,
                 jsonSerializerService, permissionInfoFactory);
@@ -123,7 +124,8 @@ namespace Beacon.Sdk
                 keyPairService,
                 peerFactory,
                 incomingMessageHandler,
-                outgoingMessageHandler,
+                outgoingMessageHandler, 
+                permissionHandler,
                 options);
 
             return _client;

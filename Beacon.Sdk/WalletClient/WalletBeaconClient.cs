@@ -18,6 +18,7 @@ namespace Beacon.Sdk.WalletClient
         private readonly IP2PCommunicationService _p2PCommunicationService;
         private readonly PeerFactory _peerFactory;
         private readonly IPeerRepository _peerRepository;
+        private readonly PermissionHandler _permissionHandler;
 
         private readonly RequestMessageHandler _requestMessageHandler;
         private readonly ResponseMessageHandler _responseMessageHandler;
@@ -31,6 +32,7 @@ namespace Beacon.Sdk.WalletClient
             PeerFactory peerFactory,
             RequestMessageHandler requestMessageHandler,
             ResponseMessageHandler responseMessageHandler,
+            PermissionHandler permissionHandler,
             BeaconOptions options)
             : base(keyPairService, appMetadataRepository, options)
         {
@@ -39,12 +41,14 @@ namespace Beacon.Sdk.WalletClient
             _p2PCommunicationService = p2PCommunicationService;
             _requestMessageHandler = requestMessageHandler;
             _responseMessageHandler = responseMessageHandler;
+            _permissionHandler = permissionHandler;
             _peerFactory = peerFactory;
         }
 
         public bool LoggedIn { get; private set; }
-        
+
         public bool Connected { get; private set; }
+
         public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
 
         public async Task InitAsync()
@@ -88,7 +92,7 @@ namespace Beacon.Sdk.WalletClient
         {
             _p2PCommunicationService.Stop();
             _p2PCommunicationService.OnP2PMessagesReceived -= OnP2PMessagesReceived;
-            
+
             Connected = _p2PCommunicationService.Syncing;
         }
 
@@ -108,16 +112,24 @@ namespace Beacon.Sdk.WalletClient
                 throw new ArgumentException("sender is not IP2PCommunicationClient");
 
             foreach (string message in e.Messages)
-            {
-                (AcknowledgeResponse ack, IBeaconRequest requestMessage) =
-                    _requestMessageHandler.Handle(message, SenderId);
+                await HandleMessage(message);
+        }
 
-                if (requestMessage.Version != "1")
-                    await SendResponseAsync(requestMessage.SenderId, ack);
+        private async Task HandleMessage(string message)
+        {
+            (AcknowledgeResponse ack, IBeaconRequest requestMessage) =
+                _requestMessageHandler.Handle(message, SenderId);
 
+            if (requestMessage.Version != "1")
+                await SendResponseAsync(requestMessage.SenderId, ack);
+
+            bool hasPermission = await _permissionHandler.HasPermission(requestMessage);
+
+            if (hasPermission)
                 OnBeaconMessageReceived?.Invoke(this,
                     new BeaconMessageEventArgs(requestMessage.SenderId, requestMessage));
-            }
+            else
+                _logger.LogInformation("Received message have not permission");
         }
     }
 }
