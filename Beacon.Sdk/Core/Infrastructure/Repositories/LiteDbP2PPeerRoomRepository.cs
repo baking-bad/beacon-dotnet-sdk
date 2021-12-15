@@ -16,9 +16,11 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         public Task<P2PPeerRoom> CreateOrUpdate(P2PPeerRoom p2PPeerRoom) =>
             InConnection(col =>
             {
-                P2PPeerRoom? result = col.Query()
-                    .Where(x => x.PeerHexPublicKey.Value == p2PPeerRoom.PeerHexPublicKey.Value)
-                    .FirstOrDefault();
+                // P2PPeerRoom? result = col.Query()
+                //     .Where(x => x.PeerHexPublicKey.Value == p2PPeerRoom.PeerHexPublicKey.Value)
+                //     .FirstOrDefault();
+
+                P2PPeerRoom? result = col.FindOne(x => x.PeerHexPublicKey.Value == p2PPeerRoom.PeerHexPublicKey.Value);
 
                 if (result == null)
                 {
@@ -37,18 +39,22 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         public Task<P2PPeerRoom?> TryRead(string p2PUserId) =>
             InConnectionNullable(col =>
             {
-                P2PPeerRoom? peerRoom = col.Query().Where(x => x.P2PUserId == p2PUserId)
-                    .FirstOrDefault();
-
+                // P2PPeerRoom? peerRoom = col.Query().Where(x => x.P2PUserId == p2PUserId)
+                //     .FirstOrDefault();
+                
+                P2PPeerRoom? peerRoom = col.FindOne(x => x.P2PUserId == p2PUserId);
+                
                 return Task.FromResult(peerRoom ?? null);
             });
 
         public Task<P2PPeerRoom?> TryRead(HexString peerHexPublicKey) =>
             InConnectionNullable(col =>
             {
-                P2PPeerRoom? peerRoom = col.Query().Where(x => x.PeerHexPublicKey.Value == peerHexPublicKey.Value)
-                    .FirstOrDefault();
+                // P2PPeerRoom? peerRoom = col.Query().Where(x => x.PeerHexPublicKey.Value == peerHexPublicKey.Value)
+                //     .FirstOrDefault();
 
+                P2PPeerRoom? peerRoom = col.FindOne(x => x.PeerHexPublicKey.Value == peerHexPublicKey.Value);
+                    
                 return Task.FromResult(peerRoom ?? null);
             });
     }

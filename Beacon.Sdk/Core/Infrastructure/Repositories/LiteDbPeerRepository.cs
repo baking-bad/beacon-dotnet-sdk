@@ -24,8 +24,10 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         public Task<Peer?> TryRead(string senderUserId) =>
             InConnectionNullable(col =>
             {
-                Peer? peer = col.Query().Where(x => x.SenderUserId == senderUserId).FirstOrDefault();
+                // Peer? peer = col.Query().Where(x => x.SenderUserId == senderUserId).FirstOrDefault();
 
+                Peer? peer = col.FindOne(x => x.SenderUserId == senderUserId);
+                    
                 return Task.FromResult(peer ?? null);
             });
     }

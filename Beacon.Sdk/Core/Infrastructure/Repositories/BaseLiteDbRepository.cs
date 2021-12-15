@@ -15,37 +15,18 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
             _logger = logger;
             _connectionString = settings.ConnectionString;
-
-            // BsonMapper.Global.RegisterType<HexString>
-            // (
-            //     serialize: hexString => hexString.Value,
-            //     deserialize: bson => new HexString(bson.AsArray));
-            // }
-
-            BsonMapper.Global.RegisterType
-            (
-                obj =>
-                {
-                    var doc = new BsonDocument
-                    {
-                        ["DateTime"] = obj.DateTime.Ticks,
-                        ["Offset"] = obj.Offset.Ticks
-                    };
-                    return doc;
-                },
-                doc => new DateTimeOffset(doc["DateTime"].AsInt64, new TimeSpan(doc["Offset"].AsInt64))
-            );
         }
 
-        protected Task<T> InConnection(Func<ILiteCollection<T>, Task<T>> func)
+        protected Task<T> InConnection(Func<LiteCollection<T>, Task<T>> func)
         {
             try
             {
                 lock (_syncRoot)
                 {
                     using var db = new LiteDatabase(_connectionString);
-                    ILiteCollection<T> col = db.GetCollection<T>(nameof(T));
+                    LiteCollection<T> col = db.GetCollection<T>(nameof(T));
 
+                    
                     return func(col);
                 }
             }
@@ -57,14 +38,14 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             return new Task<T>(() => default!);
         }
 
-        protected Task<T?> InConnectionNullable(Func<ILiteCollection<T>, Task<T?>> func)
+        protected Task<T?> InConnectionNullable(Func<LiteCollection<T>, Task<T?>> func)
         {
             try
             {
                 lock (_syncRoot)
                 {
                     using var db = new LiteDatabase(_connectionString);
-                    ILiteCollection<T> col = db.GetCollection<T>(nameof(T));
+                    LiteCollection<T> col = db.GetCollection<T>(nameof(T));
 
                     return func(col);
                 }
@@ -78,14 +59,14 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         }
 
 
-        protected Task<T[]?> InConnectionNullable(Func<ILiteCollection<T>, Task<T[]?>> func)
+        protected Task<T[]?> InConnectionNullable(Func<LiteCollection<T>, Task<T[]?>> func)
         {
             try
             {
                 lock (_syncRoot)
                 {
                     using var db = new LiteDatabase(_connectionString);
-                    ILiteCollection<T> col = db.GetCollection<T>(nameof(T));
+                    LiteCollection<T> col = db.GetCollection<T>(nameof(T));
 
                     return func(col);
                 }
@@ -98,4 +79,5 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             return new Task<T[]?>(() => default);
         }
     }
+    
 }

@@ -32,7 +32,7 @@ namespace Beacon.Sdk.Core.Domain.Entities
                 PublicKey = publicKey.ToString(),
                 Network = network,
                 Scopes = scopes,
-                ConnectedAt = DateTimeOffset.Now
+                ConnectedAt = DateTime.UtcNow
             };
         }
     }
