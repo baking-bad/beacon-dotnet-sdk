@@ -53,9 +53,9 @@
 
         public bool Syncing { get; private set; }
 
-        public async Task LoginAsync()
+        public async Task LoginAsync(string[] knownRelayServers)
         {
-            P2PLoginRequest request = await _p2PLoginRequestFactory.Create();
+            P2PLoginRequest request = await _p2PLoginRequestFactory.Create(knownRelayServers);
 
             await _matrixClient.LoginAsync(request.Address, request.Username, request.Password, request.DeviceId);
 

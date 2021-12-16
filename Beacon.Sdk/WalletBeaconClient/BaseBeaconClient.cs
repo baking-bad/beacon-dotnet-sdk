@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.WalletClient
+namespace Beacon.Sdk.WalletBeaconClient
 {
     using System;
     using Beacon;
@@ -12,16 +12,21 @@ namespace Beacon.Sdk.WalletClient
         private readonly string? _appUrl;
         private readonly string? _iconUrl;
         private readonly KeyPairService _keyPairService;
+        
         protected readonly string AppName;
+        protected readonly string[]? KnownRelayServers;
 
         protected BaseBeaconClient(KeyPairService keyPairService, IAppMetadataRepository appMetadataRepository,
             BeaconOptions options)
         {
             _keyPairService = keyPairService;
             AppMetadataRepository = appMetadataRepository;
-            AppName = options.AppName;
+            
             _iconUrl = options.IconUrl;
             _appUrl = options.AppUrl;
+            
+            AppName = options.AppName;
+            KnownRelayServers = options.KnownRelayServers;
         }
 
         private HexString BeaconId

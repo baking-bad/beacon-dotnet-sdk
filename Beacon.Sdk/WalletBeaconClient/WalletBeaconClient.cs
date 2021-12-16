@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.WalletClient
+namespace Beacon.Sdk.WalletBeaconClient
 {
     using System;
     using System.Threading.Tasks;
@@ -53,7 +53,7 @@ namespace Beacon.Sdk.WalletClient
 
         public async Task InitAsync()
         {
-            await _p2PCommunicationService.LoginAsync();
+            await _p2PCommunicationService.LoginAsync(KnownRelayServers ?? Constants.KnownRelayServers);
 
             LoggedIn = _p2PCommunicationService.LoggedIn;
         }

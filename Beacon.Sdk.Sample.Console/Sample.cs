@@ -4,6 +4,7 @@ namespace Beacon.Sdk.Sample.Console
 {
     using System;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
     using Base58Check;
@@ -11,25 +12,27 @@ namespace Beacon.Sdk.Sample.Console
     using Beacon.Operation;
     using Beacon.Permission;
     using Core.Domain;
-    using Core.Domain.Services;
-    using Core.Infrastructure.Cryptography;
-    using Core.Infrastructure.Repositories;
-    using Microsoft.Extensions.Logging;
+    using Netezos.Forging;
+    using Netezos.Forging.Models;
+    using Netezos.Keys;
+    using Netezos.Rpc;
     using Newtonsoft.Json;
     using Serilog.Extensions.Logging;
-    using WalletClient;
+    using WalletBeaconClient;
 
     public class Sample
     {
-        private const string QrCode =
-            "BSdNU2tFbvrGQoe9zMh8XXYEf3geBM237D9WVrsCxPSPctGMfCznJByJyoinpNcU6AQWasVADB7WwWBuS8kJtzHASXGF8n69A7xLvcU2HiR7ZqZx6xQUdyVkGFVTWYgd9HKwDW2bfr3veddXPqfkc2LtxK5jUcMKebDsGRM19TdxE1gkpujDf19vpu1syAVkdzSHqxAJMwnTiMYQ22UusCq6YctJkwFpiPyoms3fSCv298ntN5A9QkHxbNVDLZqnB3quKhUDW8sWECtVrxWEuSDTosmUaHwWefQQ7pDprj1gX44Kt3qoGeRne4FVkeFqQnK8hER5";
+        private const string QrCode = "";
 
         public async Task Run()
         {
             const string path = "test1.db";
             File.Delete(path);
 
-            var factory = new WalletClientFactory();
+            var walletKey = Key.FromBase58("edsk35n2ruX2r92SdtWzP87mEUqxWSwM14hG6GRhEvU6kfdH8Ut6SW");
+            string address = walletKey.PubKey.Address;
+
+            var factory = new WalletBeaconClientFactory();
 
             var options = new BeaconOptions
             {
@@ -38,35 +41,46 @@ namespace Beacon.Sdk.Sample.Console
                 IconUrl = "" // string?
             };
 
-            IWalletClient client = factory.Create(options, new SerilogLoggerFactory());
+            IWalletBeaconClient client = factory.Create(options, new SerilogLoggerFactory());
 
-            client.OnBeaconMessageReceived += (sender, args) =>
+            client.OnBeaconMessageReceived += async (sender, args) =>
             {
                 IBeaconRequest message = args.Request;
 
                 if (message.Type == BeaconMessageType.permission_request)
                 {
                     var request = message as PermissionRequest;
+
+                    var network = new Network(
+                        Type: NetworkType.hangzhounet,
+                        Name: "Hangzhounet",
+                        RpcUrl: "https://hangzhounet.tezblock.io");
                     
                     var response = new PermissionResponse(
                         id: request!.Id,
-                        network: request.Network,
-                        scopes: request.Scopes,
-                        "3b92229274683b311cf8b040cf91ac0f8e19e410f06eda5537ef077e718e0024");
+                        network: network,
+                        scopes: request.Scopes, 
+                        publicKey: walletKey.PubKey.ToString());
 
-                    client.SendResponseAsync(args.SenderId, response);
+                    await client.SendResponseAsync(args.SenderId, response);
                 }
-
-                if (message.Type == BeaconMessageType.operation_request)
+                else if (message.Type == BeaconMessageType.operation_request)
                 {
                     var request = message as OperationRequest;
+
+                    string transactionHash = await MakeTransactionAsync(walletKey);
                     
-                    
+                    var response = new OperationResponse(
+                        id: request!.Id, 
+                        transactionHash: transactionHash);
                 }
             };
 
             await client.InitAsync();
             client.Connect();
+            
+            Console.WriteLine($"client.LoggedIn: {client.LoggedIn}");
+            Console.WriteLine($"client.Connected: {client.Connected}");
 
             byte[] decodedBytes = Base58CheckEncoding.Decode(QrCode);
             string message = Encoding.Default.GetString(decodedBytes);
@@ -80,24 +94,36 @@ namespace Beacon.Sdk.Sample.Console
             client.Disconnect();
         }
 
-        public void TestRepositories()
+        private static async Task<string> MakeTransactionAsync(Key key)
         {
-            var path = "test.db";
-            File.Delete(path);
-            var repositorySettings = new RepositorySettings
+            using var rpc = new TezosRpc("https://hangzhounet.api.tez.ie/");
+
+            // get a head block
+            string head = await rpc.Blocks.Head.Hash.GetAsync<string>();
+
+            // get account's counter
+            int counter = await rpc.Blocks.Head.Context.Contracts[key.Address].Counter.GetAsync<int>();
+
+            var content = new ManagerOperationContent[]
             {
-                ConnectionString = path
+                new TransactionContent
+                {
+                    Source = key.PubKey.Address,
+                    Counter = ++counter,
+                    Amount = 1000000, // 1 tez
+                    Destination = "tz1KhnTgwoRRALBX6vRHRnydDGSBFsWtcJxc",
+                    GasLimit = 1500,
+                    Fee = 1000 // 0.001 tez
+                }
             };
 
-            var cryptographyService = new CryptographyService();
-            var loggerFactory = new SerilogLoggerFactory();
-            var seedRepository =
-                new LiteDbSeedRepository(new Logger<LiteDbSeedRepository>(loggerFactory), repositorySettings);
+            byte[] bytes = await new LocalForge().ForgeOperationGroupAsync(head, content);
 
-            var keyPairService = new KeyPairService(cryptographyService, seedRepository);
+            // sign the operation bytes
+            byte[] signature = key.SignOperation(bytes);
 
-            var guid = Guid.NewGuid().ToString();
-            string g = KeyPairService.CreateGuid();
+            // inject the operation and get its id (operation hash)
+            return await rpc.Inject.Operation.PostAsync(bytes.Concat(signature));
         }
     }
 }

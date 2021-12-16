@@ -13,7 +13,7 @@ namespace Beacon.Sdk
     using Matrix.Sdk.Core.Infrastructure.Services;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Abstractions;
-    using WalletClient;
+    using WalletBeaconClient;
 
     public class WalletBeaconClientFactory
     {
@@ -114,8 +114,8 @@ namespace Beacon.Sdk
 
             #endregion
 
-            _client = new WalletBeaconClient(
-                new Logger<WalletBeaconClient>(loggerFactory ?? new NullLoggerFactory()),
+            _client = new WalletBeaconClient.WalletBeaconClient(
+                new Logger<WalletBeaconClient.WalletBeaconClient>(loggerFactory ?? new NullLoggerFactory()),
                 peerRepository,
                 appMetadataRepository,
                 p2PCommunicationService,

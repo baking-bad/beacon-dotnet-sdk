@@ -14,7 +14,7 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
         bool Syncing { get; }
         event TaskEventHandler<P2PMessageEventArgs> OnP2PMessagesReceived;
 
-        Task LoginAsync();
+        Task LoginAsync(string[] knownRelayServers);
 
         void Start();
 
