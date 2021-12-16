@@ -14,7 +14,7 @@ namespace Beacon.Sdk.WalletBeaconClient
         private readonly KeyPairService _keyPairService;
         
         protected readonly string AppName;
-        protected readonly string[]? KnownRelayServers;
+        protected readonly string[] KnownRelayServers;
 
         protected BaseBeaconClient(KeyPairService keyPairService, IAppMetadataRepository appMetadataRepository,
             BeaconOptions options)

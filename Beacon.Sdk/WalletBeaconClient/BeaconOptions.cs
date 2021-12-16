@@ -16,10 +16,16 @@ namespace Beacon.Sdk.WalletBeaconClient
         ///     A URL to the website of the application
         /// </summary>
         public string? AppUrl { get; set; }
-        
+
         /// <summary>
         ///     Optional. You can directly pass Matrix nodes addresses.
         /// </summary>
-        public string[]? KnownRelayServers { get; set; }
+        public string[] KnownRelayServers
+        {
+            get => _knownRelayServers ?? Constants.KnownRelayServers;
+            init => _knownRelayServers = value;
+        }
+
+        private readonly string[]? _knownRelayServers;
     }
 }

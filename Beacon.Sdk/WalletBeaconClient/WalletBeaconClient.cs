@@ -53,7 +53,7 @@ namespace Beacon.Sdk.WalletBeaconClient
 
         public async Task InitAsync()
         {
-            await _p2PCommunicationService.LoginAsync(KnownRelayServers ?? Constants.KnownRelayServers);
+            await _p2PCommunicationService.LoginAsync(KnownRelayServers);
 
             LoggedIn = _p2PCommunicationService.LoggedIn;
         }

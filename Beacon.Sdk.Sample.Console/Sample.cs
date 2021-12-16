@@ -1,4 +1,6 @@
 // ReSharper disable ArgumentsStyleNamedExpression
+// ReSharper disable ArgumentsStyleOther
+// ReSharper disable ArgumentsStyleStringLiteral
 
 namespace Beacon.Sdk.Sample.Console
 {
@@ -29,8 +31,8 @@ namespace Beacon.Sdk.Sample.Console
             const string path = "test1.db";
             File.Delete(path);
 
+            // Use existing key
             var walletKey = Key.FromBase58("edsk35n2ruX2r92SdtWzP87mEUqxWSwM14hG6GRhEvU6kfdH8Ut6SW");
-            string address = walletKey.PubKey.Address;
 
             var factory = new WalletBeaconClientFactory();
 
@@ -38,7 +40,8 @@ namespace Beacon.Sdk.Sample.Console
             {
                 AppName = "Atomex Mobile",
                 AppUrl = "", //string?
-                IconUrl = "" // string?
+                IconUrl = "", // string?
+                KnownRelayServers = new []{"beacon-node-0.papers.tech:8448"}
             };
 
             IWalletBeaconClient client = factory.Create(options, new SerilogLoggerFactory());
