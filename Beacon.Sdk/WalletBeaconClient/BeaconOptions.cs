@@ -2,6 +2,8 @@ namespace Beacon.Sdk.WalletBeaconClient
 {
     public class BeaconOptions
     {
+        private readonly string[]? _knownRelayServers;
+
         /// <summary>
         ///     Name of the application
         /// </summary>
@@ -25,7 +27,5 @@ namespace Beacon.Sdk.WalletBeaconClient
             get => _knownRelayServers ?? Constants.KnownRelayServers;
             init => _knownRelayServers = value;
         }
-
-        private readonly string[]? _knownRelayServers;
     }
 }

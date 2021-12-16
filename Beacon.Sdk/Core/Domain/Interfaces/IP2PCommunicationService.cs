@@ -4,7 +4,7 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
     using Entities;
     using Entities.P2P;
     using P2P;
-    
+
     public delegate Task TaskEventHandler<TEventArgs>(object? sender, TEventArgs e);
 
     public interface IP2PCommunicationService

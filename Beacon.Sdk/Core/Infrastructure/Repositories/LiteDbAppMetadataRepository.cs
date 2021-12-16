@@ -17,8 +17,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             InConnection(col =>
             {
                 AppMetadata? result = col.FindOne(x => x.SenderId == appMetadata.SenderId);
-                    // .Where(x => x.SenderId == appMetadata.SenderId)
-                    // .FirstOrDefault();
+                // .Where(x => x.SenderId == appMetadata.SenderId)
+                // .FirstOrDefault();
 
                 if (result == null)
                 {

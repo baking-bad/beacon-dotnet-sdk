@@ -41,7 +41,7 @@ namespace Beacon.Sdk.Sample.Console
                 AppName = "Atomex Mobile",
                 AppUrl = "", //string?
                 IconUrl = "", // string?
-                KnownRelayServers = new []{"beacon-node-0.papers.tech:8448"}
+                KnownRelayServers = new[] {"beacon-node-0.papers.tech:8448"}
             };
 
             IWalletBeaconClient client = factory.Create(options, new SerilogLoggerFactory());
@@ -58,11 +58,11 @@ namespace Beacon.Sdk.Sample.Console
                         Type: NetworkType.hangzhounet,
                         Name: "Hangzhounet",
                         RpcUrl: "https://hangzhounet.tezblock.io");
-                    
+
                     var response = new PermissionResponse(
                         id: request!.Id,
                         network: network,
-                        scopes: request.Scopes, 
+                        scopes: request.Scopes,
                         publicKey: walletKey.PubKey.ToString());
 
                     await client.SendResponseAsync(args.SenderId, response);
@@ -72,16 +72,16 @@ namespace Beacon.Sdk.Sample.Console
                     var request = message as OperationRequest;
 
                     string transactionHash = await MakeTransactionAsync(walletKey);
-                    
+
                     var response = new OperationResponse(
-                        id: request!.Id, 
+                        id: request!.Id,
                         transactionHash: transactionHash);
                 }
             };
 
             await client.InitAsync();
             client.Connect();
-            
+
             Console.WriteLine($"client.LoggedIn: {client.LoggedIn}");
             Console.WriteLine($"client.Connected: {client.Connected}");
 

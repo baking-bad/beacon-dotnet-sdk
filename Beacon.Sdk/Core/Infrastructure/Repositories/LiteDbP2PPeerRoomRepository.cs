@@ -41,9 +41,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             {
                 // P2PPeerRoom? peerRoom = col.Query().Where(x => x.P2PUserId == p2PUserId)
                 //     .FirstOrDefault();
-                
+
                 P2PPeerRoom? peerRoom = col.FindOne(x => x.P2PUserId == p2PUserId);
-                
+
                 return Task.FromResult(peerRoom ?? null);
             });
 
@@ -54,7 +54,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 //     .FirstOrDefault();
 
                 P2PPeerRoom? peerRoom = col.FindOne(x => x.PeerHexPublicKey.Value == peerHexPublicKey.Value);
-                    
+
                 return Task.FromResult(peerRoom ?? null);
             });
     }

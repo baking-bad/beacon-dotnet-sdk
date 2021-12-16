@@ -12,7 +12,7 @@ namespace Beacon.Sdk.WalletBeaconClient
         private readonly string? _appUrl;
         private readonly string? _iconUrl;
         private readonly KeyPairService _keyPairService;
-        
+
         protected readonly string AppName;
         protected readonly string[] KnownRelayServers;
 
@@ -21,10 +21,10 @@ namespace Beacon.Sdk.WalletBeaconClient
         {
             _keyPairService = keyPairService;
             AppMetadataRepository = appMetadataRepository;
-            
+
             _iconUrl = options.IconUrl;
             _appUrl = options.AppUrl;
-            
+
             AppName = options.AppName;
             KnownRelayServers = options.KnownRelayServers;
         }

@@ -4,7 +4,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     using System.Threading.Tasks;
     using Domain.Entities;
     using Domain.Interfaces.Data;
-    using LiteDB;
     using Microsoft.Extensions.Logging;
 
     // Todo: Add secure storage
@@ -25,7 +24,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
                 col.Insert(data);
                 col.EnsureIndex(x => x.Seed);
-                
+
                 return Task.FromResult(data);
             });
 
@@ -35,9 +34,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 // SeedEntity seedEntity = col.Query().FirstOrDefault();
 
                 // return Task.FromResult(seedEntity ?? null);
-                
-                var seedEntity = col.FindAll().FirstOrDefault();
-                
+
+                SeedEntity? seedEntity = col.FindAll().FirstOrDefault();
+
                 return Task.FromResult(seedEntity ?? null);
             });
     }
