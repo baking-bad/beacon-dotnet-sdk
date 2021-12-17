@@ -27,5 +27,7 @@ namespace Beacon.Sdk.WalletBeaconClient
             get => _knownRelayServers ?? Constants.KnownRelayServers;
             init => _knownRelayServers = value;
         }
+
+        public string DatabaseConnectionString { get; set; }
     }
 }

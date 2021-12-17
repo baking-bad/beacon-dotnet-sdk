@@ -34,7 +34,7 @@ namespace Beacon.Sdk
 
             var repositorySettings = new RepositorySettings
             {
-                ConnectionString = "test1.db"
+                ConnectionString = options.DatabaseConnectionString
             };
             var cryptographyService = new CryptographyService();
             var sessionKeyPairRepository = new InMemorySessionKeyPairRepository(cryptographyService);

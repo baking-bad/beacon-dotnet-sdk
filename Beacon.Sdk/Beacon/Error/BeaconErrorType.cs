@@ -1,6 +1,10 @@
-namespace Beacon.Sdk.Beacon
+namespace Beacon.Sdk.Beacon.Error
 {
-    public enum ErrorType
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum BeaconErrorType
     {
         /// <summary>
         ///     Indicates that the transaction broadcast failed.

@@ -11,6 +11,7 @@ namespace Beacon.Sdk.Sample.Console
     using System.Threading.Tasks;
     using Base58Check;
     using Beacon;
+    using Beacon.Error;
     using Beacon.Operation;
     using Beacon.Permission;
     using Core.Domain;
@@ -24,7 +25,8 @@ namespace Beacon.Sdk.Sample.Console
 
     public class Sample
     {
-        private const string QrCode = "";
+        private const string QrCode =
+            "BSdNU2tFbwGhyU9mSkVHF6EsQiyVTTWgseX3jsLZALQq27U4H4jGmYro7gyapirT5pnuJCbXqMQTqnN8KqnfQmFvzyazf48z2xDMfdr5i17WLxGjUhaeG38KwCeVJmxVjD5ZBSC65KLBRVDpWNZ1nqHSiHWQnurpVyq9Sggtd3RoNefE3diNUzXHUicFFboAzujHimsJUJ4M9FEaN7Ca175DD9aNEwWYp896eQgrWuS1s3EL26pcynZWgadajixCHDMAtKCPC5iTaHDGwJaQcaBAPnSfmZN7c14q3LWY7QL5kr44g1e7ZgLPu4Qv7iwhrW9z4aQ9";
 
         public async Task Run()
         {
@@ -41,7 +43,8 @@ namespace Beacon.Sdk.Sample.Console
                 AppName = "Atomex Mobile",
                 AppUrl = "", //string?
                 IconUrl = "", // string?
-                KnownRelayServers = new[] {"beacon-node-0.papers.tech:8448"}
+                KnownRelayServers = new[] {"beacon-node-0.papers.tech:8448"},
+                DatabaseConnectionString = "Filename=test1.db; Mode=Exclusive"
             };
 
             IWalletBeaconClient client = factory.Create(options, new SerilogLoggerFactory());
@@ -54,16 +57,18 @@ namespace Beacon.Sdk.Sample.Console
                 {
                     var request = message as PermissionRequest;
 
-                    var network = new Network(
-                        Type: NetworkType.hangzhounet,
-                        Name: "Hangzhounet",
-                        RpcUrl: "https://hangzhounet.tezblock.io");
+                    // var network = new Network(
+                    //     Type: NetworkType.hangzhounet,
+                    //     Name: "Hangzhounet",
+                    //     RpcUrl: "https://hangzhounet.tezblock.io");
+                    //
+                    // var response = new PermissionResponse(
+                    //     id: request!.Id,
+                    //     network: network,
+                    //     scopes: request.Scopes,
+                    //     publicKey: walletKey.PubKey.ToString());
 
-                    var response = new PermissionResponse(
-                        id: request!.Id,
-                        network: network,
-                        scopes: request.Scopes,
-                        publicKey: walletKey.PubKey.ToString());
+                    var response = new BeaconAbortedError(message.Id);
 
                     await client.SendResponseAsync(args.SenderId, response);
                 }
@@ -71,11 +76,22 @@ namespace Beacon.Sdk.Sample.Console
                 {
                     var request = message as OperationRequest;
 
-                    string transactionHash = await MakeTransactionAsync(walletKey);
+                    try
+                    {
+                        string transactionHash = await MakeTransactionAsync(walletKey);
 
-                    var response = new OperationResponse(
-                        id: request!.Id,
-                        transactionHash: transactionHash);
+                        var response = new OperationResponse(
+                            id: request!.Id,
+                            transactionHash: transactionHash);
+
+                        await client.SendResponseAsync(args.SenderId, response);
+                    }
+                    catch (Exception exception)
+                    {
+                        Console.WriteLine(exception.Message);
+
+                        throw;
+                    }
                 }
             };
 

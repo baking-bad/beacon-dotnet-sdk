@@ -2,21 +2,14 @@ namespace Beacon.Sdk.Beacon.Operation
 {
     using Core.Domain;
 
-    public record OperationResponse(
-            string Id,
-            string SenderId,
-            string TransactionHash)
-        : BeaconBaseMessage(
-            BeaconMessageType.operation_response,
-            Constants.MessageVersion,
-            Id,
-            SenderId), IBeaconResponse
+    public class OperationResponse : BaseBeaconMessage, IBeaconResponse
     {
         public OperationResponse(string id, string transactionHash)
-            : this(id, string.Empty, transactionHash)
+            : base(BeaconMessageType.operation_response, id)
         {
+            TransactionHash = transactionHash;
         }
 
-        public string TransactionHash { get; } = TransactionHash;
+        public string TransactionHash { get; }
     }
 }

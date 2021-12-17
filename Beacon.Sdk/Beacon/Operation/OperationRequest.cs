@@ -4,25 +4,30 @@ namespace Beacon.Sdk.Beacon.Operation
     using Core.Domain;
     using Permission;
 
-    public record OperationRequest(
-            BeaconMessageType Type,
-            string Version,
-            string Id,
-            string SenderId,
-            Network Network,
-            List<PartialTezosTransactionOperation> OperationDetails,
-            string SourceAddress)
-        : BeaconBaseMessage(
-            Type,
-            Version,
-            Id,
-            SenderId), IBeaconRequest
+    public class OperationRequest : BaseBeaconMessage, IBeaconRequest
     {
+        public OperationRequest(
+            BeaconMessageType type,
+            string version,
+            string id,
+            string senderId,
+            Network network,
+            List<PartialTezosTransactionOperation> operationDetails,
+            string sourceAddress)
+            : base(type, version, id, senderId)
+        {
+            Network = network;
+            OperationDetails = operationDetails;
+            SourceAddress = sourceAddress;
+        }
+
         /// <summary>
         ///     Network on which the operation will be broadcast
         /// </summary>
-        public Network Network { get; } = Network;
+        public Network Network { get; }
 
-        public string SourceAddress { get; } = SourceAddress;
+        public List<PartialTezosTransactionOperation> OperationDetails { get; }
+
+        public string SourceAddress { get; }
     }
 }

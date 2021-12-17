@@ -2,6 +2,7 @@ namespace Beacon.Sdk.Core.Domain
 {
     using System;
     using Beacon;
+    using Beacon.Error;
     using Beacon.Operation;
     using Beacon.Permission;
     using Entities;
@@ -37,6 +38,7 @@ namespace Beacon.Sdk.Core.Domain
                 BeaconMessageType.permission_response => HandlePermissionResponse(response, ownAppMetadata, senderId,
                     receiverId),
                 BeaconMessageType.operation_response => HandleOperationResponse(response, senderId),
+                BeaconMessageType.error => HandleError(response, senderId),
                 _ => throw new Exception("Invalid beacon message type")
             };
 
@@ -52,35 +54,42 @@ namespace Beacon.Sdk.Core.Domain
             string receiverId)
         {
             var response = beaconResponse as PermissionResponse;
-            var newResponse = new PermissionResponse(
-                response!.Id,
-                senderId,
-                ownAppMetadata,
-                response.Network,
-                response.Scopes,
-                response.PublicKey);
+            response!.SenderId = senderId;
+            response.AppMetadata = ownAppMetadata;
 
             AppMetadata receiverAppMetadata = _appMetadataRepository.TryRead(receiverId).Result ??
                                               throw new Exception("AppMetadata not found");
 
             PermissionInfo info = _permissionInfoFactory.Create(receiverId, receiverAppMetadata,
-                PubKey.FromBase58(newResponse.PublicKey),
-                newResponse.Network, newResponse.Scopes);
+                PubKey.FromBase58(response.PublicKey),
+                response.Network, response.Scopes);
 
             info = _permissionInfoRepository.Create(info).Result;
 
-            return _jsonSerializerService.Serialize(newResponse);
+            return _jsonSerializerService.Serialize(response);
         }
 
         private string HandleOperationResponse(IBeaconResponse beaconResponse, string senderId)
         {
             var response = beaconResponse as OperationResponse;
-            var newResponse = new OperationResponse(
-                response!.Id,
-                senderId,
-                response.TransactionHash);
+            response!.SenderId = senderId;
 
-            return _jsonSerializerService.Serialize(newResponse);
+            return _jsonSerializerService.Serialize(response);
+        }
+
+        private string HandleError(IBeaconResponse response, string senderId)
+        {
+            var error = response as BaseBeaconError;
+
+            if (error!.ErrorType == BeaconErrorType.ABORTED_ERROR)
+            {
+                var abortedError = response as BeaconAbortedError;
+                abortedError!.SenderId = senderId;
+
+                return _jsonSerializerService.Serialize(abortedError);
+            }
+
+            throw new ArgumentException("error.ErrorType");
         }
     }
 }

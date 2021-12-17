@@ -54,7 +54,7 @@ namespace Beacon.Sdk.Sample.Console
 
         public void Disconnect() => Console.WriteLine("Disconnect");
 
-        public Task RespondAsync(BeaconBaseMessage beaconBaseMessage)
+        public Task RespondAsync(BaseBeaconMessage baseBeaconMessage)
         {
             Console.WriteLine("Respond");
 
