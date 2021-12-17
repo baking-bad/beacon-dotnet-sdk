@@ -1,9 +1,8 @@
 namespace Beacon.Sdk.Beacon.Permission
 {
     using System.Collections.Generic;
-    using Core.Domain;
 
-    public record PermissionResponse : BaseBeaconMessage, IBeaconResponse
+    public record PermissionResponse : BaseBeaconMessage
     {
         public PermissionResponse(
             string id,

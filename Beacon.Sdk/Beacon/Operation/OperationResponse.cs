@@ -1,8 +1,6 @@
 namespace Beacon.Sdk.Beacon.Operation
 {
-    using Core.Domain;
-
-    public record OperationResponse : BaseBeaconMessage, IBeaconResponse
+    public record OperationResponse : BaseBeaconMessage
     {
         public OperationResponse(string id, string senderId, string transactionHash)
             : base(BeaconMessageType.operation_response, id, senderId)

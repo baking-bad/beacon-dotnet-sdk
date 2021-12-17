@@ -13,7 +13,6 @@ namespace Beacon.Sdk.Sample.Console
     using Beacon;
     using Beacon.Operation;
     using Beacon.Permission;
-    using Core.Domain;
     using Netezos.Forging;
     using Netezos.Forging.Models;
     using Netezos.Keys;
@@ -25,7 +24,7 @@ namespace Beacon.Sdk.Sample.Console
     public class Sample
     {
         private const string QrCode =
-            "BSdNU2tFbwGhyU9mSkVHF6EsQiyVTTWgseX3jsLZALQq27U4H4jGmYro7gyapirT5pnuJCbXqMQTqnN8KqnfQmFvzyazf48z2xDMfdr5i17WLxGjUhaeG38KwCeVJmxVjD5ZBSC65KLBRVDpWNZ1nqHSiHWQnurpVyq9Sggtd3RoNefE3diNUzXHUicFFboAzujHimsJUJ4M9FEaN7Ca175DD9aNEwWYp896eQgrWuS1s3EL26pcynZWgadajixCHDMAtKCPC5iTaHDGwJaQcaBAPnSfmZN7c14q3LWY7QL5kr44g1e7ZgLPu4Qv7iwhrW9z4aQ9";
+            "BSdNU2tFbvstNHJTvvHbKBzDTC1sPBySNYHr5Ho4whm478TEpuzP1PkG1hpwd9yejWTiKL17nX2p51vWFHzeoQRBdocxXiKtPHh4LcDP2mNJLJdjtcgDW8Jju8M4HMGHtHyezsDR6gZJfbL7sTGo7USsVU3G5Ve18r2N5aNLhvP56ATtZqKsrLGGVixFPrD9b5C8EtSYHM7AFATuRvwhjBLtJRRm3QVdPtVdazDocotDcmE7TtFyk6j4WQjgLHTBqyzBZB2HCAD3S335AicLahNz6S7MYxYvWBDhXChEeYKTKjw2BhYEuZ3kpGQAV9QXTvsHRuj2";
 
         public async Task Run()
         {
@@ -48,18 +47,18 @@ namespace Beacon.Sdk.Sample.Console
 
             IWalletBeaconClient walletClient = factory.Create(options, new SerilogLoggerFactory());
 
-            walletClient.OnBeaconMessageReceived += async (sender, dappClient) =>
+            walletClient.OnBeaconMessageReceived += async (_, dAppClient) =>
             {
-                IBeaconRequest message = dappClient.Request;
+                BaseBeaconMessage message = dAppClient.Request;
 
                 if (message.Type == BeaconMessageType.permission_request)
                 {
                     var request = message as PermissionRequest;
 
                     var network = new Network(
-                        Type: NetworkType.hangzhounet,
-                        Name: "Hangzhounet",
-                        RpcUrl: "https://hangzhounet.tezblock.io");
+                        type: NetworkType.hangzhounet,
+                        name: "Hangzhounet",
+                        rpcUrl: "https://hangzhounet.tezblock.io");
 
                     var response = new PermissionResponse(
                         id: request!.Id,
@@ -71,7 +70,7 @@ namespace Beacon.Sdk.Sample.Console
 
                     // var response = new BeaconAbortedError(message.Id, walletClient.SenderId);
 
-                    await walletClient.SendResponseAsync(dappClient.SenderId, response);
+                    await walletClient.SendResponseAsync(receiverId: dAppClient.SenderId, response);
                 }
                 else if (message.Type == BeaconMessageType.operation_request)
                 {
@@ -86,7 +85,7 @@ namespace Beacon.Sdk.Sample.Console
                             senderId: walletClient.SenderId,
                             transactionHash: transactionHash);
 
-                        await walletClient.SendResponseAsync(dappClient.SenderId, response);
+                        await walletClient.SendResponseAsync(receiverId: dAppClient.SenderId, response);
                     }
                     catch (Exception exception)
                     {

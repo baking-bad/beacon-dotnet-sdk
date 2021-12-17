@@ -18,7 +18,7 @@ namespace Beacon.Sdk.Core.Domain
             _jsonSerializerService = jsonSerializerService;
         }
 
-        public (AcknowledgeResponse, IBeaconRequest) Handle(string message, string senderId)
+        public (AcknowledgeResponse, BaseBeaconMessage) Handle(string message, string senderId)
         {
             BaseBeaconMessage baseBeaconMessage = _jsonSerializerService.Deserialize<BaseBeaconMessage>(message);
             var ack = new AcknowledgeResponse(baseBeaconMessage.Id, senderId);
@@ -31,7 +31,7 @@ namespace Beacon.Sdk.Core.Domain
             };
         }
 
-        private IBeaconRequest HandlePermissionRequest(string message)
+        private BaseBeaconMessage HandlePermissionRequest(string message)
         {
             PermissionRequest request = _jsonSerializerService.Deserialize<PermissionRequest>(message);
 
@@ -40,7 +40,7 @@ namespace Beacon.Sdk.Core.Domain
             return request;
         }
 
-        private IBeaconRequest HandleOperationRequest(string message)
+        private BaseBeaconMessage HandleOperationRequest(string message)
         {
             OperationRequest request = _jsonSerializerService.Deserialize<OperationRequest>(message);
 
@@ -50,9 +50,3 @@ namespace Beacon.Sdk.Core.Domain
         }
     }
 }
-
-// var options = new JsonSerializerOptions {MaxDepth = 100_000};
-
-// var op = (Operation)DJson.Read($"{directory}/unsigned.json", options);
-// dynamic? k = DJson.Parse(message, options);
-// var d = (OperationContent) DJson.Parse(message, options);

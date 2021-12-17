@@ -1,10 +1,9 @@
 namespace Beacon.Sdk.Beacon.Operation
 {
     using System.Collections.Generic;
-    using Core.Domain;
     using Permission;
 
-    public record OperationRequest : BaseBeaconMessage, IBeaconRequest
+    public record OperationRequest : BaseBeaconMessage
     {
         public OperationRequest(
             BeaconMessageType type,

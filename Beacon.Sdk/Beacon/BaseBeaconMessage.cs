@@ -2,7 +2,8 @@ namespace Beacon.Sdk.Beacon
 {
     public record BaseBeaconMessage
     {
-        protected BaseBeaconMessage(BeaconMessageType type, string version, string id, string senderId)
+        // public for json deserialize
+        public BaseBeaconMessage(BeaconMessageType type, string version, string id, string senderId)
         {
             Type = type;
             Version = version;

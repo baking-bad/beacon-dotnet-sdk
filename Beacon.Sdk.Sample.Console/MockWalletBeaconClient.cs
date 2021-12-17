@@ -3,15 +3,22 @@ namespace Beacon.Sdk.Sample.Console
     using System;
     using System.Threading.Tasks;
     using Beacon;
-    using Core.Domain;
     using Utils;
 
-    public class MockRequest : IBeaconRequest
+    public record MockRequest : BaseBeaconMessage
     {
-        public string Id { get; }
-        public string SenderId { get; }
-        public string Version { get; }
-        public BeaconMessageType Type { get; }
+        // public string Id { get; }
+        // public string SenderId { get; }
+        // public string Version { get; }
+        // public BeaconMessageType Type { get; }
+        public MockRequest(BeaconMessageType type, string version, string id, string senderId) : base(type, version, id,
+            senderId)
+        {
+        }
+
+        protected MockRequest(BeaconMessageType type, string id, string senderId) : base(type, id, senderId)
+        {
+        }
     }
 
     public class MockWalletBeaconClient : IWalletBeaconClient
@@ -19,6 +26,8 @@ namespace Beacon.Sdk.Sample.Console
         public HexString BeaconId { get; }
 
         public string AppName { get; }
+
+        public string SenderId { get; }
 
         public bool LoggedIn { get; }
 
@@ -30,7 +39,7 @@ namespace Beacon.Sdk.Sample.Console
 
         public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
 
-        public Task SendResponseAsync(string receiverId, IBeaconResponse response) =>
+        public Task SendResponseAsync(string receiverId, BaseBeaconMessage response) =>
             throw new NotImplementedException();
 
         public Task InitAsync()
@@ -45,7 +54,7 @@ namespace Beacon.Sdk.Sample.Console
             await Task.Delay(100);
 
             // var eventArgs = new BeaconMessageEventArgs("", new BeaconBaseMessage(BeaconMessageType.acknowledge, "2", "id", "senderId"));
-            OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs("", new MockRequest()));
+            // OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs("", new MockRequest()));
 
             await Task.CompletedTask;
         }

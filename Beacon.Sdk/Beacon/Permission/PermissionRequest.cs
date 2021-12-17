@@ -3,9 +3,8 @@
 namespace Beacon.Sdk.Beacon.Permission
 {
     using System.Collections.Generic;
-    using Core.Domain;
 
-    public record PermissionRequest : BaseBeaconMessage, IBeaconRequest
+    public record PermissionRequest : BaseBeaconMessage
     {
         public PermissionRequest(
             BeaconMessageType type,

@@ -19,20 +19,19 @@ namespace Beacon.Sdk.Core.Domain
             _accountService = accountService;
         }
 
-        public async Task<bool> HasPermission(IBeaconRequest beaconRequest) =>
+        public async Task<bool> HasPermission(BaseBeaconMessage beaconRequest) =>
             beaconRequest.Type switch
             {
                 BeaconMessageType.permission_request => true,
                 BeaconMessageType.broadcast_request => true,
-                BeaconMessageType.operation_request => await HandleOperationRequest(beaconRequest),
+                BeaconMessageType.operation_request => await HandleOperationRequest(beaconRequest as OperationRequest),
                 _ => false
             };
 
-        private async Task<bool> HandleOperationRequest(IBeaconRequest request)
+        private async Task<bool> HandleOperationRequest(OperationRequest request)
         {
-            var operationRequest = request as OperationRequest;
             string accountIdentifier =
-                _accountService.GetAccountIdentifier(operationRequest!.SourceAddress, operationRequest.Network);
+                _accountService.GetAccountIdentifier(request.SourceAddress, request.Network);
 
             PermissionInfo? permissionInfo = await _permissionInfoRepository.TryRead(accountIdentifier);
 

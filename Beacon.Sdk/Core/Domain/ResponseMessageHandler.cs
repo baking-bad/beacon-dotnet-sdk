@@ -30,7 +30,7 @@ namespace Beacon.Sdk.Core.Domain
             _permissionInfoFactory = permissionInfoFactory;
         }
 
-        public string Handle(IBeaconResponse response, string receiverId) =>
+        public string Handle(BaseBeaconMessage response, string receiverId) =>
             response.Type switch
             {
                 BeaconMessageType.acknowledge => HandleAcknowledge(response as AcknowledgeResponse),
@@ -42,19 +42,10 @@ namespace Beacon.Sdk.Core.Domain
                 _ => throw new ArgumentException("Invalid beacon message type")
             };
 
-        private string HandleAcknowledge(AcknowledgeResponse? response)
+        private string HandleAcknowledge(AcknowledgeResponse response) => _jsonSerializerService.Serialize(response);
+
+        private string HandlePermissionResponse(string receiverId, PermissionResponse response)
         {
-            if (response == null)
-                throw new InvalidOperationException();
-
-            return _jsonSerializerService.Serialize(response);
-        }
-
-        private string HandlePermissionResponse(string receiverId, PermissionResponse? response)
-        {
-            if (response == null)
-                throw new InvalidOperationException();
-
             AppMetadata? receiverAppMetadata = _appMetadataRepository.TryRead(receiverId).Result;
 
             if (receiverAppMetadata == null)
@@ -72,19 +63,11 @@ namespace Beacon.Sdk.Core.Domain
             return _jsonSerializerService.Serialize(response);
         }
 
-        private string HandleOperationResponse(OperationResponse? response)
+        private string HandleOperationResponse(OperationResponse response) =>
+            _jsonSerializerService.Serialize(response);
+
+        private string HandleError(BaseBeaconError response)
         {
-            if (response == null)
-                throw new InvalidOperationException();
-
-            return _jsonSerializerService.Serialize(response);
-        }
-
-        private string HandleError(BaseBeaconError? response)
-        {
-            if (response == null)
-                throw new InvalidOperationException();
-
             if (response!.ErrorType == BeaconErrorType.ABORTED_ERROR)
             {
                 BeaconAbortedError beaconAbortedError =

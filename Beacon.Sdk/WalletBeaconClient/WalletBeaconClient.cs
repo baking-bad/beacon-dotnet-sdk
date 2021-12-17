@@ -96,12 +96,12 @@ namespace Beacon.Sdk.WalletBeaconClient
             Connected = _p2PCommunicationService.Syncing;
         }
 
-        public async Task SendResponseAsync(string receiverId, IBeaconResponse beaconResponse)
+        public async Task SendResponseAsync(string receiverId, BaseBeaconMessage response)
         {
             Peer peer = _peerRepository.TryRead(receiverId).Result
                         ?? throw new NullReferenceException(nameof(Peer));
 
-            string message = _responseMessageHandler.Handle(beaconResponse, receiverId);
+            string message = _responseMessageHandler.Handle(response, receiverId);
 
             await _p2PCommunicationService.SendMessageAsync(peer, message);
         }
@@ -117,7 +117,7 @@ namespace Beacon.Sdk.WalletBeaconClient
 
         private async Task HandleMessage(string message)
         {
-            (AcknowledgeResponse ack, IBeaconRequest requestMessage) =
+            (AcknowledgeResponse ack, BaseBeaconMessage requestMessage) =
                 _requestMessageHandler.Handle(message, SenderId);
 
             if (requestMessage.Version != "1")
