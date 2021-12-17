@@ -1,6 +1,6 @@
 namespace Beacon.Sdk.Beacon
 {
-    public class BaseBeaconMessage
+    public record BaseBeaconMessage
     {
         protected BaseBeaconMessage(BeaconMessageType type, string version, string id, string senderId)
         {
@@ -10,11 +10,12 @@ namespace Beacon.Sdk.Beacon
             SenderId = senderId;
         }
 
-        protected BaseBeaconMessage(BeaconMessageType type, string id)
+        protected BaseBeaconMessage(BeaconMessageType type, string id, string senderId)
         {
             Type = type;
             Version = Constants.MessageVersion;
             Id = id;
+            SenderId = senderId;
         }
 
         /// <summary>
@@ -36,6 +37,6 @@ namespace Beacon.Sdk.Beacon
         /// <summary>
         ///     Id of the sender. This is used to identify the sender of the message
         /// </summary>
-        public string SenderId { get; set; } = default!;
+        public string SenderId { get; }
     }
 }

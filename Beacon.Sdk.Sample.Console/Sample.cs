@@ -11,7 +11,6 @@ namespace Beacon.Sdk.Sample.Console
     using System.Threading.Tasks;
     using Base58Check;
     using Beacon;
-    using Beacon.Error;
     using Beacon.Operation;
     using Beacon.Permission;
     using Core.Domain;
@@ -47,30 +46,32 @@ namespace Beacon.Sdk.Sample.Console
                 DatabaseConnectionString = "Filename=test1.db; Mode=Exclusive"
             };
 
-            IWalletBeaconClient client = factory.Create(options, new SerilogLoggerFactory());
+            IWalletBeaconClient walletClient = factory.Create(options, new SerilogLoggerFactory());
 
-            client.OnBeaconMessageReceived += async (sender, args) =>
+            walletClient.OnBeaconMessageReceived += async (sender, dappClient) =>
             {
-                IBeaconRequest message = args.Request;
+                IBeaconRequest message = dappClient.Request;
 
                 if (message.Type == BeaconMessageType.permission_request)
                 {
                     var request = message as PermissionRequest;
 
-                    // var network = new Network(
-                    //     Type: NetworkType.hangzhounet,
-                    //     Name: "Hangzhounet",
-                    //     RpcUrl: "https://hangzhounet.tezblock.io");
-                    //
-                    // var response = new PermissionResponse(
-                    //     id: request!.Id,
-                    //     network: network,
-                    //     scopes: request.Scopes,
-                    //     publicKey: walletKey.PubKey.ToString());
+                    var network = new Network(
+                        Type: NetworkType.hangzhounet,
+                        Name: "Hangzhounet",
+                        RpcUrl: "https://hangzhounet.tezblock.io");
 
-                    var response = new BeaconAbortedError(message.Id);
+                    var response = new PermissionResponse(
+                        id: request!.Id,
+                        senderId: walletClient.SenderId,
+                        network: network,
+                        scopes: request.Scopes,
+                        publicKey: walletKey.PubKey.ToString(),
+                        appMetadata: walletClient.Metadata);
 
-                    await client.SendResponseAsync(args.SenderId, response);
+                    // var response = new BeaconAbortedError(message.Id, walletClient.SenderId);
+
+                    await walletClient.SendResponseAsync(dappClient.SenderId, response);
                 }
                 else if (message.Type == BeaconMessageType.operation_request)
                 {
@@ -82,9 +83,10 @@ namespace Beacon.Sdk.Sample.Console
 
                         var response = new OperationResponse(
                             id: request!.Id,
+                            senderId: walletClient.SenderId,
                             transactionHash: transactionHash);
 
-                        await client.SendResponseAsync(args.SenderId, response);
+                        await walletClient.SendResponseAsync(dappClient.SenderId, response);
                     }
                     catch (Exception exception)
                     {
@@ -95,22 +97,22 @@ namespace Beacon.Sdk.Sample.Console
                 }
             };
 
-            await client.InitAsync();
-            client.Connect();
+            await walletClient.InitAsync();
+            walletClient.Connect();
 
-            Console.WriteLine($"client.LoggedIn: {client.LoggedIn}");
-            Console.WriteLine($"client.Connected: {client.Connected}");
+            Console.WriteLine($"client.LoggedIn: {walletClient.LoggedIn}");
+            Console.WriteLine($"client.Connected: {walletClient.Connected}");
 
             byte[] decodedBytes = Base58CheckEncoding.Decode(QrCode);
             string message = Encoding.Default.GetString(decodedBytes);
 
             P2PPairingRequest pairingRequest = JsonConvert.DeserializeObject<P2PPairingRequest>(message);
 
-            await client.AddPeerAsync(pairingRequest!);
+            await walletClient.AddPeerAsync(pairingRequest!);
 
             Console.ReadLine();
 
-            client.Disconnect();
+            walletClient.Disconnect();
         }
 
         private static async Task<string> MakeTransactionAsync(Key key)

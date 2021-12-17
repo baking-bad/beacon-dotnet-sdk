@@ -3,15 +3,18 @@ namespace Beacon.Sdk.Beacon.Permission
     using System.Collections.Generic;
     using Core.Domain;
 
-    public class PermissionResponse : BaseBeaconMessage, IBeaconResponse
+    public record PermissionResponse : BaseBeaconMessage, IBeaconResponse
     {
         public PermissionResponse(
             string id,
+            string senderId,
+            AppMetadata appMetadata,
             Network network,
             List<PermissionScope> scopes,
             string publicKey)
-            : base(BeaconMessageType.permission_response, id)
+            : base(BeaconMessageType.permission_response, id, senderId)
         {
+            AppMetadata = appMetadata;
             Network = network;
             Scopes = scopes;
             PublicKey = publicKey;
@@ -20,7 +23,7 @@ namespace Beacon.Sdk.Beacon.Permission
         /// <summary>
         ///     Some additional information about the Wallet
         /// </summary>
-        public AppMetadata AppMetadata { get; set; }
+        public AppMetadata AppMetadata { get; }
 
         /// <summary>
         ///     Network on which the permissions have been granted

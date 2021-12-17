@@ -7,6 +7,8 @@ namespace Beacon.Sdk
 
     public interface IWalletBeaconClient
     {
+        string SenderId { get; }
+
         bool LoggedIn { get; }
 
         bool Connected { get; }

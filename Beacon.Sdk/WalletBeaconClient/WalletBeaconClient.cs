@@ -101,7 +101,7 @@ namespace Beacon.Sdk.WalletBeaconClient
             Peer peer = _peerRepository.TryRead(receiverId).Result
                         ?? throw new NullReferenceException(nameof(Peer));
 
-            string message = _responseMessageHandler.Handle(beaconResponse, Metadata, SenderId, receiverId);
+            string message = _responseMessageHandler.Handle(beaconResponse, receiverId);
 
             await _p2PCommunicationService.SendMessageAsync(peer, message);
         }

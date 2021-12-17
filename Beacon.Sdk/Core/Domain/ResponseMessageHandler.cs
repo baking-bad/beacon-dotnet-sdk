@@ -30,63 +30,67 @@ namespace Beacon.Sdk.Core.Domain
             _permissionInfoFactory = permissionInfoFactory;
         }
 
-        public string Handle(IBeaconResponse response, AppMetadata ownAppMetadata, string senderId,
-            string receiverId) =>
+        public string Handle(IBeaconResponse response, string receiverId) =>
             response.Type switch
             {
-                BeaconMessageType.acknowledge => HandleAcknowledge(response),
-                BeaconMessageType.permission_response => HandlePermissionResponse(response, ownAppMetadata, senderId,
-                    receiverId),
-                BeaconMessageType.operation_response => HandleOperationResponse(response, senderId),
-                BeaconMessageType.error => HandleError(response, senderId),
-                _ => throw new Exception("Invalid beacon message type")
+                BeaconMessageType.acknowledge => HandleAcknowledge(response as AcknowledgeResponse),
+                BeaconMessageType.permission_response => HandlePermissionResponse(receiverId,
+                    response as PermissionResponse),
+                BeaconMessageType.operation_response => HandleOperationResponse(response as OperationResponse),
+                BeaconMessageType.error => HandleError(response as BaseBeaconError),
+
+                _ => throw new ArgumentException("Invalid beacon message type")
             };
 
-        private string HandleAcknowledge(IBeaconResponse response)
+        private string HandleAcknowledge(AcknowledgeResponse? response)
         {
-            var ack = response as AcknowledgeResponse;
+            if (response == null)
+                throw new InvalidOperationException();
 
-            return _jsonSerializerService.Serialize(ack!);
+            return _jsonSerializerService.Serialize(response);
         }
 
-        private string HandlePermissionResponse(IBeaconResponse beaconResponse, AppMetadata ownAppMetadata,
-            string senderId,
-            string receiverId)
+        private string HandlePermissionResponse(string receiverId, PermissionResponse? response)
         {
-            var response = beaconResponse as PermissionResponse;
-            response!.SenderId = senderId;
-            response.AppMetadata = ownAppMetadata;
+            if (response == null)
+                throw new InvalidOperationException();
 
-            AppMetadata receiverAppMetadata = _appMetadataRepository.TryRead(receiverId).Result ??
-                                              throw new Exception("AppMetadata not found");
+            AppMetadata? receiverAppMetadata = _appMetadataRepository.TryRead(receiverId).Result;
 
-            PermissionInfo info = _permissionInfoFactory.Create(receiverId, receiverAppMetadata,
+            if (receiverAppMetadata == null)
+                throw new Exception("AppMetadata not found");
+
+            PermissionInfo info = _permissionInfoFactory.Create(
+                receiverId,
+                receiverAppMetadata,
                 PubKey.FromBase58(response.PublicKey),
-                response.Network, response.Scopes);
+                response.Network,
+                response.Scopes);
 
             info = _permissionInfoRepository.Create(info).Result;
 
             return _jsonSerializerService.Serialize(response);
         }
 
-        private string HandleOperationResponse(IBeaconResponse beaconResponse, string senderId)
+        private string HandleOperationResponse(OperationResponse? response)
         {
-            var response = beaconResponse as OperationResponse;
-            response!.SenderId = senderId;
+            if (response == null)
+                throw new InvalidOperationException();
 
             return _jsonSerializerService.Serialize(response);
         }
 
-        private string HandleError(IBeaconResponse response, string senderId)
+        private string HandleError(BaseBeaconError? response)
         {
-            var error = response as BaseBeaconError;
+            if (response == null)
+                throw new InvalidOperationException();
 
-            if (error!.ErrorType == BeaconErrorType.ABORTED_ERROR)
+            if (response!.ErrorType == BeaconErrorType.ABORTED_ERROR)
             {
-                var abortedError = response as BeaconAbortedError;
-                abortedError!.SenderId = senderId;
+                BeaconAbortedError beaconAbortedError =
+                    response as BeaconAbortedError ?? throw new InvalidOperationException();
 
-                return _jsonSerializerService.Serialize(abortedError);
+                return _jsonSerializerService.Serialize(beaconAbortedError);
             }
 
             throw new ArgumentException("error.ErrorType");

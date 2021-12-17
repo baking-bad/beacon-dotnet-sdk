@@ -1,8 +1,8 @@
 namespace Beacon.Sdk.Beacon.Error
 {
-    public class BeaconAbortedError : BaseBeaconError
+    public record BeaconAbortedError : BaseBeaconError
     {
-        public BeaconAbortedError(string id) : base(id, BeaconErrorType.ABORTED_ERROR)
+        public BeaconAbortedError(string id, string senderId) : base(id, senderId, BeaconErrorType.ABORTED_ERROR)
         {
         }
     }

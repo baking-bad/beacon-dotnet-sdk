@@ -40,7 +40,7 @@ namespace Beacon.Sdk.WalletBeaconClient
             }
         }
 
-        protected string SenderId => Base58.Convert(PeerFactory.Hash(BeaconId.ToByteArray(), 5));
+        public string SenderId => Base58.Convert(PeerFactory.Hash(BeaconId.ToByteArray(), 5));
 
         public IAppMetadataRepository AppMetadataRepository { get; }
 

@@ -2,10 +2,10 @@ namespace Beacon.Sdk.Beacon.Error
 {
     using Core.Domain;
 
-    public class BaseBeaconError : BaseBeaconMessage, IBeaconResponse
+    public record BaseBeaconError : BaseBeaconMessage, IBeaconResponse
     {
-        protected BaseBeaconError(string id, BeaconErrorType errorType)
-            : base(BeaconMessageType.error, id)
+        protected BaseBeaconError(string id, string senderId, BeaconErrorType errorType)
+            : base(BeaconMessageType.error, id, senderId)
         {
             ErrorType = errorType;
         }

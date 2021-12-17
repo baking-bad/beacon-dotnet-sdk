@@ -4,7 +4,7 @@ namespace Beacon.Sdk.Beacon.Operation
     using Core.Domain;
     using Permission;
 
-    public class OperationRequest : BaseBeaconMessage, IBeaconRequest
+    public record OperationRequest : BaseBeaconMessage, IBeaconRequest
     {
         public OperationRequest(
             BeaconMessageType type,
