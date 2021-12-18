@@ -11,6 +11,7 @@ namespace Beacon.Sdk.Sample.Console
     using System.Threading.Tasks;
     using Base58Check;
     using Beacon;
+    using Beacon.Error;
     using Beacon.Operation;
     using Beacon.Permission;
     using Netezos.Forging;
@@ -24,11 +25,12 @@ namespace Beacon.Sdk.Sample.Console
     public class Sample
     {
         private const string QrCode =
-            "BSdNU2tFbvstNHJTvvHbKBzDTC1sPBySNYHr5Ho4whm478TEpuzP1PkG1hpwd9yejWTiKL17nX2p51vWFHzeoQRBdocxXiKtPHh4LcDP2mNJLJdjtcgDW8Jju8M4HMGHtHyezsDR6gZJfbL7sTGo7USsVU3G5Ve18r2N5aNLhvP56ATtZqKsrLGGVixFPrD9b5C8EtSYHM7AFATuRvwhjBLtJRRm3QVdPtVdazDocotDcmE7TtFyk6j4WQjgLHTBqyzBZB2HCAD3S335AicLahNz6S7MYxYvWBDhXChEeYKTKjw2BhYEuZ3kpGQAV9QXTvsHRuj2";
+            "BSdNU2tFbvqMEHQk8NN847VqF3dWV364n25KmmBWeExZJH3F1mUo4EbcZ8hC2VojBQ6iaX6x7p9qvfJt8WCLSpu4gSt7pM1AAEK6ynHSYMtPYGJs3H6VxoGKPvk4MmgnSrVZvwSoTFCqS7AxexYLAfZpvYw2qgwZrHmfnVMzvNds46PDTjoxnF7kBjbWsxnCTArWFSxpaDXFxFzLWzN2gRoVRRzJnjEWPByBadYpDWk5EaB8ZH5tWH7baUwrNLA6ZA47898gWQeKCZUyh4nAk4tuZhNMXbQXnGnZLs2Ac5Ny7fXdk52Z3t9sTbVM46rRBNHBrinJ";
 
         public async Task Run()
         {
             const string path = "test1.db";
+            // const string path = "prod_test.db";
             File.Delete(path);
 
             // Use existing key
@@ -42,10 +44,12 @@ namespace Beacon.Sdk.Sample.Console
                 AppUrl = "", //string?
                 IconUrl = "", // string?
                 KnownRelayServers = new[] {"beacon-node-0.papers.tech:8448"},
-                DatabaseConnectionString = "Filename=test1.db; Mode=Exclusive"
+                // see https://github.com/mbdavid/LiteDB/issues/787
+                DatabaseConnectionString = $"Filename={path}; Mode=Exclusive", // mac m1
+                // DatabaseConnectionString = $"Filename={path}"
             };
 
-            IWalletBeaconClient walletClient = factory.Create(options, new SerilogLoggerFactory());
+            IWalletBeaconClient walletClient = factory.Create(options);
 
             walletClient.OnBeaconMessageReceived += async (_, dAppClient) =>
             {
@@ -54,11 +58,13 @@ namespace Beacon.Sdk.Sample.Console
                 if (message.Type == BeaconMessageType.permission_request)
                 {
                     var request = message as PermissionRequest;
-
-                    var network = new Network(
-                        type: NetworkType.hangzhounet,
-                        name: "Hangzhounet",
-                        rpcUrl: "https://hangzhounet.tezblock.io");
+                    
+                    var network = new Network 
+                    {
+                        Type = NetworkType.hangzhounet,
+                        Name = "Hangzhounet",
+                        RpcUrl = "https://hangzhounet.tezblock.io"
+                    };
 
                     var response = new PermissionResponse(
                         id: request!.Id,
@@ -75,24 +81,15 @@ namespace Beacon.Sdk.Sample.Console
                 else if (message.Type == BeaconMessageType.operation_request)
                 {
                     var request = message as OperationRequest;
+                    
+                    string transactionHash = await MakeTransactionAsync(walletKey);
 
-                    try
-                    {
-                        string transactionHash = await MakeTransactionAsync(walletKey);
+                    var response = new OperationResponse(
+                        id: request!.Id,
+                        senderId: walletClient.SenderId,
+                        transactionHash: transactionHash);
 
-                        var response = new OperationResponse(
-                            id: request!.Id,
-                            senderId: walletClient.SenderId,
-                            transactionHash: transactionHash);
-
-                        await walletClient.SendResponseAsync(receiverId: dAppClient.SenderId, response);
-                    }
-                    catch (Exception exception)
-                    {
-                        Console.WriteLine(exception.Message);
-
-                        throw;
-                    }
+                    await walletClient.SendResponseAsync(receiverId: dAppClient.SenderId, response);
                 }
             };
 
@@ -104,7 +101,7 @@ namespace Beacon.Sdk.Sample.Console
 
             byte[] decodedBytes = Base58CheckEncoding.Decode(QrCode);
             string message = Encoding.Default.GetString(decodedBytes);
-
+            
             P2PPairingRequest pairingRequest = JsonConvert.DeserializeObject<P2PPairingRequest>(message);
 
             await walletClient.AddPeerAsync(pairingRequest!);
