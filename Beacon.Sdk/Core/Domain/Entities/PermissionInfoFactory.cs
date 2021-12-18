@@ -4,6 +4,7 @@ namespace Beacon.Sdk.Core.Domain.Entities
     using System.Collections.Generic;
     using Beacon;
     using Beacon.Permission;
+    using Netezos.Keys;
     using Services;
 
     public class PermissionInfoFactory
@@ -15,10 +16,10 @@ namespace Beacon.Sdk.Core.Domain.Entities
             _accountService = accountService;
         }
 
-        public PermissionInfo Create(string receiverId, AppMetadata metadata, string publicKey, Network network,
+        public PermissionInfo Create(string receiverId, AppMetadata metadata, PubKey publicKey, Network network,
             List<PermissionScope> scopes)
         {
-            string address = _accountService.GetAddressFromPublicKey(publicKey);
+            string address = publicKey.Address;
             string accountId = _accountService.GetAccountIdentifier(address, network);
 
             return new PermissionInfo
@@ -28,7 +29,7 @@ namespace Beacon.Sdk.Core.Domain.Entities
                 AppMetadata = metadata,
                 Website = "",
                 Address = address,
-                PublicKey = publicKey,
+                PublicKey = publicKey.ToString(),
                 Network = network,
                 Scopes = scopes,
                 ConnectedAt = DateTime.UtcNow

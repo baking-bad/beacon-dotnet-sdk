@@ -18,20 +18,20 @@ namespace Beacon.Sdk.Core.Domain
             _jsonSerializerService = jsonSerializerService;
         }
 
-        public (AcknowledgeResponse, IBeaconRequest) Handle(string message, string senderId)
+        public (AcknowledgeResponse, BaseBeaconMessage) Handle(string message, string senderId)
         {
-            BeaconBaseMessage beaconMessage = _jsonSerializerService.Deserialize<BeaconBaseMessage>(message);
-            var ack = new AcknowledgeResponse(beaconMessage.Id, senderId);
+            BaseBeaconMessage baseBeaconMessage = _jsonSerializerService.Deserialize<BaseBeaconMessage>(message);
+            var ack = new AcknowledgeResponse(baseBeaconMessage.Id, senderId);
 
-            return beaconMessage.Type switch
+            return baseBeaconMessage.Type switch
             {
                 BeaconMessageType.permission_request => (ack, HandlePermissionRequest(message)),
                 BeaconMessageType.operation_request => (ack, HandleOperationRequest(message)),
-                _ => (ack, beaconMessage)
+                _ => throw new Exception("Unknown beaconMessage.Type.")
             };
         }
 
-        public IBeaconRequest HandlePermissionRequest(string message)
+        private BaseBeaconMessage HandlePermissionRequest(string message)
         {
             PermissionRequest request = _jsonSerializerService.Deserialize<PermissionRequest>(message);
 
@@ -40,26 +40,13 @@ namespace Beacon.Sdk.Core.Domain
             return request;
         }
 
-        public IBeaconRequest HandleOperationRequest(string message)
+        private BaseBeaconMessage HandleOperationRequest(string message)
         {
-            try
-            {
-                OperationRequest request = _jsonSerializerService.Deserialize<OperationRequest>(message);
+            OperationRequest request = _jsonSerializerService.Deserialize<OperationRequest>(message);
 
-                // _appMetadataRepository.TryRead(beaconMessage.SenderId).Result;
+            _ = _appMetadataRepository.TryRead(request.SenderId).Result;
 
-                return request;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-            // OperationRequest request = _jsonSerializerService.Deserialize<OperationRequest>(message);
-            //
-            // // _appMetadataRepository.TryRead(beaconMessage.SenderId).Result;
-            //
-            // return request;
+            return request;
         }
     }
 }

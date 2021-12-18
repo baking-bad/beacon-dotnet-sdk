@@ -33,10 +33,10 @@ namespace Beacon.Sdk.Core.Domain.Entities.P2P
             _keyPairService = keyPairService;
         }
 
-        public async Task<P2PLoginRequest> Create()
+        public async Task<P2PLoginRequest> Create(string[] knownRelayServers)
         {
             KeyPair keyPair = _keyPairService.KeyPair;
-            string relayServer = await GetRelayServer(keyPair.PublicKey);
+            string relayServer = await GetRelayServer(keyPair.PublicKey, knownRelayServers);
 
             byte[] loginDigest = _cryptographyService.GenerateLoginDigest();
             string hexSignature = _cryptographyService.GenerateHexSignature(loginDigest, keyPair.PrivateKey);
@@ -58,18 +58,18 @@ namespace Beacon.Sdk.Core.Domain.Entities.P2P
             return (int) Math.Floor((decimal) (sum % modulus));
         }
 
-        private async Task<string> GetRelayServer(byte[] publicKey)
+        private async Task<string> GetRelayServer(byte[] publicKey, string[] knownRelayServers)
         {
             if (_sdkStorage.MatrixSelectedNode is {Length: > 0})
                 return _sdkStorage.MatrixSelectedNode;
 
-            int startIndex = PublicKeyToInt(publicKey, Constants.KnownRelayServers.Length);
+            int startIndex = PublicKeyToInt(publicKey, knownRelayServers.Length);
             var offset = 0;
 
-            while (offset < Constants.KnownRelayServers.Length)
+            while (offset < knownRelayServers.Length)
             {
-                int index = (startIndex + offset) % Constants.KnownRelayServers.Length;
-                string relayServer = Constants.KnownRelayServers[index];
+                int index = (startIndex + offset) % knownRelayServers.Length;
+                string relayServer = knownRelayServers[index];
 
                 try
                 {

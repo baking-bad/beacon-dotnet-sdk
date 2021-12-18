@@ -1,41 +1,42 @@
 namespace Beacon.Sdk.Beacon.Permission
 {
     using System.Collections.Generic;
-    using Core.Domain;
 
-    public record PermissionResponse(
-            string Id,
-            string SenderId,
-            AppMetadata AppMetadata,
-            Network Network,
-            List<PermissionScope> Scopes,
-            string PublicKey)
-        : BeaconBaseMessage(BeaconMessageType.permission_response, Constants.MessageVersion, Id, SenderId),
-            IBeaconResponse
+    public record PermissionResponse : BaseBeaconMessage
     {
-        public PermissionResponse(string id, Network network, List<PermissionScope> scopes, string publicKey)
-            : this(id, string.Empty, new AppMetadata(), network, scopes, publicKey)
+        public PermissionResponse(
+            string id,
+            string senderId,
+            AppMetadata appMetadata,
+            Network network,
+            List<PermissionScope> scopes,
+            string publicKey)
+            : base(BeaconMessageType.permission_response, id, senderId)
         {
+            AppMetadata = appMetadata;
+            Network = network;
+            Scopes = scopes;
+            PublicKey = publicKey;
         }
 
         /// <summary>
         ///     Some additional information about the Wallet
         /// </summary>
-        public AppMetadata AppMetadata { get; } = AppMetadata;
+        public AppMetadata AppMetadata { get; }
 
         /// <summary>
         ///     Network on which the permissions have been granted
         /// </summary>
-        public Network Network { get; } = Network;
+        public Network Network { get; }
 
         /// <summary>
         ///     Permissions that have been granted for this specific address / account
         /// </summary>
-        public List<PermissionScope> Scopes { get; } = Scopes;
+        public List<PermissionScope> Scopes { get; }
 
         /// <summary>
         ///     Public Key, because it can be used to verify signatures
         /// </summary>
-        public string PublicKey { get; } = PublicKey;
+        public string PublicKey { get; }
     }
 }

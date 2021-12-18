@@ -3,18 +3,19 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
+        <LangVersion>9</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Base58Check" Version="0.2.0" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
-        <PackageReference Include="Serilog" Version="2.11.0-dev-01371" />
-        <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
-        <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1-dev-00879" />
+        <PackageReference Include="Base58Check" Version="0.2.0"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0"/>
+        <PackageReference Include="Serilog" Version="2.11.0-dev-01371"/>
+        <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0"/>
+        <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1-dev-00879"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Beacon.Sdk\Beacon.Sdk.csproj" />
+        <ProjectReference Include="..\Beacon.Sdk\Beacon.Sdk.csproj"/>
     </ItemGroup>
 
 </Project>

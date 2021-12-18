@@ -9,9 +9,12 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
 
     public interface IP2PCommunicationService
     {
+        bool LoggedIn { get; }
+
+        bool Syncing { get; }
         event TaskEventHandler<P2PMessageEventArgs> OnP2PMessagesReceived;
 
-        Task LoginAsync();
+        Task LoginAsync(string[] knownRelayServers);
 
         void Start();
 

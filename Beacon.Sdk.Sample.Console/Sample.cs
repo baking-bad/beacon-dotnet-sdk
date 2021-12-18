@@ -1,103 +1,146 @@
 // ReSharper disable ArgumentsStyleNamedExpression
+// ReSharper disable ArgumentsStyleOther
+// ReSharper disable ArgumentsStyleStringLiteral
 
 namespace Beacon.Sdk.Sample.Console
 {
     using System;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
     using Base58Check;
     using Beacon;
+    using Beacon.Error;
     using Beacon.Operation;
     using Beacon.Permission;
-    using Core.Domain;
-    using Core.Domain.Services;
-    using Core.Infrastructure.Cryptography;
-    using Core.Infrastructure.Repositories;
-    using Microsoft.Extensions.Logging;
+    using Netezos.Forging;
+    using Netezos.Forging.Models;
+    using Netezos.Keys;
+    using Netezos.Rpc;
     using Newtonsoft.Json;
     using Serilog.Extensions.Logging;
-    using WalletClient;
+    using WalletBeaconClient;
 
     public class Sample
     {
         private const string QrCode =
-            "BSdNU2tFbvrGQoe9zMh8XXYEf3geBM237D9WVrsCxPSPctGMfCznJByJyoinpNcU6AQWasVADB7WwWBuS8kJtzHASXGF8n69A7xLvcU2HiR7ZqZx6xQUdyVkGFVTWYgd9HKwDW2bfr3veddXPqfkc2LtxK5jUcMKebDsGRM19TdxE1gkpujDf19vpu1syAVkdzSHqxAJMwnTiMYQ22UusCq6YctJkwFpiPyoms3fSCv298ntN5A9QkHxbNVDLZqnB3quKhUDW8sWECtVrxWEuSDTosmUaHwWefQQ7pDprj1gX44Kt3qoGeRne4FVkeFqQnK8hER5";
+            "BSdNU2tFbvqMEHQk8NN847VqF3dWV364n25KmmBWeExZJH3F1mUo4EbcZ8hC2VojBQ6iaX6x7p9qvfJt8WCLSpu4gSt7pM1AAEK6ynHSYMtPYGJs3H6VxoGKPvk4MmgnSrVZvwSoTFCqS7AxexYLAfZpvYw2qgwZrHmfnVMzvNds46PDTjoxnF7kBjbWsxnCTArWFSxpaDXFxFzLWzN2gRoVRRzJnjEWPByBadYpDWk5EaB8ZH5tWH7baUwrNLA6ZA47898gWQeKCZUyh4nAk4tuZhNMXbQXnGnZLs2Ac5Ny7fXdk52Z3t9sTbVM46rRBNHBrinJ";
 
         public async Task Run()
         {
             const string path = "test1.db";
+            // const string path = "prod_test.db";
             File.Delete(path);
 
-            var factory = new WalletClientFactory();
+            // Use existing key
+            var walletKey = Key.FromBase58("edsk35n2ruX2r92SdtWzP87mEUqxWSwM14hG6GRhEvU6kfdH8Ut6SW");
+
+            var factory = new WalletBeaconClientFactory();
 
             var options = new BeaconOptions
             {
                 AppName = "Atomex Mobile",
                 AppUrl = "", //string?
-                IconUrl = "" // string?
+                IconUrl = "", // string?
+                KnownRelayServers = new[] {"beacon-node-0.papers.tech:8448"},
+                // see https://github.com/mbdavid/LiteDB/issues/787
+                DatabaseConnectionString = $"Filename={path}; Mode=Exclusive", // mac m1
+                // DatabaseConnectionString = $"Filename={path}"
             };
 
-            IWalletClient client = factory.Create(options, new SerilogLoggerFactory());
+            IWalletBeaconClient walletClient = factory.Create(options);
 
-            client.OnBeaconMessageReceived += (sender, args) =>
+            walletClient.OnBeaconMessageReceived += async (_, dAppClient) =>
             {
-                IBeaconRequest message = args.Request;
+                BaseBeaconMessage message = dAppClient.Request;
 
                 if (message.Type == BeaconMessageType.permission_request)
                 {
                     var request = message as PermissionRequest;
                     
+                    var network = new Network 
+                    {
+                        Type = NetworkType.hangzhounet,
+                        Name = "Hangzhounet",
+                        RpcUrl = "https://hangzhounet.tezblock.io"
+                    };
+
                     var response = new PermissionResponse(
                         id: request!.Id,
-                        network: request.Network,
+                        senderId: walletClient.SenderId,
+                        network: network,
                         scopes: request.Scopes,
-                        "3b92229274683b311cf8b040cf91ac0f8e19e410f06eda5537ef077e718e0024");
+                        publicKey: walletKey.PubKey.ToString(),
+                        appMetadata: walletClient.Metadata);
 
-                    client.SendResponseAsync(args.SenderId, response);
+                    // var response = new BeaconAbortedError(message.Id, walletClient.SenderId);
+
+                    await walletClient.SendResponseAsync(receiverId: dAppClient.SenderId, response);
                 }
-
-                if (message.Type == BeaconMessageType.operation_request)
+                else if (message.Type == BeaconMessageType.operation_request)
                 {
                     var request = message as OperationRequest;
                     
-                    
+                    string transactionHash = await MakeTransactionAsync(walletKey);
+
+                    var response = new OperationResponse(
+                        id: request!.Id,
+                        senderId: walletClient.SenderId,
+                        transactionHash: transactionHash);
+
+                    await walletClient.SendResponseAsync(receiverId: dAppClient.SenderId, response);
                 }
             };
 
-            await client.InitAsync();
-            client.Connect();
+            await walletClient.InitAsync();
+            walletClient.Connect();
+
+            Console.WriteLine($"client.LoggedIn: {walletClient.LoggedIn}");
+            Console.WriteLine($"client.Connected: {walletClient.Connected}");
 
             byte[] decodedBytes = Base58CheckEncoding.Decode(QrCode);
             string message = Encoding.Default.GetString(decodedBytes);
-
+            
             P2PPairingRequest pairingRequest = JsonConvert.DeserializeObject<P2PPairingRequest>(message);
 
-            await client.AddPeerAsync(pairingRequest!);
+            await walletClient.AddPeerAsync(pairingRequest!);
 
             Console.ReadLine();
 
-            client.Disconnect();
+            walletClient.Disconnect();
         }
 
-        public void TestRepositories()
+        private static async Task<string> MakeTransactionAsync(Key key)
         {
-            var path = "test.db";
-            File.Delete(path);
-            var repositorySettings = new RepositorySettings
+            using var rpc = new TezosRpc("https://hangzhounet.api.tez.ie/");
+
+            // get a head block
+            string head = await rpc.Blocks.Head.Hash.GetAsync<string>();
+
+            // get account's counter
+            int counter = await rpc.Blocks.Head.Context.Contracts[key.Address].Counter.GetAsync<int>();
+
+            var content = new ManagerOperationContent[]
             {
-                ConnectionString = path
+                new TransactionContent
+                {
+                    Source = key.PubKey.Address,
+                    Counter = ++counter,
+                    Amount = 1000000, // 1 tez
+                    Destination = "tz1KhnTgwoRRALBX6vRHRnydDGSBFsWtcJxc",
+                    GasLimit = 1500,
+                    Fee = 1000 // 0.001 tez
+                }
             };
 
-            var cryptographyService = new CryptographyService();
-            var loggerFactory = new SerilogLoggerFactory();
-            var seedRepository =
-                new LiteDbSeedRepository(new Logger<LiteDbSeedRepository>(loggerFactory), repositorySettings);
+            byte[] bytes = await new LocalForge().ForgeOperationGroupAsync(head, content);
 
-            var keyPairService = new KeyPairService(cryptographyService, seedRepository);
+            // sign the operation bytes
+            byte[] signature = key.SignOperation(bytes);
 
-            var guid = Guid.NewGuid().ToString();
-            string g = KeyPairService.CreateGuid();
+            // inject the operation and get its id (operation hash)
+            return await rpc.Inject.Operation.PostAsync(bytes.Concat(signature));
         }
     }
 }

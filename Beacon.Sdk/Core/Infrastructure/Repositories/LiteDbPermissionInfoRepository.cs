@@ -26,7 +26,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             //     col.Query().Where(x => x.AccountIdentifier == accountIdentifier).FirstOrDefault();
 
             PermissionInfo? permissionInfo = col.FindOne(x => x.AccountIdentifier == accountIdentifier);
-                
+
             return Task.FromResult(permissionInfo ?? null);
         });
     }

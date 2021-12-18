@@ -10,8 +10,8 @@ namespace Beacon.Sdk.Utils
 
         public HexString()
         {
-            
         }
+
         public HexString(string value)
         {
             Value = value;

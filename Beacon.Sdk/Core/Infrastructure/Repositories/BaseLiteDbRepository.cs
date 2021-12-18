@@ -26,7 +26,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                     using var db = new LiteDatabase(_connectionString);
                     LiteCollection<T> col = db.GetCollection<T>(nameof(T));
 
-                    
+
                     return func(col);
                 }
             }
@@ -79,5 +79,4 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             return new Task<T[]?>(() => default);
         }
     }
-    
 }

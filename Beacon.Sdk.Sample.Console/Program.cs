@@ -1,7 +1,5 @@
 ﻿namespace Beacon.Sdk.Sample.Console
 {
-    using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -34,16 +32,8 @@
 
             logger.LogInformation("START");
 
-
             var sample = new Sample();
-            try
-            {
-                await sample.Run();
-            }
-            catch (Exception ex)
-            {
-            }
-            // sample.TestRepositories();
+            await sample.Run();
 
             logger.LogInformation("STOP");
 

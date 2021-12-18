@@ -2,10 +2,13 @@ namespace Beacon.Sdk.Core.Domain
 {
     using System;
     using Beacon;
+    using Beacon.Error;
+    using Beacon.Operation;
     using Beacon.Permission;
     using Entities;
     using Interfaces;
     using Interfaces.Data;
+    using Netezos.Keys;
 
     public class ResponseMessageHandler
     {
@@ -27,45 +30,53 @@ namespace Beacon.Sdk.Core.Domain
             _permissionInfoFactory = permissionInfoFactory;
         }
 
-        public string Handle(IBeaconResponse response, AppMetadata ownAppMetadata, string senderId,
-            string receiverId) =>
+        public string Handle(BaseBeaconMessage response, string receiverId) =>
             response.Type switch
             {
-                BeaconMessageType.acknowledge => HandleAcknowledge(response),
-                BeaconMessageType.permission_response => HandlePermissionResponse(response, ownAppMetadata, senderId,
-                    receiverId),
-                _ => throw new Exception("Invalid beacon message type")
+                BeaconMessageType.acknowledge => HandleAcknowledge(response as AcknowledgeResponse),
+                BeaconMessageType.permission_response => HandlePermissionResponse(receiverId,
+                    response as PermissionResponse),
+                BeaconMessageType.operation_response => HandleOperationResponse(response as OperationResponse),
+                BeaconMessageType.error => HandleError(response as BaseBeaconError),
+
+                _ => throw new ArgumentException("Invalid beacon message type")
             };
 
-        private string HandleAcknowledge(IBeaconResponse response)
-        {
-            var ack = response as AcknowledgeResponse;
+        private string HandleAcknowledge(AcknowledgeResponse response) => _jsonSerializerService.Serialize(response);
 
-            return _jsonSerializerService.Serialize(ack!);
-        }
-
-        private string HandlePermissionResponse(IBeaconResponse beaconResponse, AppMetadata ownAppMetadata,
-            string senderId,
-            string receiverId)
+        private string HandlePermissionResponse(string receiverId, PermissionResponse response)
         {
-            var response = beaconResponse as PermissionResponse;
-            var newResponse = new PermissionResponse(
-                response!.Id,
-                senderId,
-                ownAppMetadata,
+            AppMetadata? receiverAppMetadata = _appMetadataRepository.TryRead(receiverId).Result;
+
+            if (receiverAppMetadata == null)
+                throw new Exception("AppMetadata not found");
+
+            PermissionInfo info = _permissionInfoFactory.Create(
+                receiverId,
+                receiverAppMetadata,
+                PubKey.FromBase58(response.PublicKey),
                 response.Network,
-                response.Scopes,
-                response.PublicKey);
-
-            AppMetadata receiverAppMetadata = _appMetadataRepository.TryRead(receiverId).Result ??
-                                              throw new Exception("AppMetadata not found");
-
-            PermissionInfo info = _permissionInfoFactory.Create(receiverId, receiverAppMetadata, newResponse.PublicKey,
-                newResponse.Network, newResponse.Scopes);
+                response.Scopes);
 
             info = _permissionInfoRepository.Create(info).Result;
 
-            return _jsonSerializerService.Serialize(newResponse);
+            return _jsonSerializerService.Serialize(response);
+        }
+
+        private string HandleOperationResponse(OperationResponse response) =>
+            _jsonSerializerService.Serialize(response);
+
+        private string HandleError(BaseBeaconError response)
+        {
+            if (response!.ErrorType == BeaconErrorType.ABORTED_ERROR)
+            {
+                BeaconAbortedError beaconAbortedError =
+                    response as BeaconAbortedError ?? throw new InvalidOperationException();
+
+                return _jsonSerializerService.Serialize(beaconAbortedError);
+            }
+
+            throw new ArgumentException("error.ErrorType");
         }
     }
 }

@@ -3,17 +3,22 @@ namespace Beacon.Sdk
     using System;
     using System.Threading.Tasks;
     using Beacon;
-    using Core.Domain;
 
-    public interface IWalletClient
+    public interface IWalletBeaconClient
     {
+        string SenderId { get; }
+
+        bool LoggedIn { get; }
+
+        bool Connected { get; }
+
         AppMetadata Metadata { get; }
 
         IAppMetadataRepository AppMetadataRepository { get; }
 
         event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
 
-        Task SendResponseAsync(string receiverId, IBeaconResponse response);
+        Task SendResponseAsync(string receiverId, BaseBeaconMessage response);
 
         Task InitAsync();
 

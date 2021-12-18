@@ -1,11 +1,11 @@
 namespace Beacon.Sdk
 {
     using System;
-    using Core.Domain;
+    using Beacon;
 
     public class BeaconMessageEventArgs : EventArgs
     {
-        public BeaconMessageEventArgs(string senderId, IBeaconRequest request)
+        public BeaconMessageEventArgs(string senderId, BaseBeaconMessage request)
         {
             SenderId = senderId;
             Request = request;
@@ -13,6 +13,6 @@ namespace Beacon.Sdk
 
         public string SenderId { get; }
 
-        public IBeaconRequest Request { get; }
+        public BaseBeaconMessage Request { get; }
     }
 }

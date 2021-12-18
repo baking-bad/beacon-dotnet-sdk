@@ -13,18 +13,16 @@ namespace Beacon.Sdk
     using Matrix.Sdk.Core.Infrastructure.Services;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Abstractions;
-    using WalletClient;
-    
-    
+    using WalletBeaconClient;
 
-    public class WalletClientFactory
+    public class WalletBeaconClientFactory
     {
         private static readonly MatrixClientFactory MatrixClientFactory = new();
         private static readonly SingletonHttpFactory SingletonHttpFactory = new();
 
-        private IWalletClient? _client;
+        private IWalletBeaconClient? _client;
 
-        public IWalletClient Create(
+        public IWalletBeaconClient Create(
             BeaconOptions options,
             ILoggerFactory? loggerFactory = null)
 
@@ -36,7 +34,7 @@ namespace Beacon.Sdk
 
             var repositorySettings = new RepositorySettings
             {
-                ConnectionString = "test1.db"
+                ConnectionString = options.DatabaseConnectionString
             };
             var cryptographyService = new CryptographyService();
             var sessionKeyPairRepository = new InMemorySessionKeyPairRepository(cryptographyService);
@@ -77,6 +75,7 @@ namespace Beacon.Sdk
             var peerFactory = new PeerFactory(cryptographyService);
             var permissionInfoFactory = new PermissionInfoFactory(accountService);
 
+            var permissionHandler = new PermissionHandler(permissionInfoRepository, accountService);
             var incomingMessageHandler = new RequestMessageHandler(appMetadataRepository, jsonSerializerService);
             var outgoingMessageHandler = new ResponseMessageHandler(appMetadataRepository, permissionInfoRepository,
                 jsonSerializerService, permissionInfoFactory);
@@ -115,8 +114,8 @@ namespace Beacon.Sdk
 
             #endregion
 
-            _client = new WalletBeaconClient(
-                new Logger<WalletBeaconClient>(loggerFactory ?? new NullLoggerFactory()),
+            _client = new WalletBeaconClient.WalletBeaconClient(
+                new Logger<WalletBeaconClient.WalletBeaconClient>(loggerFactory ?? new NullLoggerFactory()),
                 peerRepository,
                 appMetadataRepository,
                 p2PCommunicationService,
@@ -124,6 +123,7 @@ namespace Beacon.Sdk
                 peerFactory,
                 incomingMessageHandler,
                 outgoingMessageHandler,
+                permissionHandler,
                 options);
 
             return _client;
