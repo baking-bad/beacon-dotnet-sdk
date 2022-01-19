@@ -24,11 +24,12 @@ namespace Beacon.Sdk.Sample.Console
 
     public class Sample
     {
-        private const string QrCode =
-            "BSdNU2tFbvqMEHQk8NN847VqF3dWV364n25KmmBWeExZJH3F1mUo4EbcZ8hC2VojBQ6iaX6x7p9qvfJt8WCLSpu4gSt7pM1AAEK6ynHSYMtPYGJs3H6VxoGKPvk4MmgnSrVZvwSoTFCqS7AxexYLAfZpvYw2qgwZrHmfnVMzvNds46PDTjoxnF7kBjbWsxnCTArWFSxpaDXFxFzLWzN2gRoVRRzJnjEWPByBadYpDWk5EaB8ZH5tWH7baUwrNLA6ZA47898gWQeKCZUyh4nAk4tuZhNMXbQXnGnZLs2Ac5Ny7fXdk52Z3t9sTbVM46rRBNHBrinJ";
-
         public async Task Run()
         {
+            
+            Console.WriteLine("Enter QR code:");
+            string qrCode = Console.ReadLine();
+            
             const string path = "test1.db";
             // const string path = "prod_test.db";
             File.Delete(path);
@@ -81,15 +82,22 @@ namespace Beacon.Sdk.Sample.Console
                 else if (message.Type == BeaconMessageType.operation_request)
                 {
                     var request = message as OperationRequest;
+
+                    if (request!.OperationDetails.Count <= 0) return;
                     
-                    string transactionHash = await MakeTransactionAsync(walletKey);
+                    PartialTezosTransactionOperation operation = request.OperationDetails[0];
+                    if (long.TryParse(operation.Amount, out long amount))
+                    {
+                        string transactionHash =
+                            await MakeTransactionAsync(walletKey, operation.Destination, amount);
 
-                    var response = new OperationResponse(
-                        id: request!.Id,
-                        senderId: walletClient.SenderId,
-                        transactionHash: transactionHash);
+                        var response = new OperationResponse(
+                            id: request!.Id,
+                            senderId: walletClient.SenderId,
+                            transactionHash: transactionHash);
 
-                    await walletClient.SendResponseAsync(receiverId: dAppClient.SenderId, response);
+                        await walletClient.SendResponseAsync(receiverId: dAppClient.SenderId, response);   
+                    }
                 }
             };
 
@@ -99,7 +107,7 @@ namespace Beacon.Sdk.Sample.Console
             Console.WriteLine($"client.LoggedIn: {walletClient.LoggedIn}");
             Console.WriteLine($"client.Connected: {walletClient.Connected}");
 
-            byte[] decodedBytes = Base58CheckEncoding.Decode(QrCode);
+            byte[] decodedBytes = Base58CheckEncoding.Decode(qrCode);
             string message = Encoding.Default.GetString(decodedBytes);
             
             P2PPairingRequest pairingRequest = JsonConvert.DeserializeObject<P2PPairingRequest>(message);
@@ -111,7 +119,7 @@ namespace Beacon.Sdk.Sample.Console
             walletClient.Disconnect();
         }
 
-        private static async Task<string> MakeTransactionAsync(Key key)
+        private static async Task<string> MakeTransactionAsync(Key key, string destination, long amount)
         {
             using var rpc = new TezosRpc("https://hangzhounet.api.tez.ie/");
 
@@ -127,8 +135,8 @@ namespace Beacon.Sdk.Sample.Console
                 {
                     Source = key.PubKey.Address,
                     Counter = ++counter,
-                    Amount = 1000000, // 1 tez
-                    Destination = "tz1KhnTgwoRRALBX6vRHRnydDGSBFsWtcJxc",
+                    Amount = amount,
+                    Destination = destination,
                     GasLimit = 1500,
                     Fee = 1000 // 0.001 tez
                 }
