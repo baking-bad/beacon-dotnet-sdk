@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Entities;
@@ -11,6 +12,7 @@
     using Matrix.Sdk;
     using Matrix.Sdk.Core.Domain.MatrixRoom;
     using Matrix.Sdk.Core.Domain.RoomEvent;
+    using Matrix.Sdk.Core.Infrastructure.Dto.Room.Create;
     using Microsoft.Extensions.Logging;
     using P2P;
     using P2P.ChannelOpening;
@@ -87,7 +89,8 @@
             _channelOpeningMessageBuilder.Reset();
             _channelOpeningMessageBuilder.BuildRecipientId(peer.RelayServer, peer.HexPublicKey);
             _channelOpeningMessageBuilder.BuildPairingPayload(id, peer.Version,
-                "beacon-node-0.papers.tech:8448",
+                senderRelayServer,
+                // "beacon-node-0.papers.tech:8448",
                 appName);
 
             _channelOpeningMessageBuilder.BuildEncryptedPayload(peer.HexPublicKey);
@@ -95,18 +98,29 @@
             ChannelOpeningMessage channelOpeningMessage = _channelOpeningMessageBuilder.Message;
 
             // We force room creation here because if we "re-pair", we need to make sure that we don't send it to an old room.
-            MatrixRoom matrixRoom = await _matrixClient.CreateTrustedPrivateRoomAsync(new[]
+            CreateRoomResponse createRoomResponse = await _matrixClient.CreateTrustedPrivateRoomAsync(new[]
             {
                 channelOpeningMessage.RecipientId
             });
 
             var spin = new SpinWait();
-            while (_matrixClient.JoinedRooms.Length == 0)
+            MatrixRoom? needRoom = _matrixClient.JoinedRooms.FirstOrDefault(x => x.Id == createRoomResponse.RoomId);
+
+            var wait = true;
+            while (wait)
+            {
                 spin.SpinOnce();
+                    
+                needRoom = _matrixClient.JoinedRooms.FirstOrDefault(x => x.Id == createRoomResponse.RoomId);
 
-            _ = await _matrixClient.SendMessageAsync(matrixRoom.Id, channelOpeningMessage.ToString());
+                if (needRoom != null)
+                    if (needRoom.JoinedUserIds.Count == 2)
+                        wait = false;
+            }
 
-            P2PPeerRoom p2PPeerRoom = _p2PPeerRoomFactory.Create(peer.RelayServer, peer.HexPublicKey, matrixRoom.Id);
+            _ = await _matrixClient.SendMessageAsync(createRoomResponse.RoomId, channelOpeningMessage.ToString());
+
+            P2PPeerRoom p2PPeerRoom = _p2PPeerRoomFactory.Create(peer.RelayServer, peer.HexPublicKey, createRoomResponse.RoomId);
 
             return _p2PPeerRoomRepository.CreateOrUpdate(p2PPeerRoom).Result;
         }
