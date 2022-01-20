@@ -11,13 +11,13 @@ namespace Beacon.Sdk.Core.Domain.P2P.ChannelOpening
     public class ChannelOpeningMessageBuilder : IChannelOpeningMessageBuilder
     {
         private readonly ICryptographyService _cryptographyService;
-        private readonly JsonSerializerService _jsonSerializerService;
+        private readonly IJsonSerializerService _jsonSerializerService;
         private readonly KeyPairService _keyPairService;
         private ChannelOpeningMessage _message;
 
         public ChannelOpeningMessageBuilder(
             ICryptographyService cryptographyService,
-            JsonSerializerService jsonSerializerService,
+            IJsonSerializerService jsonSerializerService,
             KeyPairService keyPairService)
         {
             _cryptographyService = cryptographyService;
