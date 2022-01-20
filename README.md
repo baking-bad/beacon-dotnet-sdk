@@ -16,15 +16,15 @@ Beacon .NET SDK is [available on NuGet](https://www.nuget.org/packages/Beacon.Sd
 ```
 dotnet add package Beacon.Sdk
 ```
-# Use the SDK in your app
+## Use the SDK in your app
 For a complete example, refer to [`Sample.cs`](https://github.com/baking-bad/beacon-dotnet-sdk/blob/main/Beacon.Sdk.Sample.Console/Sample.cs).
 You can also clone this repository and run `Beacon.Sdk.Sample.Console`.
 
 
-## **Wallet**
+### **Wallet**
 Here is step by step **guide**:
 
-## 1. Create
+#### 1. Create
 Use `WalletBeaconClientFactory` to create an instance of `WalletBeaconClient`
 ```cs
 const string path = "your-database-name.db";
@@ -41,7 +41,7 @@ var options = new BeaconOptions
 
 IWalletBeaconClient walletClient = factory.Create(options);
 ```
-## 2. Start listening for incoming events
+#### 2. Start listening for incoming events
 To listen for the incoming Beacon messages you need to subscribe to `OnBeaconMessageReceived;`
 ```cs
 walletClient.OnBeaconMessageReceived += async (_, dAppClient) =>
@@ -88,13 +88,13 @@ walletClient.OnBeaconMessageReceived += async (_, dAppClient) =>
 ```
 I recommend that you don't use anonymous functions to subscribe to events if you have to unsubscribe from the event at some later point in your code.
 
-## 3. Init
+#### 3. Init
 
 ```cs
 await walletClient.InitAsync()
 ```
 
-## 4. Connect
+#### 4. Connect
 ```cs
 walletClient.Connect();
 ```
@@ -111,7 +111,18 @@ P2PPairingRequest pairingRequest = JsonConvert.DeserializeObject<P2PPairingReque
 await walletClient.AddPeerAsync(pairingRequest!);
 ```
 
-## 6. Disconnect
+#### 6. Disconnect
 ```cs
 walletClient.Disconnect();
 ```
+
+## Demo app
+
+Follow these steps to reproduce the typical wallet workflow:
+1. Clone this repo and make sure you have `dotnet` command available in your shell
+2. Open Beacon [playground](https://docs.walletbeacon.io/getting-started/first-dapp#setup), scroll to Setup and press "Run Code"
+3. Choose "Pair wallet on another device" and click on the QR code to copy
+4. In your shell run `make sample` and follow the instructions
+5. In the browser you should see "Got permissions" message
+6. Scroll down to "Operation Request" item and do the "Run Code" thing again
+7. You should see the sucessful operation message
