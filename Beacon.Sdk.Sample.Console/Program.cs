@@ -1,6 +1,7 @@
 ﻿namespace Beacon.Sdk.Sample.Console
 {
     using System.Threading.Tasks;
+    using Matrix.Sdk;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -9,35 +10,40 @@
 
     internal class Program
     {
+        private static readonly DependencyInjectionSample DependencyInjectionSample = new();
+
+#pragma warning disable CA1416
         private static IHostBuilder CreateHostBuilder() => new HostBuilder()
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddLogging(loggingBuilder =>
+                services.AddLogging(loggingBuilder => 
                     loggingBuilder.AddSerilog(dispose: true));
-                // services.AddBeaconClient();
-                // services.AddConsoleApp();
+
+                services.AddMatrixClient();
+                services.AddBeaconClient();
+                
             }).UseConsoleLifetime();
+        
+#pragma warning restore CA1416
 
         private static async Task<int> Main(string[] args)
         {
             IHost host = CreateHostBuilder().Build();
-
+            ILogger<Program> logger = host.Services.GetRequiredService<ILogger<Program>>();
+            
             SystemConsoleTheme theme = LoggerSetup.SetupTheme();
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .WriteTo.Console(theme: theme)
                 .CreateLogger();
 
-            ILogger<Program> logger = host.Services.GetRequiredService<ILogger<Program>>();
-
             logger.LogInformation("START");
-
-            var sample = new Sample();
-            await sample.Run();
-
+            
+            // await sample.Run();
+            await DependencyInjectionSample.Run(host.Services);
+            
             logger.LogInformation("STOP");
-
-
+            
             return 0;
         }
     }

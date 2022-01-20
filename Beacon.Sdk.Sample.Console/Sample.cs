@@ -44,13 +44,23 @@ namespace Beacon.Sdk.Sample.Console
                 AppName = "Atomex Mobile",
                 AppUrl = "", //string?
                 IconUrl = "", // string?
-                KnownRelayServers = new[] {"beacon-node-0.papers.tech:8448"},
+                KnownRelayServers = new[]
+                {
+                    "beacon-node-0.papers.tech:8448",
+                    "beacon-node-1.diamond.papers.tech",
+                    "beacon-node-1.sky.papers.tech",
+                    "beacon-node-2.sky.papers.tech",
+                    "beacon-node-1.hope.papers.tech",
+                    "beacon-node-1.hope-2.papers.tech",
+                    "beacon-node-1.hope-3.papers.tech",
+                    "beacon-node-1.hope-4.papers.tech",
+                },
                 // see https://github.com/mbdavid/LiteDB/issues/787
                 DatabaseConnectionString = $"Filename={path}; Mode=Exclusive", // mac m1
                 // DatabaseConnectionString = $"Filename={path}"
             };
 
-            IWalletBeaconClient walletClient = factory.Create(options);
+            IWalletBeaconClient walletClient = factory.Create(options, new SerilogLoggerFactory());
 
             walletClient.OnBeaconMessageReceived += async (_, dAppClient) =>
             {
