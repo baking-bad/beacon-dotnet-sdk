@@ -1,7 +1,3 @@
-// ReSharper disable ArgumentsStyleNamedExpression
-// ReSharper disable ArgumentsStyleOther
-// ReSharper disable ArgumentsStyleStringLiteral
-
 namespace Beacon.Sdk.Sample.Console
 {
     using System;
@@ -11,58 +7,32 @@ namespace Beacon.Sdk.Sample.Console
     using System.Threading.Tasks;
     using Base58Check;
     using Beacon;
-    using Beacon.Error;
     using Beacon.Operation;
     using Beacon.Permission;
+    using Microsoft.Extensions.DependencyInjection;
     using Netezos.Forging;
     using Netezos.Forging.Models;
     using Netezos.Keys;
     using Netezos.Rpc;
     using Newtonsoft.Json;
-    using Serilog.Extensions.Logging;
-    using WalletBeaconClient;
 
-    public class Sample
+    public class DependencyInjectionSample
     {
-        public async Task Run()
+        public async Task Run(IServiceProvider serviceProvider)
         {
-            
             Console.WriteLine("Enter QR code:");
             string qrCode = Console.ReadLine();
             
             const string path = "test1.db";
             // const string path = "prod_test.db";
             File.Delete(path);
-
+            
             // Use existing key
             var walletKey = Key.FromBase58("edsk35n2ruX2r92SdtWzP87mEUqxWSwM14hG6GRhEvU6kfdH8Ut6SW");
-
-            var factory = new WalletBeaconClientFactory();
-
-            var options = new BeaconOptions
-            {
-                AppName = "Atomex Mobile",
-                AppUrl = "", //string?
-                IconUrl = "", // string?
-                KnownRelayServers = new[]
-                {
-                    "beacon-node-0.papers.tech:8448",
-                    "beacon-node-1.diamond.papers.tech",
-                    "beacon-node-1.sky.papers.tech",
-                    "beacon-node-2.sky.papers.tech",
-                    "beacon-node-1.hope.papers.tech",
-                    "beacon-node-1.hope-2.papers.tech",
-                    "beacon-node-1.hope-3.papers.tech",
-                    "beacon-node-1.hope-4.papers.tech",
-                },
-                // see https://github.com/mbdavid/LiteDB/issues/787
-                DatabaseConnectionString = $"Filename={path}; Mode=Exclusive", // mac m1
-                // DatabaseConnectionString = $"Filename={path}"
-            };
-
-            IWalletBeaconClient walletClient = factory.Create(options, new SerilogLoggerFactory());
-
-            walletClient.OnBeaconMessageReceived += async (_, dAppClient) =>
+            
+            IWalletBeaconClient walletClient = serviceProvider.GetRequiredService<IWalletBeaconClient>();
+            
+             walletClient.OnBeaconMessageReceived += async (_, dAppClient) =>
             {
                 BaseBeaconMessage message = dAppClient.Request;
 
@@ -128,7 +98,7 @@ namespace Beacon.Sdk.Sample.Console
 
             walletClient.Disconnect();
         }
-
+        
         private static async Task<string> MakeTransactionAsync(Key key, string destination, long amount)
         {
             using var rpc = new TezosRpc("https://hangzhounet.api.tez.ie/");

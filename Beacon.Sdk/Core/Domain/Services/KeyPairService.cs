@@ -15,7 +15,7 @@ namespace Beacon.Sdk.Core.Domain.Services
         private readonly ICryptographyService _cryptographyService;
         private readonly ISeedRepository _seedRepository;
 
-        public KeyPairService(ICryptographyService cryptographyService, LiteDbSeedRepository seedRepository)
+        public KeyPairService(ICryptographyService cryptographyService, ISeedRepository seedRepository)
         {
             _cryptographyService = cryptographyService;
             _seedRepository = seedRepository;
