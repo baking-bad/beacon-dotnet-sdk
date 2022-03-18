@@ -25,7 +25,7 @@ namespace Beacon.Sdk.Core.Domain.Services
             if (network.RpcUrl != null)
                 data.Add($"rpc:{network.RpcUrl}");
 
-            var m = string.Join('-', data);
+            var m = string.Join("-", data);
 
             byte[] h = _cryptographyService.Hash(Encoding.UTF8.GetBytes(m), 10);
 
