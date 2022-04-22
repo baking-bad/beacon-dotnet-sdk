@@ -8,13 +8,15 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
     public class LiteDbP2PPeerRoomRepository : BaseLiteDbRepository<P2PPeerRoom>, IP2PPeerRoomRepository
     {
+        private const string CollectionName = "P2PPeerRoom";
+        
         public LiteDbP2PPeerRoomRepository(ILogger<LiteDbP2PPeerRoomRepository> logger, RepositorySettings settings) :
             base(logger, settings)
         {
         }
 
         public Task<P2PPeerRoom> CreateOrUpdate(P2PPeerRoom p2PPeerRoom) =>
-            InConnection(col =>
+            InConnection(CollectionName,col =>
             {
                 // P2PPeerRoom? result = col.Query()
                 //     .Where(x => x.PeerHexPublicKey.Value == p2PPeerRoom.PeerHexPublicKey.Value)
@@ -37,7 +39,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             });
 
         public Task<P2PPeerRoom?> TryRead(string p2PUserId) =>
-            InConnectionNullable(col =>
+            InConnectionNullable(CollectionName,col =>
             {
                 // P2PPeerRoom? peerRoom = col.Query().Where(x => x.P2PUserId == p2PUserId)
                 //     .FirstOrDefault();
@@ -48,7 +50,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             });
 
         public Task<P2PPeerRoom?> TryRead(HexString peerHexPublicKey) =>
-            InConnectionNullable(col =>
+            InConnectionNullable(CollectionName,col =>
             {
                 // P2PPeerRoom? peerRoom = col.Query().Where(x => x.PeerHexPublicKey.Value == peerHexPublicKey.Value)
                 //     .FirstOrDefault();

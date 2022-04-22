@@ -1,12 +1,17 @@
 namespace Beacon.Sdk.Core.Domain.Interfaces.Data
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Entities;
 
     public interface IPermissionInfoRepository
     {
-        Task<PermissionInfo> Create(PermissionInfo permissionInfo);
+        Task<PermissionInfo> CreateOrUpdateAsync(PermissionInfo permissionInfo);
 
-        Task<PermissionInfo?> TryRead(string accountIdentifier);
+        Task<PermissionInfo?> TryReadAsync(string accountIdentifier);
+
+        Task<List<PermissionInfo>> ReadAllAsync();
+
+        Task DeleteByAddressAsync(string address);
     }
 }

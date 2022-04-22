@@ -37,6 +37,6 @@ namespace Beacon.Sdk.Beacon.Permission
         /// <summary>
         ///     Public Key, because it can be used to verify signatures
         /// </summary>
-        public string PublicKey { get; }
+        public string PublicKey { get; set; }
     }
 }
