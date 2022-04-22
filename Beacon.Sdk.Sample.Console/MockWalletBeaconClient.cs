@@ -3,6 +3,9 @@ namespace Beacon.Sdk.Sample.Console
     using System;
     using System.Threading.Tasks;
     using Beacon;
+    using Beacon.Permission;
+    using Core.Domain.Entities;
+    using Core.Domain.Interfaces.Data;
     using Utils;
 
     public record MockRequest : BaseBeaconMessage
@@ -29,6 +32,8 @@ namespace Beacon.Sdk.Sample.Console
 
         public string SenderId { get; }
 
+        public IPermissionInfoRepository PermissionInfoRepository { get; }
+        public ISeedRepository SeedRepository { get; }
         public bool LoggedIn { get; }
 
         public bool Connected { get; }
@@ -38,6 +43,7 @@ namespace Beacon.Sdk.Sample.Console
         public IAppMetadataRepository AppMetadataRepository { get; }
 
         public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
+        public event EventHandler<DappConnectedEventArgs> OnDappConnected;
 
         public Task SendResponseAsync(string receiverId, BaseBeaconMessage response) =>
             throw new NotImplementedException();
@@ -62,6 +68,7 @@ namespace Beacon.Sdk.Sample.Console
         public void Connect() => Console.WriteLine("Connect");
 
         public void Disconnect() => Console.WriteLine("Disconnect");
+        public Task<PermissionInfo?> TryReadPermissionInfo(string sourceAddress, Network network) => throw new NotImplementedException();
 
         public Task RespondAsync(BaseBeaconMessage baseBeaconMessage)
         {

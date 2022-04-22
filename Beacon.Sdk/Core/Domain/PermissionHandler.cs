@@ -33,9 +33,9 @@ namespace Beacon.Sdk.Core.Domain
             string accountIdentifier =
                 _accountService.GetAccountIdentifier(request.SourceAddress, request.Network);
 
-            PermissionInfo? permissionInfo = await _permissionInfoRepository.TryRead(accountIdentifier);
+            PermissionInfo? permissionInfo = await _permissionInfoRepository.TryReadAsync(accountIdentifier);
 
-            return permissionInfo != null && permissionInfo.Scopes.Contains(PermissionScope.operation_request);
+            return permissionInfo != null; // && permissionInfo.Scopes.Contains(PermissionScope.operation_request);
         }
     }
 }

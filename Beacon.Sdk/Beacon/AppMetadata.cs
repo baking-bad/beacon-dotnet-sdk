@@ -4,7 +4,9 @@ namespace Beacon.Sdk.Beacon
 
     public class AppMetadata
     {
-        [BsonId] public string SenderId { get; set; }
+        public long Id { get; set; }
+        
+        public string SenderId { get; set; }
 
         public string Name { get; set; }
 

@@ -3,7 +3,6 @@ namespace Beacon.Sdk.Core.Domain.Services
     using System;
     using System.Linq;
     using Entities;
-    using Infrastructure.Repositories;
     using Interfaces;
     using Interfaces.Data;
     using Sodium;
@@ -21,19 +20,19 @@ namespace Beacon.Sdk.Core.Domain.Services
             _seedRepository = seedRepository;
         }
 
+        private KeyPair? _keyPair;
         public KeyPair KeyPair
         {
             get
             {
-                SeedEntity? data = _seedRepository.TryRead().Result;
+                if (_keyPair != null)
+                    return _keyPair;
+                
+                SeedEntity? data = _seedRepository.TryReadAsync().Result ?? _seedRepository.CreateAsync(CreateGuid()).Result;
 
-                if (data != null)
-                    return _cryptographyService.GenerateEd25519KeyPair(data.Seed);
-
-                SeedEntity newSeedEntity = _seedRepository.Create(CreateGuid()).Result ??
-                                           throw new ArgumentNullException(nameof(data));
-
-                return _cryptographyService.GenerateEd25519KeyPair(newSeedEntity.Seed);
+                _keyPair = _cryptographyService.GenerateEd25519KeyPair(data.Seed);
+                        
+                return _keyPair;
             }
         }
 

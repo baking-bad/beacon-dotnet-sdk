@@ -35,7 +35,7 @@ namespace Beacon.Sdk.Core.Domain
         {
             PermissionRequest request = _jsonSerializerService.Deserialize<PermissionRequest>(message);
 
-            _ = _appMetadataRepository.CreateOrUpdate(request.AppMetadata).Result;
+            _ = _appMetadataRepository.CreateOrUpdateAsync(request.AppMetadata).Result;
 
             return request;
         }
@@ -44,7 +44,7 @@ namespace Beacon.Sdk.Core.Domain
         {
             OperationRequest request = _jsonSerializerService.Deserialize<OperationRequest>(message);
 
-            _ = _appMetadataRepository.TryRead(request.SenderId).Result;
+            _ = _appMetadataRepository.TryReadAsync(request.SenderId).Result;
 
             return request;
         }

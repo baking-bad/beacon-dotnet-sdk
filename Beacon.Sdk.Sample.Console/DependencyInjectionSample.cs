@@ -32,7 +32,7 @@ namespace Beacon.Sdk.Sample.Console
             
             IWalletBeaconClient walletClient = serviceProvider.GetRequiredService<IWalletBeaconClient>();
             
-             walletClient.OnBeaconMessageReceived += async (_, dAppClient) =>
+            walletClient.OnBeaconMessageReceived += async (_, dAppClient) =>
             {
                 BaseBeaconMessage message = dAppClient.Request;
 

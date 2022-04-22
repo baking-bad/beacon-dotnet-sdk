@@ -6,6 +6,7 @@ namespace Beacon.Sdk.Core.Domain.Entities.P2P
     using System.Threading.Tasks;
     using Infrastructure;
     using Interfaces;
+    using Interfaces.Data;
     using Matrix.Sdk.Core.Infrastructure.Services;
     using Microsoft.Extensions.Logging;
     using Services;
@@ -36,6 +37,7 @@ namespace Beacon.Sdk.Core.Domain.Entities.P2P
         public async Task<P2PLoginRequest> Create(string[] knownRelayServers)
         {
             KeyPair keyPair = _keyPairService.KeyPair;
+            
             string relayServer = await GetRelayServer(keyPair.PublicKey, knownRelayServers);
 
             byte[] loginDigest = _cryptographyService.GenerateLoginDigest();

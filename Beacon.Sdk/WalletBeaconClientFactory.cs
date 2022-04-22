@@ -118,13 +118,19 @@ namespace Beacon.Sdk
                 new Logger<WalletBeaconClient.WalletBeaconClient>(loggerFactory ?? new NullLoggerFactory()),
                 peerRepository,
                 appMetadataRepository,
+                permissionInfoRepository,
+                seedRepository,
                 p2PCommunicationService,
+                accountService,
                 keyPairService,
                 peerFactory,
                 incomingMessageHandler,
                 outgoingMessageHandler,
                 permissionHandler,
                 options);
+
+            var k = new Logger<WalletBeaconClientFactory>(loggerFactory ?? new NullLoggerFactory());
+            k.LogDebug("Init factory");
 
             return _client;
         }

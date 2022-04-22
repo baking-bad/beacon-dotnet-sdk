@@ -61,7 +61,8 @@ namespace Beacon.Sdk.Sample.Console
             };
 
             IWalletBeaconClient walletClient = factory.Create(options, new SerilogLoggerFactory());
-
+            var d = await walletClient.PermissionInfoRepository.ReadAllAsync();
+            
             walletClient.OnBeaconMessageReceived += async (_, dAppClient) =>
             {
                 BaseBeaconMessage message = dAppClient.Request;
@@ -113,7 +114,7 @@ namespace Beacon.Sdk.Sample.Console
 
             await walletClient.InitAsync();
             walletClient.Connect();
-
+            
             Console.WriteLine($"client.LoggedIn: {walletClient.LoggedIn}");
             Console.WriteLine($"client.Connected: {walletClient.Connected}");
 

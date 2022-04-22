@@ -3,6 +3,7 @@ namespace Beacon.Sdk
     using System;
     using System.Threading.Tasks;
     using Beacon;
+    using Core.Domain.Interfaces.Data;
 
     public interface IWalletBeaconClient
     {
@@ -15,6 +16,8 @@ namespace Beacon.Sdk
         AppMetadata Metadata { get; }
 
         IAppMetadataRepository AppMetadataRepository { get; }
+        
+        IPermissionInfoRepository PermissionInfoRepository { get; }
 
         event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
 

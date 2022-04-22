@@ -2,6 +2,7 @@ namespace Beacon.Sdk
 {
     using System;
     using Beacon;
+    using global::Beacon.Sdk.Core.Domain.Entities;
 
     public class BeaconMessageEventArgs : EventArgs
     {
@@ -14,5 +15,18 @@ namespace Beacon.Sdk
         public string SenderId { get; }
 
         public BaseBeaconMessage Request { get; }
+    }
+
+    public class DappConnectedEventArgs : EventArgs
+    {
+        public DappConnectedEventArgs(AppMetadata dappMetadata, PermissionInfo dappPermissionInfo)
+        {
+            this.dappMetadata = dappMetadata;
+            this.dappPermissionInfo = dappPermissionInfo;
+        }
+
+        public AppMetadata dappMetadata { get; }
+
+        public PermissionInfo dappPermissionInfo { get; }
     }
 }

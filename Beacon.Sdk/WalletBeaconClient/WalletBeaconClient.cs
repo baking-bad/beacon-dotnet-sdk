@@ -3,6 +3,8 @@ namespace Beacon.Sdk.WalletBeaconClient
     using System;
     using System.Threading.Tasks;
     using Beacon;
+    using Beacon.Operation;
+    using Beacon.Permission;
     using Core.Domain;
     using Core.Domain.Entities;
     using Core.Domain.Interfaces;
@@ -27,14 +29,17 @@ namespace Beacon.Sdk.WalletBeaconClient
             ILogger<WalletBeaconClient> logger,
             IPeerRepository peerRepository,
             IAppMetadataRepository appMetadataRepository,
+            IPermissionInfoRepository permissionInfoRepository,
+            ISeedRepository seedRepository,
             IP2PCommunicationService p2PCommunicationService,
+            AccountService accountService,
             KeyPairService keyPairService,
             PeerFactory peerFactory,
             RequestMessageHandler requestMessageHandler,
             ResponseMessageHandler responseMessageHandler,
             PermissionHandler permissionHandler,
             BeaconOptions options)
-            : base(keyPairService, appMetadataRepository, options)
+            : base(keyPairService, accountService, appMetadataRepository, permissionInfoRepository, seedRepository, options)
         {
             _logger = logger;
             _peerRepository = peerRepository;
@@ -50,6 +55,8 @@ namespace Beacon.Sdk.WalletBeaconClient
         public bool Connected { get; private set; }
 
         public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
+        
+        public event EventHandler<DappConnectedEventArgs>? OnDappConnected;
 
         public async Task InitAsync()
         {
@@ -73,16 +80,16 @@ namespace Beacon.Sdk.WalletBeaconClient
                 pairingRequest.RelayServer
             );
 
-            peer = _peerRepository.Create(peer).Result;
+            peer = _peerRepository.CreateAsync(peer).Result;
 
             if (sendPairingResponse)
                 _ = await _p2PCommunicationService.SendChannelOpeningMessageAsync(peer, pairingRequest.Id, AppName);
         }
 
-
         public void Connect()
         {
             _p2PCommunicationService.OnP2PMessagesReceived += OnP2PMessagesReceived;
+            _responseMessageHandler.OnDappConnected += OnDappConnected;
             _p2PCommunicationService.Start();
 
             Connected = _p2PCommunicationService.Syncing;
@@ -92,13 +99,14 @@ namespace Beacon.Sdk.WalletBeaconClient
         {
             _p2PCommunicationService.Stop();
             _p2PCommunicationService.OnP2PMessagesReceived -= OnP2PMessagesReceived;
+            _responseMessageHandler.OnDappConnected -= OnDappConnected;
 
             Connected = _p2PCommunicationService.Syncing;
         }
 
         public async Task SendResponseAsync(string receiverId, BaseBeaconMessage response)
         {
-            Peer peer = _peerRepository.TryRead(receiverId).Result
+            Peer peer = _peerRepository.TryReadAsync(receiverId).Result
                         ?? throw new NullReferenceException(nameof(Peer));
 
             string message = _responseMessageHandler.Handle(response, receiverId);
@@ -123,13 +131,37 @@ namespace Beacon.Sdk.WalletBeaconClient
             if (requestMessage.Version != "1")
                 await SendResponseAsync(requestMessage.SenderId, ack);
 
-            bool hasPermission = await _permissionHandler.HasPermission(requestMessage);
+            bool hasPermission = await HasPermission(requestMessage);
 
             if (hasPermission)
                 OnBeaconMessageReceived?.Invoke(this,
                     new BeaconMessageEventArgs(requestMessage.SenderId, requestMessage));
             else
                 _logger.LogInformation("Received message have not permission");
+        }
+        
+        private async Task<bool> HasPermission(BaseBeaconMessage beaconRequest) =>
+            beaconRequest.Type switch
+            {
+                BeaconMessageType.permission_request => true,
+                BeaconMessageType.broadcast_request => true,
+                BeaconMessageType.operation_request => await HandleOperationRequest(beaconRequest as OperationRequest),
+                _ => false
+            };
+
+        private async Task<bool> HandleOperationRequest(OperationRequest request)
+        {
+            PermissionInfo? permissionInfo = await TryReadPermissionInfo(request.SourceAddress, request.Network);
+
+            return permissionInfo != null; // && permissionInfo.Scopes.Contains(PermissionScope.operation_request);
+        }
+        
+        public async Task<PermissionInfo?> TryReadPermissionInfo(string sourceAddress, Network network)
+        {
+            string accountIdentifier =
+                AccountService.GetAccountIdentifier(sourceAddress, network);
+
+            return await PermissionInfoRepository.TryReadAsync(accountIdentifier);
         }
     }
 }

@@ -11,6 +11,7 @@
     internal class Program
     {
         private static readonly DependencyInjectionSample DependencyInjectionSample = new();
+        private static readonly Sample Sample = new();
 
 #pragma warning disable CA1416
         private static IHostBuilder CreateHostBuilder() => new HostBuilder()
@@ -39,8 +40,8 @@
 
             logger.LogInformation("START");
             
-            // await sample.Run();
-            await DependencyInjectionSample.Run(host.Services);
+            await Sample.Run();
+            // await DependencyInjectionSample.Run(host.Services);
             
             logger.LogInformation("STOP");
             
