@@ -110,7 +110,7 @@
             while (wait)
             {
                 spin.SpinOnce();
-                    
+
                 needRoom = _matrixClient.JoinedRooms.FirstOrDefault(x => x.Id == createRoomResponse.RoomId);
 
                 if (needRoom != null)
@@ -120,7 +120,8 @@
 
             _ = await _matrixClient.SendMessageAsync(createRoomResponse.RoomId, channelOpeningMessage.ToString());
 
-            P2PPeerRoom p2PPeerRoom = _p2PPeerRoomFactory.Create(peer.RelayServer, peer.HexPublicKey, createRoomResponse.RoomId);
+            P2PPeerRoom p2PPeerRoom =
+                _p2PPeerRoomFactory.Create(peer.RelayServer, peer.HexPublicKey, createRoomResponse.RoomId);
 
             return _p2PPeerRoomRepository.CreateOrUpdate(p2PPeerRoom).Result;
         }

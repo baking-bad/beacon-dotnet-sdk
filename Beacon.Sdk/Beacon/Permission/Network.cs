@@ -8,14 +8,14 @@ namespace Beacon.Sdk.Beacon.Permission
     //
     //     public string? RpcUrl { get; } = RpcUrl;
     // }
-    
+
     // see: https://github.com/mbdavid/LiteDB/issues/1860
     public record Network
     {
         public NetworkType Type { get; set; }
-    
+
         public string? Name { get; set; }
-    
+
         public string? RpcUrl { get; set; }
     }
 }

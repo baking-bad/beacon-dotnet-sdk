@@ -16,7 +16,7 @@ namespace Beacon.Sdk
         AppMetadata Metadata { get; }
 
         IAppMetadataRepository AppMetadataRepository { get; }
-        
+
         IPermissionInfoRepository PermissionInfoRepository { get; }
 
         event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;

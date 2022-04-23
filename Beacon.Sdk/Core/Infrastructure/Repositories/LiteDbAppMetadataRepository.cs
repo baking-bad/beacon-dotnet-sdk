@@ -1,23 +1,21 @@
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
-    using System;
     using System.Linq;
     using System.Threading.Tasks;
     using Beacon;
-    using LiteDB;
     using Microsoft.Extensions.Logging;
 
     public class LiteDbAppMetadataRepository : BaseLiteDbRepository<AppMetadata>, IAppMetadataRepository
     {
         private const string CollectionName = "AppMetadata";
-        
+
         public LiteDbAppMetadataRepository(ILogger<LiteDbAppMetadataRepository> logger, RepositorySettings settings)
             : base(logger, settings)
         {
         }
 
         public Task<AppMetadata> CreateOrUpdateAsync(AppMetadata appMetadata) =>
-            InConnection(CollectionName,col =>
+            InConnection(CollectionName, col =>
             {
                 AppMetadata? result = col.FindOne(x => x.SenderId == appMetadata.SenderId);
                 // .Where(x => x.SenderId == appMetadata.SenderId)
@@ -27,17 +25,17 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                     col.Insert(appMetadata);
                 else
                     col.Update(appMetadata);
-                
+
                 col.EnsureIndex(x => x.SenderId);
 
                 return Task.FromResult(appMetadata);
             });
 
         public Task<AppMetadata?> TryReadAsync(string senderId) =>
-            InConnectionNullable(CollectionName,col =>
+            InConnectionNullable(CollectionName, col =>
             {
                 col.EnsureIndex(x => x.SenderId);
-                
+
                 AppMetadata? appMetadata = col.FindOne(x => x.SenderId == senderId);
                 // AppMetadata? appMetadata = col.Query().Where(x => x.SenderId == senderId)
                 //     .FirstOrDefault();
@@ -46,7 +44,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             });
 
         public Task<AppMetadata[]?> ReadAll() =>
-            InConnectionNullable(CollectionName,col =>
+            InConnectionNullable(CollectionName, col =>
             {
                 AppMetadata[]? result = col.FindAll().ToArray();
                 // AppMetadata[]? result = col.Query().ToArray();
@@ -55,7 +53,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             });
 
         public Task Delete(string senderId) =>
-            InConnection(CollectionName,col =>
+            InConnection(CollectionName, col =>
             {
                 col.Delete(senderId);
 
@@ -63,7 +61,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             });
 
         public Task DeleteAll() =>
-            InConnection(CollectionName,col =>
+            InConnection(CollectionName, col =>
             {
                 // col.Delete(Query.All());
                 // col.DeleteAll();

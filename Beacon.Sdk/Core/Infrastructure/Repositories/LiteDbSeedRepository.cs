@@ -1,6 +1,5 @@
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -31,7 +30,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 return Task.FromResult(data);
             });
 
-        public Task<SeedEntity?> TryReadAsync() => 
+        public Task<SeedEntity?> TryReadAsync() =>
             InConnectionNullable(CollectionName, col =>
             {
                 SeedEntity[] t = col.FindAll().ToArray();
@@ -43,7 +42,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 return Task.FromResult(seedEntity ?? null);
             });
 
-        public Task<List<SeedEntity>> ReadAllAsync() => 
+        public Task<List<SeedEntity>> ReadAllAsync() =>
             InConnection(CollectionName, col =>
             {
                 var seedEntities = col.FindAll().ToList();

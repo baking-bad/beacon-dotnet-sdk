@@ -14,24 +14,26 @@ namespace Beacon.Sdk.Core.Domain.Services
         private readonly ICryptographyService _cryptographyService;
         private readonly ISeedRepository _seedRepository;
 
+        private KeyPair? _keyPair;
+
         public KeyPairService(ICryptographyService cryptographyService, ISeedRepository seedRepository)
         {
             _cryptographyService = cryptographyService;
             _seedRepository = seedRepository;
         }
 
-        private KeyPair? _keyPair;
         public KeyPair KeyPair
         {
             get
             {
                 if (_keyPair != null)
                     return _keyPair;
-                
-                SeedEntity? data = _seedRepository.TryReadAsync().Result ?? _seedRepository.CreateAsync(CreateGuid()).Result;
+
+                SeedEntity? data = _seedRepository.TryReadAsync().Result ??
+                                   _seedRepository.CreateAsync(CreateGuid()).Result;
 
                 _keyPair = _cryptographyService.GenerateEd25519KeyPair(data.Seed);
-                        
+
                 return _keyPair;
             }
         }

@@ -39,7 +39,8 @@ namespace Beacon.Sdk.WalletBeaconClient
             ResponseMessageHandler responseMessageHandler,
             PermissionHandler permissionHandler,
             BeaconOptions options)
-            : base(keyPairService, accountService, appMetadataRepository, permissionInfoRepository, seedRepository, options)
+            : base(keyPairService, accountService, appMetadataRepository, permissionInfoRepository, seedRepository,
+                options)
         {
             _logger = logger;
             _peerRepository = peerRepository;
@@ -55,8 +56,6 @@ namespace Beacon.Sdk.WalletBeaconClient
         public bool Connected { get; private set; }
 
         public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
-        
-        public event EventHandler<DappConnectedEventArgs>? OnDappConnected;
 
         public async Task InitAsync()
         {
@@ -114,6 +113,8 @@ namespace Beacon.Sdk.WalletBeaconClient
             await _p2PCommunicationService.SendMessageAsync(peer, message);
         }
 
+        public event EventHandler<DappConnectedEventArgs>? OnDappConnected;
+
         private async Task OnP2PMessagesReceived(object? sender, P2PMessageEventArgs e)
         {
             if (sender is not IP2PCommunicationService)
@@ -139,7 +140,7 @@ namespace Beacon.Sdk.WalletBeaconClient
             else
                 _logger.LogInformation("Received message have not permission");
         }
-        
+
         private async Task<bool> HasPermission(BaseBeaconMessage beaconRequest) =>
             beaconRequest.Type switch
             {
@@ -155,7 +156,7 @@ namespace Beacon.Sdk.WalletBeaconClient
 
             return permissionInfo != null; // && permissionInfo.Scopes.Contains(PermissionScope.operation_request);
         }
-        
+
         public async Task<PermissionInfo?> TryReadPermissionInfo(string sourceAddress, Network network)
         {
             string accountIdentifier =

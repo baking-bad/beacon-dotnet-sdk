@@ -99,8 +99,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
             return new Task<T[]?>(() => default);
         }
-        
-        protected Task<IEnumerable<T>> InConnectionNullable(string collectionName, Func<LiteCollection<T>, Task<IEnumerable<T>>> func)
+
+        protected Task<IEnumerable<T>> InConnectionNullable(string collectionName,
+            Func<LiteCollection<T>, Task<IEnumerable<T>>> func)
         {
             try
             {
@@ -119,7 +120,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
             return new Task<IEnumerable<T>>(() => default);
         }
-        
+
         protected Task<List<T>> InConnection(string collectionName, Func<LiteCollection<T>, Task<List<T>>> func)
         {
             try

@@ -1,7 +1,6 @@
 namespace Beacon.Sdk.Core.Domain.Interfaces
 {
     using System.Threading.Tasks;
-    using Data;
     using Entities;
     using Entities.P2P;
     using P2P;

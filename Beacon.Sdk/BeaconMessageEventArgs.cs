@@ -2,7 +2,7 @@ namespace Beacon.Sdk
 {
     using System;
     using Beacon;
-    using global::Beacon.Sdk.Core.Domain.Entities;
+    using Core.Domain.Entities;
 
     public class BeaconMessageEventArgs : EventArgs
     {

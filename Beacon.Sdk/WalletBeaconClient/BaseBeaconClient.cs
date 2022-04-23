@@ -23,7 +23,7 @@ namespace Beacon.Sdk.WalletBeaconClient
             IAppMetadataRepository appMetadataRepository,
             IPermissionInfoRepository permissionInfoRepository,
             ISeedRepository seedRepository,
-            BeaconOptions options) 
+            BeaconOptions options)
         {
             _keyPairService = keyPairService;
             AccountService = accountService;
@@ -52,11 +52,11 @@ namespace Beacon.Sdk.WalletBeaconClient
         protected AccountService AccountService { get; }
 
         public string SenderId => Base58.Convert(PeerFactory.Hash(BeaconId.ToByteArray(), 5));
-        
+
         public IAppMetadataRepository AppMetadataRepository { get; }
-        
+
         public IPermissionInfoRepository PermissionInfoRepository { get; }
-        
+
         public ISeedRepository SeedRepository { get; }
 
         public AppMetadata Metadata => new()

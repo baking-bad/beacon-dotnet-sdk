@@ -44,7 +44,7 @@ namespace Beacon.Sdk.Core.Domain
                 _ => throw new ArgumentException("Invalid beacon message type")
             };
 
-        private string HandleAcknowledge(AcknowledgeResponse response) => _jsonSerializerService.Serialize(response);  
+        private string HandleAcknowledge(AcknowledgeResponse response) => _jsonSerializerService.Serialize(response);
 
         private string HandlePermissionResponse(string receiverId, PermissionResponse response)
         {
@@ -66,7 +66,7 @@ namespace Beacon.Sdk.Core.Domain
 
             OnDappConnected?.Invoke(this, new DappConnectedEventArgs(receiverAppMetadata, info));
 
-            response.PublicKey = info.PublicKey.ToString();
+            response.PublicKey = info.PublicKey;
             return _jsonSerializerService.Serialize(response);
         }
 

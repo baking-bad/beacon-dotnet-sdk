@@ -1,6 +1,5 @@
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -11,29 +10,30 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     public class LiteDbPermissionInfoRepository : BaseLiteDbRepository<PermissionInfo>, IPermissionInfoRepository
     {
         private const string CollectionName = "PermissionInfo";
-        
+
         public LiteDbPermissionInfoRepository(ILogger<LiteDbPermissionInfoRepository> logger,
             RepositorySettings settings) : base(logger, settings)
         {
         }
 
-        public Task<PermissionInfo> CreateOrUpdateAsync(PermissionInfo permissionInfo) => 
-            InConnection(CollectionName,col =>
+        public Task<PermissionInfo> CreateOrUpdateAsync(PermissionInfo permissionInfo) =>
+            InConnection(CollectionName, col =>
             {
-                PermissionInfo? oldPermissionInfo = col.FindOne(x => x.AccountIdentifier == permissionInfo.AccountIdentifier);
+                PermissionInfo? oldPermissionInfo =
+                    col.FindOne(x => x.AccountIdentifier == permissionInfo.AccountIdentifier);
 
                 if (oldPermissionInfo != null)
                     col.Update(permissionInfo);
                 else
                     col.Insert(permissionInfo);
-                
+
                 col.EnsureIndex(x => x.AccountIdentifier);
-                
+
                 return Task.FromResult(permissionInfo);
             });
 
-        public Task<PermissionInfo?> TryReadAsync(string accountIdentifier) => 
-            InConnectionNullable(CollectionName,col =>
+        public Task<PermissionInfo?> TryReadAsync(string accountIdentifier) =>
+            InConnectionNullable(CollectionName, col =>
             {
                 // PermissionInfo? permissionInfo =
                 //     col.Query().Where(x => x.AccountIdentifier == accountIdentifier).FirstOrDefault();
@@ -43,22 +43,22 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 return Task.FromResult(permissionInfo ?? null);
             });
 
-        public Task<List<PermissionInfo>> ReadAllAsync() => 
-            InConnection(CollectionName,col =>
+        public Task<List<PermissionInfo>> ReadAllAsync() =>
+            InConnection(CollectionName, col =>
             {
                 var result = col.FindAll().ToList();
 
                 return Task.FromResult(result);
             });
 
-        public Task DeleteByAddressAsync(string address) => 
-            InConnection(CollectionName,col =>
+        public Task DeleteByAddressAsync(string address) =>
+            InConnection(CollectionName, col =>
             {
                 col.EnsureIndex(x => x.AccountIdentifier);
 
                 col.Delete(x => x.Address == address);
                 //PermissionInfo? permissionInfo = col.FindOne(x => x.Address == address);
-                
+
                 //if (permissionInfo != null)
                 //    col.Delete(permissionInfo.Id);
 
