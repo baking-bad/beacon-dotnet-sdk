@@ -54,8 +54,12 @@ namespace Beacon.Sdk.WalletBeaconClient
         public bool LoggedIn { get; private set; }
 
         public bool Connected { get; private set; }
-
+        
         public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
+        
+        public event EventHandler<DappConnectedEventArgs>? OnDappConnected;
+
+        // public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
 
         public async Task InitAsync()
         {
@@ -66,14 +70,14 @@ namespace Beacon.Sdk.WalletBeaconClient
 
         public async Task AddPeerAsync(P2PPairingRequest pairingRequest, bool sendPairingResponse = true)
         {
-            if (!HexString.TryParse(pairingRequest.PublicKey, out HexString receiverHexPublicKey))
+            if (!HexString.TryParse(pairingRequest.PublicKey, out HexString peerHexPublicKey))
             {
                 _logger.LogError("Can not parse receiver public key");
                 return;
             }
 
             Peer peer = _peerFactory.Create(
-                receiverHexPublicKey,
+                peerHexPublicKey,
                 pairingRequest.Name,
                 pairingRequest.Version,
                 pairingRequest.RelayServer
@@ -85,20 +89,38 @@ namespace Beacon.Sdk.WalletBeaconClient
                 _ = await _p2PCommunicationService.SendChannelOpeningMessageAsync(peer, pairingRequest.Id, AppName);
         }
 
+        public Task RemovePeerAsync(Peer peer)
+        {
+            return  Task.CompletedTask;
+        }
+        
+        private async Task SendDisconnectMessage(string receiverId)
+        {
+            Peer peer = _peerRepository.TryReadAsync(receiverId).Result
+                        ?? throw new NullReferenceException(nameof(Peer));
+
+            // string message = _responseMessageHandler.Handle(response, receiverId);
+        }
+        
         public void Connect()
         {
             _p2PCommunicationService.OnP2PMessagesReceived += OnP2PMessagesReceived;
-            _responseMessageHandler.OnDappConnected += OnDappConnected;
+            _responseMessageHandler.OnDappConnected += _responseMessageHandler_OnDappConnected;
             _p2PCommunicationService.Start();
 
             Connected = _p2PCommunicationService.Syncing;
+        }
+
+        private void _responseMessageHandler_OnDappConnected(object sender, DappConnectedEventArgs e)
+        {
+            OnDappConnected?.Invoke(this, new DappConnectedEventArgs(e.dappMetadata, e.dappPermissionInfo));
         }
 
         public void Disconnect()
         {
             _p2PCommunicationService.Stop();
             _p2PCommunicationService.OnP2PMessagesReceived -= OnP2PMessagesReceived;
-            _responseMessageHandler.OnDappConnected -= OnDappConnected;
+            _responseMessageHandler.OnDappConnected -= _responseMessageHandler_OnDappConnected;
 
             Connected = _p2PCommunicationService.Syncing;
         }
@@ -112,9 +134,7 @@ namespace Beacon.Sdk.WalletBeaconClient
 
             await _p2PCommunicationService.SendMessageAsync(peer, message);
         }
-
-        public event EventHandler<DappConnectedEventArgs>? OnDappConnected;
-
+        
         private async Task OnP2PMessagesReceived(object? sender, P2PMessageEventArgs e)
         {
             if (sender is not IP2PCommunicationService)
@@ -152,17 +172,16 @@ namespace Beacon.Sdk.WalletBeaconClient
 
         private async Task<bool> HandleOperationRequest(OperationRequest request)
         {
-            PermissionInfo? permissionInfo = await TryReadPermissionInfo(request.SourceAddress, request.Network);
+            PermissionInfo? permissionInfo = await TryReadPermissionInfo(request.SourceAddress, request.SenderId, request.Network);
 
             return permissionInfo != null; // && permissionInfo.Scopes.Contains(PermissionScope.operation_request);
         }
 
-        public async Task<PermissionInfo?> TryReadPermissionInfo(string sourceAddress, Network network)
+        public async Task<PermissionInfo?> TryReadPermissionInfo(string sourceAddress, string senderId, Network network)
         {
-            string accountIdentifier =
-                AccountService.GetAccountIdentifier(sourceAddress, network);
+            string accountId = AccountService.GetAccountId(sourceAddress, network);
 
-            return await PermissionInfoRepository.TryReadAsync(accountIdentifier);
+            return await PermissionInfoRepository.TryReadAsync(senderId, accountId);
         }
     }
 }

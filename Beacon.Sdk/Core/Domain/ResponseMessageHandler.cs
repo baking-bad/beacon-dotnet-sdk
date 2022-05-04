@@ -58,7 +58,7 @@ namespace Beacon.Sdk.Core.Domain
                 receiverAppMetadata,
                 //response.PublicKey,
                 PubKey.FromBase64(response.PublicKey),
-                //PubKey.FromBase58(response.PublicKey),
+                // PubKey.FromBase58(response.PublicKey),
                 response.Network,
                 response.Scopes);
 

@@ -15,7 +15,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
         }
 
-        public Task<P2PPeerRoom> CreateOrUpdate(P2PPeerRoom p2PPeerRoom) =>
+        public Task<P2PPeerRoom> CreateOrUpdateAsync(P2PPeerRoom p2PPeerRoom) =>
             InConnection(CollectionName, col =>
             {
                 // P2PPeerRoom? result = col.Query()
@@ -25,20 +25,17 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 P2PPeerRoom? result = col.FindOne(x => x.PeerHexPublicKey.Value == p2PPeerRoom.PeerHexPublicKey.Value);
 
                 if (result == null)
-                {
                     col.Insert(p2PPeerRoom);
-                    col.EnsureIndex(x => x.P2PUserId);
-                    col.EnsureIndex(x => x.PeerHexPublicKey);
-                }
                 else
-                {
                     col.Update(p2PPeerRoom);
-                }
+                
+                col.EnsureIndex(x => x.P2PUserId);
+                col.EnsureIndex(x => x.PeerHexPublicKey);
 
                 return Task.FromResult(p2PPeerRoom);
             });
 
-        public Task<P2PPeerRoom?> TryRead(string p2PUserId) =>
+        public Task<P2PPeerRoom?> TryReadAsync(string p2PUserId) =>
             InConnectionNullable(CollectionName, col =>
             {
                 // P2PPeerRoom? peerRoom = col.Query().Where(x => x.P2PUserId == p2PUserId)
@@ -49,7 +46,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 return Task.FromResult(peerRoom ?? null);
             });
 
-        public Task<P2PPeerRoom?> TryRead(HexString peerHexPublicKey) =>
+        public Task<P2PPeerRoom?> TryReadAsync(HexString peerHexPublicKey) =>
             InConnectionNullable(CollectionName, col =>
             {
                 // P2PPeerRoom? peerRoom = col.Query().Where(x => x.PeerHexPublicKey.Value == peerHexPublicKey.Value)

@@ -20,11 +20,11 @@ namespace Beacon.Sdk.Core.Domain.Entities
             List<PermissionScope> scopes)
         {
             string address = publicKey.Address;
-            string accountId = _accountService.GetAccountIdentifier(address, network);
+            string accountId = _accountService.GetAccountId(address, network);
 
             return new PermissionInfo
             {
-                AccountIdentifier = accountId,
+                AccountId = accountId,
                 SenderId = receiverId,
                 AppMetadata = metadata,
                 Website = "",

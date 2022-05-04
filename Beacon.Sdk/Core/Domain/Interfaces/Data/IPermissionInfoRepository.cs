@@ -8,10 +8,10 @@ namespace Beacon.Sdk.Core.Domain.Interfaces.Data
     {
         Task<PermissionInfo> CreateOrUpdateAsync(PermissionInfo permissionInfo);
 
-        Task<PermissionInfo?> TryReadAsync(string accountIdentifier);
+        Task<PermissionInfo?> TryReadAsync(string senderId, string accountId);
 
         Task<List<PermissionInfo>> ReadAllAsync();
 
-        Task DeleteByAddressAsync(string address);
+        Task DeleteByIdAsync(string id);
     }
 }

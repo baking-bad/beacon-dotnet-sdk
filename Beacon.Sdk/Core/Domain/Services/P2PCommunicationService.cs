@@ -104,6 +104,7 @@
             });
 
             var spin = new SpinWait();
+
             MatrixRoom? needRoom = _matrixClient.JoinedRooms.FirstOrDefault(x => x.Id == createRoomResponse.RoomId);
 
             var wait = true;
@@ -123,12 +124,12 @@
             P2PPeerRoom p2PPeerRoom =
                 _p2PPeerRoomFactory.Create(peer.RelayServer, peer.HexPublicKey, createRoomResponse.RoomId);
 
-            return _p2PPeerRoomRepository.CreateOrUpdate(p2PPeerRoom).Result;
+            return _p2PPeerRoomRepository.CreateOrUpdateAsync(p2PPeerRoom).Result;
         }
 
         public async Task SendMessageAsync(Peer peer, string message)
         {
-            P2PPeerRoom p2PPeerRoom = _p2PPeerRoomRepository.TryRead(peer.HexPublicKey).Result
+            P2PPeerRoom p2PPeerRoom = _p2PPeerRoomRepository.TryReadAsync(peer.HexPublicKey).Result
                                       ?? throw new NullReferenceException(nameof(P2PPeerRoom));
 
             string encryptedMessage = _p2PMessageService.EncryptMessage(peer.HexPublicKey, message).Value;
@@ -143,7 +144,7 @@
             if (matrixRoomEvent is not TextMessageEvent textMessageEvent) return null;
 
             string senderUserId = textMessageEvent.SenderUserId;
-            P2PPeerRoom? p2PPeerRoom = _p2PPeerRoomRepository.TryRead(senderUserId).Result;
+            P2PPeerRoom? p2PPeerRoom = _p2PPeerRoomRepository.TryReadAsync(senderUserId).Result;
 
             if (p2PPeerRoom == null)
                 // _logger.LogInformation("Unknown senderUserId");

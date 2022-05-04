@@ -29,10 +29,9 @@ namespace Beacon.Sdk.Core.Domain
 
         private async Task<bool> HandleOperationRequest(OperationRequest request)
         {
-            string accountIdentifier =
-                _accountService.GetAccountIdentifier(request.SourceAddress, request.Network);
+            string accountId = _accountService.GetAccountId(request.SourceAddress, request.Network);
 
-            PermissionInfo? permissionInfo = await _permissionInfoRepository.TryReadAsync(accountIdentifier);
+            PermissionInfo? permissionInfo = await _permissionInfoRepository.TryReadAsync(request.SenderId, accountId);
 
             return permissionInfo != null; // && permissionInfo.Scopes.Contains(PermissionScope.operation_request);
         }

@@ -18,7 +18,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             InConnection(CollectionName, col =>
             {
                 col.Insert(peer);
-                col.EnsureIndex(x => x.SenderUserId);
+                col.EnsureIndex(x => x.SenderId);
 
                 return Task.FromResult(peer);
             });
@@ -28,9 +28,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             {
                 // Peer? peer = col.Query().Where(x => x.SenderUserId == senderUserId).FirstOrDefault();
 
-                col.EnsureIndex(x => x.SenderUserId);
+                col.EnsureIndex(x => x.SenderId);
 
-                Peer? peer = col.FindOne(x => x.SenderUserId == senderUserId);
+                Peer? peer = col.FindOne(x => x.SenderId == senderUserId);
 
                 return Task.FromResult(peer ?? null);
             });

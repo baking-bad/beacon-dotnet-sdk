@@ -4,14 +4,17 @@ namespace Beacon.Sdk.Core.Domain.Entities
     using System.Collections.Generic;
     using Beacon;
     using Beacon.Permission;
+    using LiteDB;
 
     public class PermissionInfo
     {
         public long Id { get; set; }
 
-        public string AccountIdentifier { get; set; }
-
+        public string PermissionInfoId2 { get; set; }
+        
         public string SenderId { get; set; }
+
+        public string AccountId { get; set; }
 
         public AppMetadata AppMetadata { get; set; }
 

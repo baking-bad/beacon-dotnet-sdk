@@ -7,6 +7,7 @@
     using Microsoft.Extensions.Logging;
     using Serilog;
     using Serilog.Sinks.SystemConsole.Themes;
+    using ILogger = Microsoft.Extensions.Logging.ILogger;
 
     internal class Program
     {
@@ -29,21 +30,35 @@
 
         private static async Task<int> Main(string[] args)
         {
-            IHost host = CreateHostBuilder().Build();
-            ILogger<Program> logger = host.Services.GetRequiredService<ILogger<Program>>();
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Warning)
+                    .AddFilter("LoggingConsoleApp.Program", LogLevel.Debug)
+                    .AddConsole();
+            });
             
-            SystemConsoleTheme theme = LoggerSetup.SetupTheme();
-            Log.Logger = new LoggerConfiguration()
-                .Enrich.FromLogContext()
-                .WriteTo.Console(theme: theme)
-                .CreateLogger();
-
-            logger.LogInformation("START");
+            ILogger logger = loggerFactory.CreateLogger<Program>();
+            logger.LogInformation("Example log message");
             
             await Sample.Run();
-            // await DependencyInjectionSample.Run(host.Services);
             
-            logger.LogInformation("STOP");
+            // IHost host = CreateHostBuilder().Build();
+            // ILogger<Program> logger = host.Services.GetRequiredService<ILogger<Program>>();
+            //
+            // SystemConsoleTheme theme = LoggerSetup.SetupTheme();
+            // Log.Logger = new LoggerConfiguration()
+            //     .Enrich.FromLogContext()
+            //     .WriteTo.Console(theme: theme)
+            //     .CreateLogger();
+            //
+            // logger.LogInformation("START");
+            //
+            // await Sample.Run();
+            // // await DependencyInjectionSample.Run(host.Services);
+            //
+            // logger.LogInformation("STOP");
             
             return 0;
         }

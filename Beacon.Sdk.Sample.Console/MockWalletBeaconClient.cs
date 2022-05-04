@@ -65,10 +65,12 @@ namespace Beacon.Sdk.Sample.Console
             await Task.CompletedTask;
         }
 
+        public Task RemovePeerAsync(Peer peer) => throw new NotImplementedException();
+
         public void Connect() => Console.WriteLine("Connect");
 
         public void Disconnect() => Console.WriteLine("Disconnect");
-        public Task<PermissionInfo?> TryReadPermissionInfo(string sourceAddress, Network network) => throw new NotImplementedException();
+        public Task<PermissionInfo?> TryReadPermissionInfo(string sourceAddress, string senderId, Network network) => throw new NotImplementedException();
 
         public Task RespondAsync(BaseBeaconMessage baseBeaconMessage)
         {

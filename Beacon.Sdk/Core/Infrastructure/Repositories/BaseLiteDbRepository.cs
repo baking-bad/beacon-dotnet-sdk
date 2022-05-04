@@ -18,26 +18,25 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             _connectionString = settings.ConnectionString;
         }
 
-        //protected Task InConnection(Func<LiteCollection<T>, Task<T>> func)
-        //{
-        //    try
-        //    {
-        //        lock (_syncRoot)
-        //        {
-        //            using var db = new LiteDatabase(_connectionString);
-        //            LiteCollection<T> col = db.GetCollection<T>(nameof(T));
+        protected Task InConnectionAction(string collectionName, Action<LiteCollection<T>> func)
+        {
+            try
+            {
+                lock (_syncRoot)
+                {
+                    using var db = new LiteDatabase(_connectionString);
+                    LiteCollection<T> col = db.GetCollection<T>(collectionName);
 
+                    func(col);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "error in repository");
+            }
 
-        //            return func(col);
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        _logger.LogError(e, "error in repository");
-        //    }
-
-        //    return new Task(() => default);
-        //}!
+            return Task.CompletedTask;
+        }
 
         protected Task<T> InConnection(string collectionName, Func<LiteCollection<T>, Task<T>> func)
         {
@@ -79,7 +78,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             return new Task<T?>(() => default);
         }
 
-
         protected Task<T[]?> InConnectionNullable(string collectionName, Func<LiteCollection<T>, Task<T[]?>> func)
         {
             try
@@ -98,27 +96,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             }
 
             return new Task<T[]?>(() => default);
-        }
-
-        protected Task<IEnumerable<T>> InConnectionNullable(string collectionName,
-            Func<LiteCollection<T>, Task<IEnumerable<T>>> func)
-        {
-            try
-            {
-                lock (_syncRoot)
-                {
-                    using var db = new LiteDatabase(_connectionString);
-                    LiteCollection<T> col = db.GetCollection<T>(collectionName);
-
-                    return func(col);
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "error in repository");
-            }
-
-            return new Task<IEnumerable<T>>(() => default);
         }
 
         protected Task<List<T>> InConnection(string collectionName, Func<LiteCollection<T>, Task<List<T>>> func)

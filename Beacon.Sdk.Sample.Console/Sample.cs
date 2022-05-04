@@ -14,6 +14,7 @@ namespace Beacon.Sdk.Sample.Console
     using Beacon.Error;
     using Beacon.Operation;
     using Beacon.Permission;
+    using Microsoft.Extensions.Logging;
     using Netezos.Forging;
     using Netezos.Forging.Models;
     using Netezos.Keys;
@@ -60,6 +61,22 @@ namespace Beacon.Sdk.Sample.Console
                 // DatabaseConnectionString = $"Filename={path}"
             };
 
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Warning)
+                    .AddFilter("LoggingConsoleApp.Program", LogLevel.Debug)
+                    .AddConsole();
+            });
+
+            using var lopggerfactory2 = new SerilogLoggerFactory();
+            // {
+            //     
+            // }
+            ILogger logger = loggerFactory.CreateLogger<Sample>();
+            logger.LogInformation("Example log message2");
+            
             IWalletBeaconClient walletClient = factory.Create(options, new SerilogLoggerFactory());
             var d = await walletClient.PermissionInfoRepository.ReadAllAsync();
             
@@ -78,6 +95,7 @@ namespace Beacon.Sdk.Sample.Console
                         RpcUrl = "https://hangzhounet.tezblock.io"
                     };
 
+                    // var u = request
                     var response = new PermissionResponse(
                         id: request!.Id,
                         senderId: walletClient.SenderId,

@@ -3,6 +3,8 @@ namespace Beacon.Sdk
     using System;
     using System.Threading.Tasks;
     using Beacon;
+    using Beacon.Permission;
+    using Core.Domain.Entities;
     using Core.Domain.Interfaces.Data;
 
     public interface IWalletBeaconClient
@@ -20,6 +22,8 @@ namespace Beacon.Sdk
         IPermissionInfoRepository PermissionInfoRepository { get; }
 
         event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
+        
+        event EventHandler<DappConnectedEventArgs> OnDappConnected;
 
         Task SendResponseAsync(string receiverId, BaseBeaconMessage response);
 
@@ -27,8 +31,12 @@ namespace Beacon.Sdk
 
         Task AddPeerAsync(P2PPairingRequest pairingRequest, bool sendPairingResponse = true);
 
+        Task RemovePeerAsync(Peer peer);
+
         void Connect();
 
         void Disconnect();
+
+        Task<PermissionInfo?> TryReadPermissionInfo(string sourceAddress, string senderId, Network network);
     }
 }
