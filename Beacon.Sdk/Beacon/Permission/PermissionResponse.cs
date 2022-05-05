@@ -10,13 +10,15 @@ namespace Beacon.Sdk.Beacon.Permission
             AppMetadata appMetadata,
             Network network,
             List<PermissionScope> scopes,
-            string publicKey)
+            string publicKey, 
+            string address)
             : base(BeaconMessageType.permission_response, id, senderId)
         {
             AppMetadata = appMetadata;
             Network = network;
             Scopes = scopes;
             PublicKey = publicKey;
+            Address = address;
         }
 
         /// <summary>
@@ -37,6 +39,8 @@ namespace Beacon.Sdk.Beacon.Permission
         /// <summary>
         ///     Public Key, because it can be used to verify signatures
         /// </summary>
-        public string PublicKey { get; set; }
+        public string PublicKey { get; }
+        
+        public string Address { get; }
     }
 }

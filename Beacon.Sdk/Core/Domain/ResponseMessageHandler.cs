@@ -56,9 +56,8 @@ namespace Beacon.Sdk.Core.Domain
             PermissionInfo info = _permissionInfoFactory.Create(
                 receiverId,
                 receiverAppMetadata,
-                //response.PublicKey,
-                PubKey.FromBase64(response.PublicKey),
-                // PubKey.FromBase58(response.PublicKey),
+                response.Address,
+                response.PublicKey,
                 response.Network,
                 response.Scopes);
 
@@ -66,9 +65,11 @@ namespace Beacon.Sdk.Core.Domain
 
             OnDappConnected?.Invoke(this, new DappConnectedEventArgs(receiverAppMetadata, info));
 
-            response.PublicKey = info.PublicKey;
             return _jsonSerializerService.Serialize(response);
         }
+        //response.PublicKey,
+        // PubKey.FromBase64(response.PublicKey),
+        // PubKey.FromBase58(response.PublicKey),
 
         private string HandleOperationResponse(OperationResponse response) =>
             _jsonSerializerService.Serialize(response);
