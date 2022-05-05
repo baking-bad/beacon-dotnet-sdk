@@ -10,7 +10,7 @@ namespace Beacon.Sdk.Core.Domain.Entities
     {
         public long Id { get; set; }
 
-        public string PermissionInfoId2 { get; set; }
+        public string PermissionInfoId { get; set; }
         
         public string SenderId { get; set; }
 

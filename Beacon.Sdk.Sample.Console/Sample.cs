@@ -95,13 +95,17 @@ namespace Beacon.Sdk.Sample.Console
                         RpcUrl = "https://hangzhounet.tezblock.io"
                     };
 
+                    var publicKey = PubKey.FromBase58(walletKey.PubKey.ToString());
+                    string address = publicKey.Address;
+                    
                     // var u = request
                     var response = new PermissionResponse(
                         id: request!.Id,
                         senderId: walletClient.SenderId,
                         network: network,
                         scopes: request.Scopes,
-                        publicKey: walletKey.PubKey.ToString(),
+                        publicKey: publicKey.ToString(),
+                        address: address,
                         appMetadata: walletClient.Metadata);
 
                     // var response = new BeaconAbortedError(message.Id, walletClient.SenderId);
