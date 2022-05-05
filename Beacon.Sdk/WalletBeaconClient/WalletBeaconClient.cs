@@ -1,6 +1,7 @@
 namespace Beacon.Sdk.WalletBeaconClient
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Threading.Tasks;
     using Beacon;
     using Beacon.Operation;
@@ -146,8 +147,7 @@ namespace Beacon.Sdk.WalletBeaconClient
 
         private async Task HandleMessage(string message)
         {
-            (AcknowledgeResponse ack, BaseBeaconMessage requestMessage) =
-                _requestMessageHandler.Handle(message, SenderId);
+            (AcknowledgeResponse ack, BaseBeaconMessage requestMessage) = _requestMessageHandler.Handle(message, SenderId);
 
             if (requestMessage.Version != "1")
                 await SendResponseAsync(requestMessage.SenderId, ack);
@@ -155,8 +155,7 @@ namespace Beacon.Sdk.WalletBeaconClient
             bool hasPermission = await HasPermission(requestMessage);
 
             if (hasPermission)
-                OnBeaconMessageReceived?.Invoke(this,
-                    new BeaconMessageEventArgs(requestMessage.SenderId, requestMessage));
+                OnBeaconMessageReceived?.Invoke(this,new BeaconMessageEventArgs(requestMessage.SenderId, requestMessage));
             else
                 _logger.LogInformation("Received message have not permission");
         }
