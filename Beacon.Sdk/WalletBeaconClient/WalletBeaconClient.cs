@@ -56,9 +56,9 @@ namespace Beacon.Sdk.WalletBeaconClient
 
         public bool Connected { get; private set; }
         
-        public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
+        public event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
         
-        public event EventHandler<DappConnectedEventArgs>? OnDappConnected;
+        public event EventHandler<DappConnectedEventArgs> OnDappConnected;
 
         // public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
 
@@ -155,7 +155,7 @@ namespace Beacon.Sdk.WalletBeaconClient
             bool hasPermission = await HasPermission(requestMessage);
 
             if (hasPermission)
-                OnBeaconMessageReceived?.Invoke(this,new BeaconMessageEventArgs(requestMessage.SenderId, requestMessage));
+                OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs(requestMessage.SenderId, requestMessage));
             else
                 _logger.LogInformation("Received message have not permission");
         }

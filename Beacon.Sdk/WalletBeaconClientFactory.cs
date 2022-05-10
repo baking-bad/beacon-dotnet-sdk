@@ -51,6 +51,8 @@ namespace Beacon.Sdk
 
             var permissionInfoRepository = new LiteDbPermissionInfoRepository(loggerFactory.CreateLogger<LiteDbPermissionInfoRepository>(), repositorySettings);
 
+            var matrixSyncRepository = new LiteDbMatrixSyncRepository(loggerFactory.CreateLogger<LiteDbMatrixSyncRepository>(), repositorySettings);
+            
             var sdkStorage = new SdkStorage();
             var jsonSerializerService = new JsonSerializerService();
 
@@ -95,6 +97,7 @@ namespace Beacon.Sdk
                 MatrixClientFactory.Create(loggerFactory.CreateLogger<PollingService>()),
                 channelOpeningMessageBuilder,
                 p2PPeerRoomRepository,
+                matrixSyncRepository,
                 cryptographyService,
                 p2PLoginRequestFactory,
                 p2PPeerRoomFactory,
