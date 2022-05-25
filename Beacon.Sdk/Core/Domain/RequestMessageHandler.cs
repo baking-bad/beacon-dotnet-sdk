@@ -21,7 +21,7 @@ namespace Beacon.Sdk.Core.Domain
         public (AcknowledgeResponse, BaseBeaconMessage) Handle(string message, string senderId)
         {
             BaseBeaconMessage baseBeaconMessage = _jsonSerializerService.Deserialize<BaseBeaconMessage>(message);
-            var ack = new AcknowledgeResponse(baseBeaconMessage.Id, senderId);
+            var ack = new AcknowledgeResponse(baseBeaconMessage.Id, senderId, baseBeaconMessage.Version);
 
             return baseBeaconMessage.Type switch
             {

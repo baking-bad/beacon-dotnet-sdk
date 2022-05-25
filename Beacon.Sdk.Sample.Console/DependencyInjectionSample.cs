@@ -15,6 +15,7 @@ namespace Beacon.Sdk.Sample.Console
     using Netezos.Keys;
     using Netezos.Rpc;
     using Newtonsoft.Json;
+    using Serilog;
 
     public class DependencyInjectionSample
     {
@@ -28,58 +29,89 @@ namespace Beacon.Sdk.Sample.Console
             File.Delete(path);
             
             // Use existing key
-            var walletKey = Key.FromBase58("edsk35n2ruX2r92SdtWzP87mEUqxWSwM14hG6GRhEvU6kfdH8Ut6SW");
+            // 
+            var walletKey = Key.FromBase58("");
             
             IWalletBeaconClient walletClient = serviceProvider.GetRequiredService<IWalletBeaconClient>();
             
              walletClient.OnBeaconMessageReceived += async (_, dAppClient) =>
-            {
-                BaseBeaconMessage message = dAppClient.Request;
+             {
+                 BaseBeaconMessage message = dAppClient.Request;
 
-                if (message.Type == BeaconMessageType.permission_request)
-                {
-                    var request = message as PermissionRequest;
+                 switch (message.Type)
+                 {
+                     case BeaconMessageType.permission_request:
+                     {
+                         var request = message as PermissionRequest;
                     
-                    var network = new Network 
-                    {
-                        Type = NetworkType.hangzhounet,
-                        Name = "Hangzhounet",
-                        RpcUrl = "https://hangzhounet.tezblock.io"
-                    };
+                         var network = new Network 
+                         {
+                             Type = NetworkType.mainnet,
+                             Name = "Mainnet",
+                             RpcUrl = "https://rpc.tzkt.io/mainnet"
+                         };
+                         
+                         Console.WriteLine($"public key is ${walletKey.PubKey}");
 
-                    var response = new PermissionResponse(
-                        id: request!.Id,
-                        senderId: walletClient.SenderId,
-                        network: network,
-                        scopes: request.Scopes,
-                        publicKey: walletKey.PubKey.ToString(),
-                        appMetadata: walletClient.Metadata);
+                         var response = new PermissionResponse(
+                             id: request!.Id,
+                             senderId: walletClient.SenderId,
+                             network: network,
+                             scopes: request.Scopes,
+                             publicKey: walletKey.PubKey.ToString(),
+                             appMetadata: walletClient.Metadata,
+                             version: request.Version);
 
-                    // var response = new BeaconAbortedError(message.Id, walletClient.SenderId);
+                         // var response = new BeaconAbortedError(message.Id, walletClient.SenderId);
 
-                    await walletClient.SendResponseAsync(receiverId: dAppClient.SenderId, response);
-                }
-                else if (message.Type == BeaconMessageType.operation_request)
-                {
-                    var request = message as OperationRequest;
+                         Log.Logger.Fatal($"SendResponseAsync with receiverId {dAppClient.SenderId}");
+                         await walletClient.SendResponseAsync(receiverId: dAppClient.SenderId, response);
+                         break;
+                     }
+                     case BeaconMessageType.operation_request:
+                     {
+                         var request = message as OperationRequest;
 
-                    if (request!.OperationDetails.Count <= 0) return;
+                         if (request!.OperationDetails.Count <= 0) return;
                     
-                    PartialTezosTransactionOperation operation = request.OperationDetails[0];
-                    if (long.TryParse(operation.Amount, out long amount))
-                    {
-                        string transactionHash =
-                            await MakeTransactionAsync(walletKey, operation.Destination, amount);
+                         PartialTezosTransactionOperation operation = request.OperationDetails[0];
+                         if (long.TryParse(operation.Amount, out long amount))
+                         {
+                             string transactionHash =
+                                 await MakeTransactionAsync(walletKey, operation.Destination, amount);
 
-                        var response = new OperationResponse(
-                            id: request!.Id,
-                            senderId: walletClient.SenderId,
-                            transactionHash: transactionHash);
+                             var response = new OperationResponse(
+                                 id: request!.Id,
+                                 senderId: walletClient.SenderId,
+                                 transactionHash: transactionHash);
 
-                        await walletClient.SendResponseAsync(receiverId: dAppClient.SenderId, response);   
-                    }
-                }
-            };
+                             await walletClient.SendResponseAsync(receiverId: dAppClient.SenderId, response);   
+                         }
+
+                         break;
+                     }
+                     case BeaconMessageType.sign_payload_request:
+                         break;
+                     case BeaconMessageType.broadcast_request:
+                         break;
+                     case BeaconMessageType.permission_response:
+                         break;
+                     case BeaconMessageType.sign_payload_response:
+                         break;
+                     case BeaconMessageType.operation_response:
+                         break;
+                     case BeaconMessageType.broadcast_response:
+                         break;
+                     case BeaconMessageType.acknowledge:
+                         break;
+                     case BeaconMessageType.disconnect:
+                         break;
+                     case BeaconMessageType.error:
+                         break;
+                     default:
+                         throw new ArgumentOutOfRangeException();
+                 }
+             };
 
             await walletClient.InitAsync();
             walletClient.Connect();

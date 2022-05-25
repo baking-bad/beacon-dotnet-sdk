@@ -5,8 +5,8 @@ namespace Beacon.Sdk.Core.Domain.P2P.Dto.Handshake
         string Name,
         string PublicKey,
         string RelayServer,
+        string Version,
         string? Icon = null,
         string? AppUrl = null,
-        string Type = "p2p-pairing-response",
-        string Version = Constants.BeaconVersion);
+        string Type = "p2p-pairing-response");
 }

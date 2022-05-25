@@ -10,8 +10,9 @@ namespace Beacon.Sdk.Beacon.Permission
             AppMetadata appMetadata,
             Network network,
             List<PermissionScope> scopes,
-            string publicKey)
-            : base(BeaconMessageType.permission_response, id, senderId)
+            string publicKey,
+            string version)
+            : base(BeaconMessageType.permission_response, version, id, senderId)
         {
             AppMetadata = appMetadata;
             Network = network;

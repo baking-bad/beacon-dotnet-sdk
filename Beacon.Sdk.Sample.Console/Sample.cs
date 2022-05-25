@@ -83,7 +83,8 @@ namespace Beacon.Sdk.Sample.Console
                         network: network,
                         scopes: request.Scopes,
                         publicKey: walletKey.PubKey.ToString(),
-                        appMetadata: walletClient.Metadata);
+                        appMetadata: walletClient.Metadata,
+                        version: request.Version);
 
                     // var response = new BeaconAbortedError(message.Id, walletClient.SenderId);
 
