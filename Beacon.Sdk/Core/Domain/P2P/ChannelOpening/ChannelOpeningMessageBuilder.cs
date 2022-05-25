@@ -91,7 +91,7 @@ namespace Beacon.Sdk.Core.Domain.P2P.ChannelOpening
                 senderAppName,
                 senderHexPublicKey.Value,
                 senderRelayServer,
-                Version: "2");
+                Version: "3");
 
             return _jsonSerializerService.Serialize(pairingResponse);
         }

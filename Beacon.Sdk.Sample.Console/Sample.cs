@@ -105,7 +105,8 @@ namespace Beacon.Sdk.Sample.Console
                         var response = new OperationResponse(
                             id: request!.Id,
                             senderId: walletClient.SenderId,
-                            transactionHash: transactionHash);
+                            transactionHash: transactionHash,
+                            request.Version);
 
                         await walletClient.SendResponseAsync(receiverId: dAppClient.SenderId, response);   
                     }

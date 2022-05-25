@@ -88,10 +88,7 @@
 
             _channelOpeningMessageBuilder.Reset();
             _channelOpeningMessageBuilder.BuildRecipientId(peer.RelayServer, peer.HexPublicKey);
-            _channelOpeningMessageBuilder.BuildPairingPayload(id, peer.Version,
-                senderRelayServer,
-                // "beacon-node-0.papers.tech:8448",
-                appName);
+            _channelOpeningMessageBuilder.BuildPairingPayload(id, peer.Version, senderRelayServer, appName);
 
             _channelOpeningMessageBuilder.BuildEncryptedPayload(peer.HexPublicKey);
 

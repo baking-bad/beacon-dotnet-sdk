@@ -51,14 +51,14 @@ namespace Beacon.Sdk.Core.Domain
             if (receiverAppMetadata == null)
                 throw new Exception("AppMetadata not found");
 
-            // PermissionInfo info = _permissionInfoFactory.Create(
-            //     receiverId,
-            //     receiverAppMetadata,
-            //     PubKey.FromBase58(response.PublicKey),
-            //     response.Network,
-            //     response.Scopes);
-            //
-            // info = _permissionInfoRepository.Create(info).Result;
+            PermissionInfo info = _permissionInfoFactory.Create(
+                receiverId,
+                receiverAppMetadata,
+                PubKey.FromBase58(response.PublicKey),
+                response.Network,
+                response.Scopes);
+            
+            _permissionInfoRepository.Create(info);
 
             return _jsonSerializerService.Serialize(response);
         }
