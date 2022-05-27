@@ -131,9 +131,9 @@ namespace Beacon.Sdk.Sample.Console
 
             byte[] decodedBytes = Base58CheckEncoding.Decode(qrCode);
             string message = Encoding.Default.GetString(decodedBytes);
-
+            
             P2PPairingRequest pairingRequest = JsonConvert.DeserializeObject<P2PPairingRequest>(message);
-
+            
             await walletClient.AddPeerAsync(pairingRequest!);
 
             Console.ReadLine();

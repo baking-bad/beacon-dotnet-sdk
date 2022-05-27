@@ -12,9 +12,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
         }
 
-        public Task<PermissionInfo> Create(PermissionInfo permissionInfo) => InConnection(col =>
+        public Task<PermissionInfo> CreateOrUpdate(PermissionInfo permissionInfo) => InConnection(col =>
         {
-            col.Insert(permissionInfo);
+            col.Upsert(permissionInfo);
             col.EnsureIndex(x => x.AccountIdentifier);
 
             return Task.FromResult(permissionInfo);

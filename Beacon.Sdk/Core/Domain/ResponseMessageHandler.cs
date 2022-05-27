@@ -58,7 +58,7 @@ namespace Beacon.Sdk.Core.Domain
                 response.Network,
                 response.Scopes);
             
-            _permissionInfoRepository.Create(info);
+            _permissionInfoRepository.CreateOrUpdate(info);
 
             return _jsonSerializerService.Serialize(response);
         }

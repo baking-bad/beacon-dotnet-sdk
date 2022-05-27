@@ -5,7 +5,7 @@ namespace Beacon.Sdk.Core.Domain.Interfaces.Data
 
     public interface IPermissionInfoRepository
     {
-        Task<PermissionInfo> Create(PermissionInfo permissionInfo);
+        Task<PermissionInfo> CreateOrUpdate(PermissionInfo permissionInfo);
 
         Task<PermissionInfo?> TryRead(string accountIdentifier);
     }
