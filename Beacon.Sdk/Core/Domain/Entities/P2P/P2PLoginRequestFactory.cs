@@ -36,6 +36,7 @@ namespace Beacon.Sdk.Core.Domain.Entities.P2P
         public async Task<P2PLoginRequest> Create(string[] knownRelayServers)
         {
             KeyPair keyPair = _keyPairService.KeyPair;
+
             string relayServer = await GetRelayServer(keyPair.PublicKey, knownRelayServers);
 
             byte[] loginDigest = _cryptographyService.GenerateLoginDigest();

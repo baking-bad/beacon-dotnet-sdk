@@ -35,7 +35,7 @@ namespace Beacon.Sdk
                     "beacon-node-1.hope.papers.tech",
                     "beacon-node-1.hope-2.papers.tech",
                     "beacon-node-1.hope-3.papers.tech",
-                    "beacon-node-1.hope-4.papers.tech",
+                    "beacon-node-1.hope-4.papers.tech"
                 },
 
                 DatabaseConnectionString = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -49,7 +49,7 @@ namespace Beacon.Sdk
 
             #region Infrastructure
 
-            services.AddSingleton<RepositorySettings>(new RepositorySettings
+            services.AddSingleton(new RepositorySettings
             {
                 ConnectionString = beaconOptions.DatabaseConnectionString
             });
@@ -60,6 +60,7 @@ namespace Beacon.Sdk
             services.AddSingleton<ISeedRepository, LiteDbSeedRepository>();
             services.AddSingleton<IAppMetadataRepository, LiteDbAppMetadataRepository>();
             services.AddSingleton<IPermissionInfoRepository, LiteDbPermissionInfoRepository>();
+            services.AddSingleton<IMatrixSyncRepository, LiteDbMatrixSyncRepository>();
             services.AddSingleton<ISdkStorage, SdkStorage>();
             services.AddSingleton<IJsonSerializerService, JsonSerializerService>();
 
@@ -88,6 +89,7 @@ namespace Beacon.Sdk
             services.AddSingleton<P2PLoginRequestFactory>();
             services.AddSingleton<P2PPeerRoomFactory>();
             services.AddSingleton<IP2PCommunicationService, P2PCommunicationService>();
+            
 
             #endregion
 

@@ -8,9 +8,13 @@ namespace Beacon.Sdk.Core.Domain.Entities
 
     public class PermissionInfo
     {
-        [BsonId] public string AccountIdentifier { get; set; }
+        public long Id { get; set; }
 
+        public string PermissionInfoId { get; set; }
+        
         public string SenderId { get; set; }
+
+        public string AccountId { get; set; }
 
         public AppMetadata AppMetadata { get; set; }
 

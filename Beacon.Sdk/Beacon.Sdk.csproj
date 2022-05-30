@@ -22,7 +22,6 @@
 
     <ItemGroup>
         <PackageReference Include="LiteDB" Version="4.1.4" />
-        <PackageReference Include="Matrix.Sdk" Version="0.0.7" />
         <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
         <PackageReference Include="Netezos" Version="2.4.6" />
@@ -30,4 +29,7 @@
         <PackageReference Include="Sodium.Core" Version="1.2.3" />
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\..\matrix-dotnet-sdk\Matrix.Sdk\Matrix.Sdk.csproj" />
+    </ItemGroup>
 </Project>

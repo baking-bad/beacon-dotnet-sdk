@@ -7,26 +7,30 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
     public class LiteDbPeerRepository : BaseLiteDbRepository<Peer>, IPeerRepository
     {
-        public LiteDbPeerRepository(ILogger<LiteDbPeerRepository> logger, RepositorySettings settings) :
-            base(logger, settings)
+        private const string CollectionName = "Peer";
+
+        public LiteDbPeerRepository(ILogger<LiteDbPeerRepository> logger, RepositorySettings settings)
+            : base(logger, settings)
         {
         }
 
-        public Task<Peer> Create(Peer peer) =>
-            InConnection(col =>
+        public Task<Peer> CreateAsync(Peer peer) =>
+            InConnection(CollectionName, col =>
             {
                 col.Insert(peer);
-                col.EnsureIndex(x => x.SenderUserId);
+                col.EnsureIndex(x => x.SenderId);
 
                 return Task.FromResult(peer);
             });
 
-        public Task<Peer?> TryRead(string senderUserId) =>
-            InConnectionNullable(col =>
+        public Task<Peer?> TryReadAsync(string senderUserId) =>
+            InConnectionNullable(CollectionName, col =>
             {
                 // Peer? peer = col.Query().Where(x => x.SenderUserId == senderUserId).FirstOrDefault();
 
-                Peer? peer = col.FindOne(x => x.SenderUserId == senderUserId);
+                col.EnsureIndex(x => x.SenderId);
+
+                Peer? peer = col.FindOne(x => x.SenderId == senderUserId);
 
                 return Task.FromResult(peer ?? null);
             });

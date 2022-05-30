@@ -1,12 +1,13 @@
 namespace Beacon.Sdk.Core.Domain.Entities
 {
+    using LiteDB;
     using Utils;
 
     public class Peer
     {
-        public long Id { get; set; }
-
-        public string SenderUserId { get; set; }
+        public  long Id { get; set; }
+        
+        public string SenderId { get; set; }
 
         public HexString HexPublicKey { get; set; }
 

@@ -1,7 +1,8 @@
+using Serilog;
+
 namespace Beacon.Sdk.Sample.Console
 {
     using System;
-    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -20,30 +21,30 @@ namespace Beacon.Sdk.Sample.Console
     {
         public async Task Run(IServiceProvider serviceProvider)
         {
-            Console.WriteLine("Enter QR code:");
-            string qrCode = Console.ReadLine();
-
-            // const string path = "test1.db";
-            // const string path = "prod_test.db";
-            // File.Delete(path);
+            Log.Information("Enter QR code:");
             
+            var qrCode = Console.ReadLine();
+
             // Use existing key
             var walletKey = Key.FromBase58("");
             
-            IWalletBeaconClient walletClient = serviceProvider.GetRequiredService<IWalletBeaconClient>();
+            var walletClient = serviceProvider.GetRequiredService<IWalletBeaconClient>();
 
             walletClient.OnBeaconMessageReceived += async (_, dAppClient) =>
             {
-                BaseBeaconMessage message = dAppClient.Request;
+                var message = dAppClient.Request;
 
-                Console.WriteLine($"Handling message with id {message.Id} Type {message.Type.ToString()}");
+                Log.Information("Handling message with id {@MessageId} Type {MessageType}",
+                    message.Id,
+                    message.Type.ToString());
+
                 switch (message.Type)
                 {
                     case BeaconMessageType.permission_request:
                     {
                         var request = message as PermissionRequest;
 
-                        Network network = request!.Network.Type switch
+                        var network = request!.Network.Type switch
                         {
                             NetworkType.mainnet => new Network
                             {
@@ -64,14 +65,19 @@ namespace Beacon.Sdk.Sample.Console
                             .Select(s => s == PermissionScope.sign ? PermissionScope.encrypt : s)
                             .ToList();
 
+                        var publicKey = PubKey.FromBase58(walletKey.PubKey.ToString());
+
                         var response = new PermissionResponse(
                             id: request!.Id,
                             senderId: walletClient.SenderId,
+                            appMetadata: walletClient.Metadata,
                             network: network,
                             scopes: scopes,
-                            publicKey: walletKey.PubKey.ToString(),
-                            appMetadata: walletClient.Metadata,
+                            publicKey: publicKey.ToString(),
+                            address: publicKey.Address,
                             version: request.Version);
+
+                        // var response = new BeaconAbortedError(message.Id, walletClient.SenderId);
 
                         await walletClient.SendResponseAsync(receiverId: dAppClient.SenderId, response);
                         break;
@@ -83,7 +89,7 @@ namespace Beacon.Sdk.Sample.Console
                         if (request!.OperationDetails.Count <= 0) return;
 
                         PartialTezosTransactionOperation operation = request.OperationDetails[0];
-                        
+
                         if (long.TryParse(operation?.Amount, out long amount))
                         {
                             // string transactionHash =
@@ -131,9 +137,9 @@ namespace Beacon.Sdk.Sample.Console
 
             byte[] decodedBytes = Base58CheckEncoding.Decode(qrCode);
             string message = Encoding.Default.GetString(decodedBytes);
-            
+
             P2PPairingRequest pairingRequest = JsonConvert.DeserializeObject<P2PPairingRequest>(message);
-            
+
             await walletClient.AddPeerAsync(pairingRequest!);
 
             Console.ReadLine();

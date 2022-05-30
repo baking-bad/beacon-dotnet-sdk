@@ -30,6 +30,8 @@ namespace Beacon.Sdk.Core.Domain
             _permissionInfoFactory = permissionInfoFactory;
         }
 
+        public event EventHandler<DappConnectedEventArgs> OnDappConnected;
+
         public string Handle(BaseBeaconMessage response, string receiverId) =>
             response.Type switch
             {
@@ -46,7 +48,7 @@ namespace Beacon.Sdk.Core.Domain
 
         private string HandlePermissionResponse(string receiverId, PermissionResponse response)
         {
-            AppMetadata? receiverAppMetadata = _appMetadataRepository.TryRead(receiverId).Result;
+            AppMetadata? receiverAppMetadata = _appMetadataRepository.TryReadAsync(receiverId).Result;
 
             if (receiverAppMetadata == null)
                 throw new Exception("AppMetadata not found");
@@ -54,14 +56,21 @@ namespace Beacon.Sdk.Core.Domain
             PermissionInfo info = _permissionInfoFactory.Create(
                 receiverId,
                 receiverAppMetadata,
-                PubKey.FromBase58(response.PublicKey),
+                response.Address,
+                response.PublicKey,
                 response.Network,
                 response.Scopes);
-            
-            _permissionInfoRepository.CreateOrUpdate(info);
 
+
+            info = _permissionInfoRepository.CreateOrUpdateAsync(info).Result;
+
+            OnDappConnected?.Invoke(this, new DappConnectedEventArgs(receiverAppMetadata, info));
+            
             return _jsonSerializerService.Serialize(response);
         }
+        //response.PublicKey,
+        // PubKey.FromBase64(response.PublicKey),
+        // PubKey.FromBase58(response.PublicKey),
 
         private string HandleOperationResponse(OperationResponse response) =>
             _jsonSerializerService.Serialize(response);

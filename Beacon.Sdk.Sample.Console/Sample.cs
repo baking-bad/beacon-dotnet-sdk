@@ -2,6 +2,9 @@
 // ReSharper disable ArgumentsStyleOther
 // ReSharper disable ArgumentsStyleStringLiteral
 
+using System.Runtime.InteropServices;
+using Serilog;
+
 namespace Beacon.Sdk.Sample.Console
 {
     using System;
@@ -14,6 +17,7 @@ namespace Beacon.Sdk.Sample.Console
     using Beacon.Error;
     using Beacon.Operation;
     using Beacon.Permission;
+    using Microsoft.Extensions.Logging;
     using Netezos.Forging;
     using Netezos.Forging.Models;
     using Netezos.Keys;
@@ -32,18 +36,18 @@ namespace Beacon.Sdk.Sample.Console
             
             const string path = "test1.db";
             // const string path = "prod_test.db";
-            File.Delete(path);
+            // File.Delete(path);
 
             // Use existing key
-            var walletKey = Key.FromBase58("edsk35n2ruX2r92SdtWzP87mEUqxWSwM14hG6GRhEvU6kfdH8Ut6SW");
+            var walletKey = Key.FromBase58("");
 
             var factory = new WalletBeaconClientFactory();
 
             var options = new BeaconOptions
             {
                 AppName = "Atomex Mobile",
-                AppUrl = "", //string?
-                IconUrl = "", // string?
+                AppUrl = "https://atomex.me",
+                IconUrl = "",
                 KnownRelayServers = new[]
                 {
                     "beacon-node-0.papers.tech:8448",
@@ -55,13 +59,22 @@ namespace Beacon.Sdk.Sample.Console
                     "beacon-node-1.hope-3.papers.tech",
                     "beacon-node-1.hope-4.papers.tech",
                 },
-                // see https://github.com/mbdavid/LiteDB/issues/787
-                DatabaseConnectionString = $"Filename={path}; Mode=Exclusive", // mac m1
-                // DatabaseConnectionString = $"Filename={path}"
+                
+                DatabaseConnectionString = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    ? $"Filename={path}; Connection=Shared;"
+                    : $"Filename={path}; Mode=Exclusive;"
             };
-
-            IWalletBeaconClient walletClient = factory.Create(options, new SerilogLoggerFactory());
-
+            
+            
+            // Log.Logger = new LoggerConfiguration()
+            //     .WriteTo.Console()
+            //     .CreateLogger();
+            //
+            Log.Information("Example log message!");
+            
+            IWalletBeaconClient walletClient = factory.Create(options, new SerilogLoggerFactory(Log.Logger));
+            var d = await walletClient.PermissionInfoRepository.ReadAllAsync();
+            
             walletClient.OnBeaconMessageReceived += async (_, dAppClient) =>
             {
                 BaseBeaconMessage message = dAppClient.Request;
@@ -70,24 +83,35 @@ namespace Beacon.Sdk.Sample.Console
                 {
                     var request = message as PermissionRequest;
                     
-                    var network = new Network 
+                    var network = request!.Network.Type switch
                     {
-                        Type = NetworkType.hangzhounet,
-                        Name = "Hangzhounet",
-                        RpcUrl = "https://hangzhounet.tezblock.io"
+                        NetworkType.mainnet => new Network
+                        {
+                            Type = NetworkType.mainnet,
+                            Name = "Mainnet",
+                            RpcUrl = "https://rpc.tzkt.io/mainnet"
+                        },
+                        _ => new Network
+                        {
+                            Type = NetworkType.ithacanet,
+                            Name = "Ithacanet",
+                            RpcUrl = "https://rpc.tzkt.io/ithacanet"
+                        }
                     };
 
+                    var publicKey = PubKey.FromBase58(walletKey.PubKey.ToString());
+                    
                     var response = new PermissionResponse(
                         id: request!.Id,
                         senderId: walletClient.SenderId,
+                        appMetadata: walletClient.Metadata,
                         network: network,
                         scopes: request.Scopes,
-                        publicKey: walletKey.PubKey.ToString(),
-                        appMetadata: walletClient.Metadata,
+                        publicKey: publicKey.ToString(),
+                        address: publicKey.Address,
                         version: request.Version);
 
                     // var response = new BeaconAbortedError(message.Id, walletClient.SenderId);
-
                     await walletClient.SendResponseAsync(receiverId: dAppClient.SenderId, response);
                 }
                 else if (message.Type == BeaconMessageType.operation_request)
@@ -115,7 +139,7 @@ namespace Beacon.Sdk.Sample.Console
 
             await walletClient.InitAsync();
             walletClient.Connect();
-
+            
             Console.WriteLine($"client.LoggedIn: {walletClient.LoggedIn}");
             Console.WriteLine($"client.Connected: {walletClient.Connected}");
 

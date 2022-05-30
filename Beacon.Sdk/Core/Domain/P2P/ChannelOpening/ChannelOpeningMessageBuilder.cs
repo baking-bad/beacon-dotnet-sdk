@@ -2,7 +2,6 @@ namespace Beacon.Sdk.Core.Domain.P2P.ChannelOpening
 {
     using System;
     using Dto.Handshake;
-    using Infrastructure;
     using Interfaces;
     using Services;
     using Sodium;

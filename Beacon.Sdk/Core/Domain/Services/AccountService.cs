@@ -15,7 +15,7 @@ namespace Beacon.Sdk.Core.Domain.Services
             _cryptographyService = cryptographyService;
         }
 
-        public string GetAccountIdentifier(string address, Network network)
+        public string GetAccountId(string address, Network network)
         {
             var data = new List<string> {address, network.Type.ToString()};
 

@@ -28,12 +28,14 @@
         private readonly P2PMessageService _p2PMessageService;
         private readonly P2PPeerRoomFactory _p2PPeerRoomFactory;
         private readonly IP2PPeerRoomRepository _p2PPeerRoomRepository;
+        private readonly IMatrixSyncRepository _matrixSyncRepository;
 
         public P2PCommunicationService(
             ILogger<P2PCommunicationService> logger,
             IMatrixClient matrixClient,
             IChannelOpeningMessageBuilder channelOpeningMessageBuilder,
             IP2PPeerRoomRepository p2PPeerRoomRepository,
+            IMatrixSyncRepository matrixSyncRepository,
             ICryptographyService cryptographyService,
             P2PLoginRequestFactory p2PLoginRequestFactory,
             P2PPeerRoomFactory p2PPeerRoomFactory,
@@ -43,6 +45,7 @@
             _matrixClient = matrixClient;
             _channelOpeningMessageBuilder = channelOpeningMessageBuilder;
             _p2PPeerRoomRepository = p2PPeerRoomRepository;
+            _matrixSyncRepository = matrixSyncRepository;
             _cryptographyService = cryptographyService;
             _p2PLoginRequestFactory = p2PLoginRequestFactory;
             _p2PPeerRoomFactory = p2PPeerRoomFactory;
@@ -67,7 +70,13 @@
         public void Start()
         {
             _matrixClient.OnMatrixRoomEventsReceived += OnMatrixRoomEventsReceived;
-            _matrixClient.Start();
+
+            MatrixSyncEntity? matrixSyncEntity = _matrixSyncRepository.TryReadAsync().Result;
+            
+            if (matrixSyncEntity != null)
+                _matrixClient.Start(matrixSyncEntity.NextBatch);
+            else 
+                _matrixClient.Start();
 
             Syncing = _matrixClient.IsSyncing;
         }
@@ -101,13 +110,14 @@
             });
 
             var spin = new SpinWait();
+
             MatrixRoom? needRoom = _matrixClient.JoinedRooms.FirstOrDefault(x => x.Id == createRoomResponse.RoomId);
 
             var wait = true;
             while (wait)
             {
                 spin.SpinOnce();
-                    
+
                 needRoom = _matrixClient.JoinedRooms.FirstOrDefault(x => x.Id == createRoomResponse.RoomId);
 
                 if (needRoom != null)
@@ -117,14 +127,15 @@
 
             _ = await _matrixClient.SendMessageAsync(createRoomResponse.RoomId, channelOpeningMessage.ToString());
 
-            P2PPeerRoom p2PPeerRoom = _p2PPeerRoomFactory.Create(peer.RelayServer, peer.HexPublicKey, createRoomResponse.RoomId);
+            P2PPeerRoom p2PPeerRoom =
+                _p2PPeerRoomFactory.Create(peer.RelayServer, peer.HexPublicKey, createRoomResponse.RoomId);
 
-            return _p2PPeerRoomRepository.CreateOrUpdate(p2PPeerRoom).Result;
+            return _p2PPeerRoomRepository.CreateOrUpdateAsync(p2PPeerRoom).Result;
         }
 
         public async Task SendMessageAsync(Peer peer, string message)
         {
-            P2PPeerRoom p2PPeerRoom = _p2PPeerRoomRepository.TryRead(peer.HexPublicKey).Result
+            P2PPeerRoom p2PPeerRoom = _p2PPeerRoomRepository.TryReadAsync(peer.HexPublicKey).Result
                                       ?? throw new NullReferenceException(nameof(P2PPeerRoom));
 
             string encryptedMessage = _p2PMessageService.EncryptMessage(peer.HexPublicKey, message).Value;
@@ -139,7 +150,7 @@
             if (matrixRoomEvent is not TextMessageEvent textMessageEvent) return null;
 
             string senderUserId = textMessageEvent.SenderUserId;
-            P2PPeerRoom? p2PPeerRoom = _p2PPeerRoomRepository.TryRead(senderUserId).Result;
+            P2PPeerRoom? p2PPeerRoom = _p2PPeerRoomRepository.TryReadAsync(senderUserId).Result;
 
             if (p2PPeerRoom == null)
                 // _logger.LogInformation("Unknown senderUserId");
@@ -162,6 +173,8 @@
             if (sender is not IMatrixClient)
                 throw new ArgumentException("sender is not IMatrixClient");
 
+            var t = _matrixSyncRepository.CreateOrUpdateAsync(e.NextBatch).Result;
+            
             var messages = new List<string>();
 
             foreach (BaseRoomEvent matrixRoomEvent in e.MatrixRoomEvents)
