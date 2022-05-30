@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+
 namespace Beacon.Sdk
 {
     using Core.Domain;
@@ -19,11 +21,7 @@ namespace Beacon.Sdk
     {
         public static IServiceCollection AddBeaconClient(this IServiceCollection services)
         {
-            services.AddMatrixClient();
-            
-            services.AddSingleton<ICryptographyService, CryptographyService>();
-
-            services.AddSingleton<BeaconOptions>(new BeaconOptions
+            var beaconOptions = new BeaconOptions
             {
                 AppName = "Atomex Mobile",
                 AppUrl = "", //string?
@@ -39,19 +37,24 @@ namespace Beacon.Sdk
                     "beacon-node-1.hope-3.papers.tech",
                     "beacon-node-1.hope-4.papers.tech",
                 },
-                // see https://github.com/mbdavid/LiteDB/issues/787
-                DatabaseConnectionString = $"Filename=test1.db; Mode=Exclusive", // mac m1
-                // DatabaseConnectionString = $"Filename={path}"
-            });
+
+                DatabaseConnectionString = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    ? "Filename=test1.db; Connection=Shared;"
+                    : "Filename=test1.db; Mode=Exclusive;"
+            };
+            
+            services.AddMatrixClient();
+            services.AddSingleton<ICryptographyService, CryptographyService>();
+            services.AddSingleton<BeaconOptions>(beaconOptions);
+
             #region Infrastructure
 
             services.AddSingleton<RepositorySettings>(new RepositorySettings
             {
-                ConnectionString = $"Filename=test1.db; Mode=Exclusive"
+                ConnectionString = beaconOptions.DatabaseConnectionString
             });
 
             services.AddSingleton<ISessionKeyPairRepository, InMemorySessionKeyPairRepository>();
-            
             services.AddSingleton<IPeerRepository, LiteDbPeerRepository>();
             services.AddSingleton<IP2PPeerRoomRepository, LiteDbP2PPeerRoomRepository>();
             services.AddSingleton<ISeedRepository, LiteDbSeedRepository>();
@@ -62,32 +65,31 @@ namespace Beacon.Sdk
 
             #endregion
 
-            
+
             #region Domain
-            
+
             services.AddSingleton<KeyPairService>();
             services.AddSingleton<AccountService>();
-           
+
             services.AddSingleton<PeerFactory>();
             services.AddSingleton<PermissionInfoFactory>();
-            
+
             services.AddSingleton<PermissionHandler>();
             services.AddSingleton<RequestMessageHandler>();
             services.AddSingleton<ResponseMessageHandler>();
-            
+
             #endregion
-            
+
             #region P2P
-            
+
             services.AddSingleton<IChannelOpeningMessageBuilder, ChannelOpeningMessageBuilder>();
             services.AddSingleton<P2PMessageService>();
             services.AddSingleton<ClientService>();
             services.AddSingleton<P2PLoginRequestFactory>();
             services.AddSingleton<P2PPeerRoomFactory>();
             services.AddSingleton<IP2PCommunicationService, P2PCommunicationService>();
-            
-            #endregion
 
+            #endregion
 
 
             // services.AddSingleton<IPeerRepository, LiteDbPeerRepository>();
@@ -97,9 +99,9 @@ namespace Beacon.Sdk
             // services.AddSingleton<IChannelOpeningMessageBuilder, ChannelOpeningMessageBuilder>();
             //
             // services.AddHttpClient("test", configureClient => { });
-            
+
             services.AddSingleton<IWalletBeaconClient, WalletBeaconClient.WalletBeaconClient>();
-            
+
             return services;
         }
     }

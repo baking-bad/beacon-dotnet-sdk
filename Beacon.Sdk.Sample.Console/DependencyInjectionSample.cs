@@ -23,13 +23,13 @@ namespace Beacon.Sdk.Sample.Console
             Console.WriteLine("Enter QR code:");
             string qrCode = Console.ReadLine();
 
-            const string path = "test1.db";
+            // const string path = "test1.db";
             // const string path = "prod_test.db";
-            File.Delete(path);
-
+            // File.Delete(path);
+            
             // Use existing key
             var walletKey = Key.FromBase58("");
-
+            
             IWalletBeaconClient walletClient = serviceProvider.GetRequiredService<IWalletBeaconClient>();
 
             walletClient.OnBeaconMessageReceived += async (_, dAppClient) =>
