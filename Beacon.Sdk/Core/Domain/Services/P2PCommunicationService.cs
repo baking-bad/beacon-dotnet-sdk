@@ -119,7 +119,7 @@
                 spin.SpinOnce();
 
                 needRoom = _matrixClient.JoinedRooms.FirstOrDefault(x => x.Id == createRoomResponse.RoomId);
-
+                
                 if (needRoom != null)
                     if (needRoom.JoinedUserIds.Count == 2)
                         wait = false;
@@ -173,7 +173,7 @@
             if (sender is not IMatrixClient)
                 throw new ArgumentException("sender is not IMatrixClient");
 
-            var t = _matrixSyncRepository.CreateOrUpdateAsync(e.NextBatch).Result;
+            _matrixSyncRepository.CreateOrUpdateAsync(e.NextBatch);
             
             var messages = new List<string>();
 
