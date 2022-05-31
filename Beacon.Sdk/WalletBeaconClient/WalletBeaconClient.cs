@@ -160,16 +160,31 @@ namespace Beacon.Sdk.WalletBeaconClient
                 _logger.LogInformation("Received message have not permission");
         }
 
-        private async Task<bool> HasPermission(BaseBeaconMessage beaconRequest) =>
-            beaconRequest.Type switch
+        private async Task<bool> HasPermission(BaseBeaconMessage beaconRequest)
+        {
+            switch (beaconRequest.Type)
             {
-                BeaconMessageType.permission_request => true,
-                BeaconMessageType.broadcast_request => true,
-                BeaconMessageType.operation_request => await HandleOperationRequest(beaconRequest as OperationRequest),
-                _ => false
-            };
+                case BeaconMessageType.permission_request:
+                case BeaconMessageType.broadcast_request:
+                    return true;
+                
+                case BeaconMessageType.operation_request:
+                {
+                    var request = beaconRequest as OperationRequest;
+                    var permissionInfo = await TryReadPermissionInfo(request!.SourceAddress, request.SenderId, request.Network);
 
-        private async Task<bool> HandleOperationRequest(OperationRequest request)
+                    return permissionInfo != null && permissionInfo.Scopes.Contains(PermissionScope.operation_request);
+                }
+                // todo: handle this permission
+                case BeaconMessageType.sign_payload_request:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        private async Task<bool> CheckOperationRequestHasPermission(OperationRequest request)
         {
             PermissionInfo? permissionInfo = await TryReadPermissionInfo(request.SourceAddress, request.SenderId, request.Network);
 
@@ -178,7 +193,7 @@ namespace Beacon.Sdk.WalletBeaconClient
 
         public async Task<PermissionInfo?> TryReadPermissionInfo(string sourceAddress, string senderId, Network network)
         {
-            string accountId = AccountService.GetAccountId(sourceAddress, network);
+            var accountId = AccountService.GetAccountId(sourceAddress, network);
 
             return await PermissionInfoRepository.TryReadAsync(senderId, accountId);
         }

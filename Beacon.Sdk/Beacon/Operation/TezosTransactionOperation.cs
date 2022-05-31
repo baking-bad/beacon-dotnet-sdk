@@ -1,3 +1,5 @@
+using Newtonsoft.Json.Linq;
+
 namespace Beacon.Sdk.Beacon.Operation
 {
     public record TezosTransactionOperation(
@@ -9,11 +11,11 @@ namespace Beacon.Sdk.Beacon.Operation
             string storage_limit,
             string amount,
             string destination)
-        : TezosBaseOperation(kind); //, IPartialTezosOperation;
+        : TezosBaseOperation(kind);
 
     public record PartialTezosTransactionOperation(
             string Amount,
             string Destination,
-            string Parameters)
+            JObject? Parameters)
         : TezosBaseOperation(TezosOperationType.transaction), IPartialTezosOperation;
 }
