@@ -1,3 +1,5 @@
+using Beacon.Sdk.Beacon.Sign;
+
 namespace Beacon.Sdk.Core.Domain
 {
     using System;
@@ -20,33 +22,39 @@ namespace Beacon.Sdk.Core.Domain
 
         public (AcknowledgeResponse, BaseBeaconMessage) Handle(string message, string senderId)
         {
-            BaseBeaconMessage baseBeaconMessage = _jsonSerializerService.Deserialize<BaseBeaconMessage>(message);
-            var ack = new AcknowledgeResponse(baseBeaconMessage.Id, senderId);
+            var baseBeaconMessage = _jsonSerializerService.Deserialize<BaseBeaconMessage>(message);
+            var ack = new AcknowledgeResponse(baseBeaconMessage.Id, senderId, baseBeaconMessage.Version);
 
             return baseBeaconMessage.Type switch
             {
                 BeaconMessageType.permission_request => (ack, HandlePermissionRequest(message)),
                 BeaconMessageType.operation_request => (ack, HandleOperationRequest(message)),
+                BeaconMessageType.sign_payload_request => (ack, HandleSignPayloadRequest(message)),
                 _ => throw new Exception("Unknown beaconMessage.Type.")
             };
         }
 
         private BaseBeaconMessage HandlePermissionRequest(string message)
         {
-            PermissionRequest request = _jsonSerializerService.Deserialize<PermissionRequest>(message);
-
-            _ = _appMetadataRepository.CreateOrUpdate(request.AppMetadata).Result;
+            var request = _jsonSerializerService.Deserialize<PermissionRequest>(message);
+            _ = _appMetadataRepository.CreateOrUpdateAsync(request.AppMetadata).Result;
 
             return request;
         }
 
         private BaseBeaconMessage HandleOperationRequest(string message)
         {
-            OperationRequest request = _jsonSerializerService.Deserialize<OperationRequest>(message);
+            var operationRequest = _jsonSerializerService.Deserialize<OperationRequest>(message);
+            _ = _appMetadataRepository.TryReadAsync(operationRequest.SenderId).Result;
 
-            _ = _appMetadataRepository.TryRead(request.SenderId).Result;
+            return operationRequest;
+        }
 
-            return request;
+
+        private BaseBeaconMessage HandleSignPayloadRequest(string message)
+        {
+            var signPayloadRequest = _jsonSerializerService.Deserialize<SignPayloadRequest>(message);
+            return signPayloadRequest;
         }
     }
 }

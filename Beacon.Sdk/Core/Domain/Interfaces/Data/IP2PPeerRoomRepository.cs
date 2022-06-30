@@ -6,10 +6,10 @@ namespace Beacon.Sdk.Core.Domain.Interfaces.Data
 
     public interface IP2PPeerRoomRepository
     {
-        Task<P2PPeerRoom> CreateOrUpdate(P2PPeerRoom p2PPeerRoom);
+        Task<P2PPeerRoom> CreateOrUpdateAsync(P2PPeerRoom p2PPeerRoom);
 
-        Task<P2PPeerRoom?> TryRead(string p2PUserId);
+        Task<P2PPeerRoom?> TryReadAsync(string p2PUserId);
 
-        Task<P2PPeerRoom?> TryRead(HexString peerHexPublicKey);
+        Task<P2PPeerRoom?> TryReadAsync(HexString peerHexPublicKey);
     }
 }

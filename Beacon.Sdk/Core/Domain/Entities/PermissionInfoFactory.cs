@@ -16,24 +16,19 @@ namespace Beacon.Sdk.Core.Domain.Entities
             _accountService = accountService;
         }
 
-        public PermissionInfo Create(string receiverId, AppMetadata metadata, PubKey publicKey, Network network,
-            List<PermissionScope> scopes)
-        {
-            string address = publicKey.Address;
-            string accountId = _accountService.GetAccountIdentifier(address, network);
-
-            return new PermissionInfo
+        public PermissionInfo Create(string receiverId, AppMetadata metadata, string address,
+            string publicKey, Network network, List<PermissionScope> scopes) =>
+            new()
             {
-                AccountIdentifier = accountId,
+                AccountId = _accountService.GetAccountId(address, network),
                 SenderId = receiverId,
                 AppMetadata = metadata,
                 Website = "",
                 Address = address,
-                PublicKey = publicKey.ToString(),
+                PublicKey = publicKey,
                 Network = network,
                 Scopes = scopes,
                 ConnectedAt = DateTime.UtcNow
             };
-        }
     }
 }

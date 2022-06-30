@@ -2,7 +2,6 @@ namespace Beacon.Sdk.Core.Domain.P2P.ChannelOpening
 {
     using System;
     using Dto.Handshake;
-    using Infrastructure;
     using Interfaces;
     using Services;
     using Sodium;
@@ -49,7 +48,8 @@ namespace Beacon.Sdk.Core.Domain.P2P.ChannelOpening
             _message.Payload = payloadVersion switch
             {
                 "1" => senderHexPublicKey.ToString(),
-                "2" => BuildPairingPayloadV2(pairingRequestId, senderHexPublicKey, senderRelayServer, senderAppName),
+                "2" => BuildPairingResponseV2(pairingRequestId, senderHexPublicKey, senderRelayServer, senderAppName),
+                "3" => BuildPairingResponseV3(pairingRequestId, senderHexPublicKey, senderRelayServer, senderAppName),
                 _ => throw new ArgumentOutOfRangeException(nameof(payloadVersion))
             };
         }
@@ -63,14 +63,34 @@ namespace Beacon.Sdk.Core.Domain.P2P.ChannelOpening
             _message.Payload = _cryptographyService.EncryptMessageAsString(before, curve25519PublicKey);
         }
 
-        private string BuildPairingPayloadV2(string pairingRequestId, HexString senderHexPublicKey,
-            string senderRelayServer, string senderAppName)
+        private string BuildPairingResponseV2(
+            string pairingRequestId,
+            HexString senderHexPublicKey,
+            string senderRelayServer,
+            string senderAppName)
         {
             var pairingResponse = new P2PPairingResponse(
                 pairingRequestId,
                 senderAppName,
                 senderHexPublicKey.Value,
-                senderRelayServer);
+                senderRelayServer,
+                Version: "2");
+
+            return _jsonSerializerService.Serialize(pairingResponse);
+        }
+        
+        private string BuildPairingResponseV3(
+            string pairingRequestId,
+            HexString senderHexPublicKey,
+            string senderRelayServer,
+            string senderAppName)
+        {
+            var pairingResponse = new P2PPairingResponse(
+                pairingRequestId,
+                senderAppName,
+                senderHexPublicKey.Value,
+                senderRelayServer,
+                Version: "3");
 
             return _jsonSerializerService.Serialize(pairingResponse);
         }

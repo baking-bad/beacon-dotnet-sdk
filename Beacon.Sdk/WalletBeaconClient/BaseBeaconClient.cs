@@ -3,6 +3,7 @@ namespace Beacon.Sdk.WalletBeaconClient
     using System;
     using Beacon;
     using Core.Domain.Entities;
+    using Core.Domain.Interfaces.Data;
     using Core.Domain.Services;
     using Netezos.Encoding;
     using Utils;
@@ -16,11 +17,19 @@ namespace Beacon.Sdk.WalletBeaconClient
         protected readonly string AppName;
         protected readonly string[] KnownRelayServers;
 
-        protected BaseBeaconClient(KeyPairService keyPairService, IAppMetadataRepository appMetadataRepository,
+        protected BaseBeaconClient(
+            KeyPairService keyPairService,
+            AccountService accountService,
+            IAppMetadataRepository appMetadataRepository,
+            IPermissionInfoRepository permissionInfoRepository,
+            ISeedRepository seedRepository,
             BeaconOptions options)
         {
             _keyPairService = keyPairService;
+            AccountService = accountService;
             AppMetadataRepository = appMetadataRepository;
+            PermissionInfoRepository = permissionInfoRepository;
+            SeedRepository = seedRepository;
 
             _iconUrl = options.IconUrl;
             _appUrl = options.AppUrl;
@@ -40,9 +49,15 @@ namespace Beacon.Sdk.WalletBeaconClient
             }
         }
 
+        protected AccountService AccountService { get; }
+
         public string SenderId => Base58.Convert(PeerFactory.Hash(BeaconId.ToByteArray(), 5));
 
         public IAppMetadataRepository AppMetadataRepository { get; }
+
+        public IPermissionInfoRepository PermissionInfoRepository { get; }
+
+        public ISeedRepository SeedRepository { get; }
 
         public AppMetadata Metadata => new()
         {

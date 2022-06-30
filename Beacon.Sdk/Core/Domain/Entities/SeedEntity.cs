@@ -1,9 +1,9 @@
 namespace Beacon.Sdk.Core.Domain.Entities
 {
+    using LiteDB;
+
     public class SeedEntity
     {
-        public long Id { get; set; }
-
-        public string Seed { get; set; }
+        [BsonId] public string Seed { get; set; }
     }
 }

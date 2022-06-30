@@ -14,7 +14,7 @@ namespace Beacon.Sdk.Beacon.Permission
         florencenet,
         granadanet,
         hangzhounet,
-        idiazabalnet,
+        ithacanet,
         custom
     }
 }

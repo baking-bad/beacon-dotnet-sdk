@@ -30,7 +30,7 @@ namespace Beacon.Sdk.Sample.Console
             var seedRepository =
                 new LiteDbSeedRepository(new Logger<LiteDbSeedRepository>(loggerFactory), repositorySettings);
 
-            var keyPairService = new KeyPairService(cryptographyService, seedRepository);
+            // var keyPairService = new KeyPairService(cryptographyService, seedRepository);
 
             var guid = Guid.NewGuid().ToString();
             string g = KeyPairService.CreateGuid();

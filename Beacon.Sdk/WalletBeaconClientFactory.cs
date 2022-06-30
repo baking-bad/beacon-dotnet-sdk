@@ -30,6 +30,7 @@ namespace Beacon.Sdk
             if (_client != null)
                 return _client;
 
+
             #region Infrastructure
 
             var repositorySettings = new RepositorySettings
@@ -39,29 +40,19 @@ namespace Beacon.Sdk
             var cryptographyService = new CryptographyService();
             var sessionKeyPairRepository = new InMemorySessionKeyPairRepository(cryptographyService);
 
-            var peerRepository =
-                new LiteDbPeerRepository(
-                    new Logger<LiteDbPeerRepository>(
-                        loggerFactory ?? NullLoggerFactory.Instance), repositorySettings);
+            
+            var peerRepository = new LiteDbPeerRepository(loggerFactory.CreateLogger<LiteDbPeerRepository>(), repositorySettings);
 
-            var p2PPeerRoomRepository =
-                new LiteDbP2PPeerRoomRepository(
-                    new Logger<LiteDbP2PPeerRoomRepository>(
-                        loggerFactory ?? NullLoggerFactory.Instance), repositorySettings);
+            var p2PPeerRoomRepository = new LiteDbP2PPeerRoomRepository(loggerFactory.CreateLogger<LiteDbP2PPeerRoomRepository>(), repositorySettings);
 
-            var seedRepository =
-                new LiteDbSeedRepository(
-                    new Logger<LiteDbSeedRepository>(
-                        loggerFactory ?? NullLoggerFactory.Instance), repositorySettings);
+            var seedRepository = new LiteDbSeedRepository(loggerFactory.CreateLogger<LiteDbSeedRepository>(), repositorySettings);
 
-            var appMetadataRepository = new LiteDbAppMetadataRepository(
-                new Logger<LiteDbAppMetadataRepository>(loggerFactory ?? NullLoggerFactory.Instance),
-                repositorySettings);
+            var appMetadataRepository = new LiteDbAppMetadataRepository(loggerFactory.CreateLogger<LiteDbAppMetadataRepository>(), repositorySettings);
 
-            var permissionInfoRepository = new LiteDbPermissionInfoRepository(
-                new Logger<LiteDbPermissionInfoRepository>(loggerFactory ?? NullLoggerFactory.Instance),
-                repositorySettings);
+            var permissionInfoRepository = new LiteDbPermissionInfoRepository(loggerFactory.CreateLogger<LiteDbPermissionInfoRepository>(), repositorySettings);
 
+            var matrixSyncRepository = new LiteDbMatrixSyncRepository(loggerFactory.CreateLogger<LiteDbMatrixSyncRepository>(), repositorySettings);
+            
             var sdkStorage = new SdkStorage();
             var jsonSerializerService = new JsonSerializerService();
 
@@ -94,8 +85,7 @@ namespace Beacon.Sdk
 
             var matrixClientService = new ClientService(SingletonHttpFactory);
 
-            var p2PLoginRequestFactory = new P2PLoginRequestFactory(
-                new Logger<P2PLoginRequestFactory>(loggerFactory ?? NullLoggerFactory.Instance),
+            var p2PLoginRequestFactory = new P2PLoginRequestFactory(loggerFactory.CreateLogger<P2PLoginRequestFactory>(),
                 matrixClientService,
                 sdkStorage,
                 cryptographyService,
@@ -103,10 +93,11 @@ namespace Beacon.Sdk
 
             var p2PPeerRoomFactory = new P2PPeerRoomFactory(cryptographyService);
             var p2PCommunicationService = new P2PCommunicationService(
-                new Logger<P2PCommunicationService>(loggerFactory ?? NullLoggerFactory.Instance),
-                MatrixClientFactory.Create(new Logger<PollingService>(loggerFactory ?? NullLoggerFactory.Instance)),
+                loggerFactory.CreateLogger<P2PCommunicationService>(),
+                MatrixClientFactory.Create(loggerFactory.CreateLogger<PollingService>()),
                 channelOpeningMessageBuilder,
                 p2PPeerRoomRepository,
+                matrixSyncRepository,
                 cryptographyService,
                 p2PLoginRequestFactory,
                 p2PPeerRoomFactory,
@@ -114,17 +105,22 @@ namespace Beacon.Sdk
 
             #endregion
 
-            _client = new WalletBeaconClient.WalletBeaconClient(
-                new Logger<WalletBeaconClient.WalletBeaconClient>(loggerFactory ?? new NullLoggerFactory()),
+            _client = new WalletBeaconClient.WalletBeaconClient(loggerFactory.CreateLogger<WalletBeaconClient.WalletBeaconClient>(),
                 peerRepository,
                 appMetadataRepository,
+                permissionInfoRepository,
+                seedRepository,
                 p2PCommunicationService,
+                accountService,
                 keyPairService,
                 peerFactory,
                 incomingMessageHandler,
                 outgoingMessageHandler,
                 permissionHandler,
                 options);
+
+            var k = loggerFactory.CreateLogger<WalletBeaconClientFactory>();
+            k.LogInformation("Init factory");
 
             return _client;
         }

@@ -1,8 +1,8 @@
+using System.Collections.Generic;
+using Beacon.Sdk.Beacon.Permission;
+
 namespace Beacon.Sdk.Beacon.Operation
 {
-    using System.Collections.Generic;
-    using Permission;
-
     public record OperationRequest : BaseBeaconMessage
     {
         public OperationRequest(
@@ -12,8 +12,8 @@ namespace Beacon.Sdk.Beacon.Operation
             string senderId,
             Network network,
             List<PartialTezosTransactionOperation> operationDetails,
-            string sourceAddress)
-            : base(type, version, id, senderId)
+            string sourceAddress
+        ) : base(type, version, id, senderId)
         {
             Network = network;
             OperationDetails = operationDetails;
