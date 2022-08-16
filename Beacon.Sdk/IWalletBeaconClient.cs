@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Beacon.Sdk
 {
     using System;
@@ -30,6 +32,8 @@ namespace Beacon.Sdk
         Task InitAsync();
 
         Task AddPeerAsync(P2PPairingRequest pairingRequest, bool sendPairingResponse = true);
+
+        IEnumerable<Peer> GetAllPeers();
 
         Task RemovePeerAsync(Peer peer);
 

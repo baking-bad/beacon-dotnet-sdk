@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Beacon.Sdk.Sample.Console
 {
     using System;
@@ -63,6 +65,11 @@ namespace Beacon.Sdk.Sample.Console
             // OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs("", new MockRequest()));
 
             await Task.CompletedTask;
+        }
+
+        public IEnumerable<Peer> GetAllPeers()
+        {
+            throw new NotImplementedException();
         }
 
         public Task RemovePeerAsync(Peer peer) => throw new NotImplementedException();

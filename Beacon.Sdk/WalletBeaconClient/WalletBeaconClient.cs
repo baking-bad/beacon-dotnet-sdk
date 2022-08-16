@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Beacon.Sdk.WalletBeaconClient
 {
     using System;
@@ -77,7 +79,7 @@ namespace Beacon.Sdk.WalletBeaconClient
                 return;
             }
 
-            Peer peer = _peerFactory.Create(
+            var peer = _peerFactory.Create(
                 peerHexPublicKey,
                 pairingRequest.Name,
                 pairingRequest.Version,
@@ -89,6 +91,12 @@ namespace Beacon.Sdk.WalletBeaconClient
             if (sendPairingResponse)
                 _ = await _p2PCommunicationService.SendChannelOpeningMessageAsync(peer, pairingRequest.Id, AppName);
         }
+
+        public IEnumerable<Peer> GetAllPeers()
+        {
+            return _peerRepository.GetAll().Result;
+        }
+
 
         public Task RemovePeerAsync(Peer peer)
         {
@@ -128,10 +136,10 @@ namespace Beacon.Sdk.WalletBeaconClient
 
         public async Task SendResponseAsync(string receiverId, BaseBeaconMessage response)
         {
-            Peer peer = _peerRepository.TryReadAsync(receiverId).Result
+            var peer = _peerRepository.TryReadAsync(receiverId).Result
                         ?? throw new NullReferenceException(nameof(Peer));
 
-            string message = _responseMessageHandler.Handle(response, receiverId);
+            var message = _responseMessageHandler.Handle(response, receiverId);
 
             await _p2PCommunicationService.SendMessageAsync(peer, message);
         }
