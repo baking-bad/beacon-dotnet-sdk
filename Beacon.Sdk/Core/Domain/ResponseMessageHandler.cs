@@ -10,7 +10,6 @@ namespace Beacon.Sdk.Core.Domain
     using Entities;
     using Interfaces;
     using Interfaces.Data;
-    using Netezos.Keys;
 
     public class ResponseMessageHandler
     {
@@ -55,12 +54,12 @@ namespace Beacon.Sdk.Core.Domain
 
         private string HandlePermissionResponse(string receiverId, PermissionResponse response)
         {
-            AppMetadata? receiverAppMetadata = _appMetadataRepository.TryReadAsync(receiverId).Result;
+            var receiverAppMetadata = _appMetadataRepository.TryReadAsync(receiverId).Result;
 
             if (receiverAppMetadata == null)
                 throw new Exception("AppMetadata not found");
 
-            PermissionInfo info = _permissionInfoFactory.Create(
+            var info = _permissionInfoFactory.Create(
                 receiverId,
                 receiverAppMetadata,
                 response.Address,
@@ -69,7 +68,6 @@ namespace Beacon.Sdk.Core.Domain
                 response.Scopes);
 
             info = _permissionInfoRepository.CreateOrUpdateAsync(info).Result;
-
             OnDappConnected?.Invoke(this, new DappConnectedEventArgs(receiverAppMetadata, info));
 
             return _jsonSerializerService.Serialize(response);

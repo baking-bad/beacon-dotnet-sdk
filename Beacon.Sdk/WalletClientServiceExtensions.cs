@@ -19,11 +19,11 @@ namespace Beacon.Sdk
 
     public static class WalletClientServiceExtensions
     {
-        public static IServiceCollection AddBeaconClient(this IServiceCollection services)
+        public static IServiceCollection AddBeaconClient(this IServiceCollection services, string appName = "Atomex")
         {
             var beaconOptions = new BeaconOptions
             {
-                AppName = "Atomex Mobile",
+                AppName = appName,
                 AppUrl = "", //string?
                 IconUrl = "", // string?
                 KnownRelayServers = new[]
@@ -39,8 +39,8 @@ namespace Beacon.Sdk
                 },
 
                 DatabaseConnectionString = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                    ? "Filename=test1.db; Connection=Shared;"
-                    : "Filename=test1.db; Mode=Exclusive;"
+                    ? "Filename=beacon.db; Connection=Shared;"
+                    : "Filename=beacon.db; Mode=Exclusive;"
             };
             
             services.AddMatrixClient();

@@ -18,16 +18,15 @@ namespace Beacon.Sdk.Core.Domain.Entities
         public static byte[] Hash(byte[] message, int bufferLength)
         {
             var buffer = new byte[bufferLength];
-
             SodiumLibrary.crypto_generichash(buffer, bufferLength, message, message.Length, Array.Empty<byte>(), 0);
 
             return buffer;
         }
 
-        public Peer Create(HexString hexPublicKey, string name, string version, string relayServer)
+        public Peer Create(HexString hexPublicKey, string name, string version, string relayServer, string addressToConnect)
         {
-            byte[] hash = _cryptographyService.Hash(hexPublicKey.ToByteArray(), 5);
-            string senderId = Base58.Convert(hash);
+            var hash = _cryptographyService.Hash(hexPublicKey.ToByteArray(), 5);
+            var senderId = Base58.Convert(hash);
 
             return new Peer
             {
@@ -35,7 +34,8 @@ namespace Beacon.Sdk.Core.Domain.Entities
                 HexPublicKey = hexPublicKey,
                 Name = name,
                 Version = version,
-                RelayServer = relayServer
+                RelayServer = relayServer,
+                ConnectedAddress = addressToConnect
             };
         }
     }

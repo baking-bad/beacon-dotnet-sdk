@@ -4,7 +4,6 @@ namespace Beacon.Sdk.Core.Domain.Entities
     using System.Collections.Generic;
     using Beacon;
     using Beacon.Permission;
-    using Netezos.Keys;
     using Services;
 
     public class PermissionInfoFactory

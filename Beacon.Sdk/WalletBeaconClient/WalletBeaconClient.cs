@@ -3,7 +3,6 @@ using System.Collections.Generic;
 namespace Beacon.Sdk.WalletBeaconClient
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Threading.Tasks;
     using Beacon;
     using Beacon.Operation;
@@ -62,8 +61,6 @@ namespace Beacon.Sdk.WalletBeaconClient
         
         public event EventHandler<DappConnectedEventArgs> OnDappConnected;
 
-        // public event EventHandler<BeaconMessageEventArgs>? OnBeaconMessageReceived;
-
         public async Task InitAsync()
         {
             await _p2PCommunicationService.LoginAsync(KnownRelayServers);
@@ -71,9 +68,9 @@ namespace Beacon.Sdk.WalletBeaconClient
             LoggedIn = _p2PCommunicationService.LoggedIn;
         }
 
-        public async Task AddPeerAsync(P2PPairingRequest pairingRequest, bool sendPairingResponse = true)
+        public async Task AddPeerAsync(P2PPairingRequest pairingRequest, string addressToConnect, bool sendPairingResponse = true)
         {
-            if (!HexString.TryParse(pairingRequest.PublicKey, out HexString peerHexPublicKey))
+            if (!HexString.TryParse(pairingRequest.PublicKey, out var peerHexPublicKey))
             {
                 _logger.LogError("Can not parse receiver public key");
                 return;
@@ -83,7 +80,8 @@ namespace Beacon.Sdk.WalletBeaconClient
                 peerHexPublicKey,
                 pairingRequest.Name,
                 pairingRequest.Version,
-                pairingRequest.RelayServer
+                pairingRequest.RelayServer,
+                addressToConnect
             );
 
             peer = _peerRepository.CreateAsync(peer).Result;
@@ -100,7 +98,8 @@ namespace Beacon.Sdk.WalletBeaconClient
 
         public Task RemovePeerAsync(Peer peer)
         {
-            return  Task.CompletedTask;
+            // todo: implement remove;
+            return Task.CompletedTask;
         }
         
         private async Task SendDisconnectMessage(string receiverId)
