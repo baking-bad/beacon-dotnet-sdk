@@ -19,7 +19,8 @@ namespace Beacon.Sdk
 
     public static class WalletClientServiceExtensions
     {
-        public static IServiceCollection AddBeaconClient(this IServiceCollection services, string appName = "Atomex")
+        public static IServiceCollection AddBeaconClient(this IServiceCollection services, string pathToDb,
+            string appName = "Atomex")
         {
             var beaconOptions = new BeaconOptions
             {
@@ -39,10 +40,10 @@ namespace Beacon.Sdk
                 },
 
                 DatabaseConnectionString = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                    ? "Filename=beacon.db; Connection=Shared;"
-                    : "Filename=beacon.db; Mode=Exclusive;"
+                    ? $"Filename={pathToDb}/beacon.db; Connection=Shared;"
+                    : $"Filename={pathToDb}/beacon.db; Mode=Exclusive;"
             };
-            
+
             services.AddMatrixClient();
             services.AddSingleton<ICryptographyService, CryptographyService>();
             services.AddSingleton<BeaconOptions>(beaconOptions);
@@ -89,7 +90,6 @@ namespace Beacon.Sdk
             services.AddSingleton<P2PLoginRequestFactory>();
             services.AddSingleton<P2PPeerRoomFactory>();
             services.AddSingleton<IP2PCommunicationService, P2PCommunicationService>();
-            
 
             #endregion
 

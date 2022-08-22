@@ -1,7 +1,5 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using LiteDB;
+
 
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
@@ -21,19 +19,18 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
         public Task<Peer> CreateAsync(Peer peer) => InConnection(CollectionName, col =>
         {
-            col.Insert(peer);
-            col.EnsureIndex(x => x.SenderId);
+            var existingPeer = col.FindOne(p => p.Name == peer.Name);
+            if (existingPeer != null)
+                peer.Id = existingPeer.Id;
 
+            col.Upsert(peer);
+            col.EnsureIndex(x => x.SenderId);
             return Task.FromResult(peer);
         });
 
         public Task<Peer?> TryReadAsync(string senderUserId) => InConnectionNullable(CollectionName, col =>
         {
-            // Peer? peer = col.Query().Where(x => x.SenderUserId == senderUserId).FirstOrDefault();
-
-            col.EnsureIndex(x => x.SenderId);
             var peer = col.FindOne(x => x.SenderId == senderUserId);
-
             return Task.FromResult(peer ?? null);
         });
 
