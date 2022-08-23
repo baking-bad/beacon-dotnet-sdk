@@ -72,10 +72,10 @@
             _matrixClient.OnMatrixRoomEventsReceived += OnMatrixRoomEventsReceived;
 
             MatrixSyncEntity? matrixSyncEntity = _matrixSyncRepository.TryReadAsync().Result;
-            
+
             if (matrixSyncEntity != null)
                 _matrixClient.Start(matrixSyncEntity.NextBatch);
-            else 
+            else
                 _matrixClient.Start();
 
             Syncing = _matrixClient.IsSyncing;
@@ -119,7 +119,7 @@
                 spin.SpinOnce();
 
                 needRoom = _matrixClient.JoinedRooms.FirstOrDefault(x => x.Id == createRoomResponse.RoomId);
-                
+
                 if (needRoom != null)
                     if (needRoom.JoinedUserIds.Count == 2)
                         wait = false;
@@ -128,9 +128,20 @@
             _ = await _matrixClient.SendMessageAsync(createRoomResponse.RoomId, channelOpeningMessage.ToString());
 
             P2PPeerRoom p2PPeerRoom =
-                _p2PPeerRoomFactory.Create(peer.RelayServer, peer.HexPublicKey, createRoomResponse.RoomId);
+                _p2PPeerRoomFactory.Create(peer.RelayServer, peer.HexPublicKey, peer.Name, createRoomResponse.RoomId);
+            var p2PeerRoom = _p2PPeerRoomRepository.CreateOrUpdateAsync(p2PPeerRoom).Result;
 
-            return _p2PPeerRoomRepository.CreateOrUpdateAsync(p2PPeerRoom).Result;
+            var allDatabaseRoomIds = _p2PPeerRoomRepository.GetAll().Result.Select(room => room.RoomId);
+            var abandonedRoomIds = (from room in _matrixClient.JoinedRooms
+                where !allDatabaseRoomIds.Contains(room.Id)
+                select room.Id).ToList();
+
+            foreach (var abandonedRoomId in abandonedRoomIds)
+            {
+                await _matrixClient.LeaveRoomAsync(abandonedRoomId);
+            }
+
+            return p2PeerRoom;
         }
 
         public async Task SendMessageAsync(Peer peer, string message)
@@ -174,7 +185,7 @@
                 throw new ArgumentException("sender is not IMatrixClient");
 
             _matrixSyncRepository.CreateOrUpdateAsync(e.NextBatch);
-            
+
             var messages = new List<string>();
 
             foreach (BaseRoomEvent matrixRoomEvent in e.MatrixRoomEvents)

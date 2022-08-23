@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Beacon.Sdk.Core.Domain.Interfaces.Data
 {
     using System.Threading.Tasks;
@@ -11,5 +13,7 @@ namespace Beacon.Sdk.Core.Domain.Interfaces.Data
         Task<P2PPeerRoom?> TryReadAsync(string p2PUserId);
 
         Task<P2PPeerRoom?> TryReadAsync(HexString peerHexPublicKey);
+
+        Task<List<P2PPeerRoom>> GetAll();
     }
 }

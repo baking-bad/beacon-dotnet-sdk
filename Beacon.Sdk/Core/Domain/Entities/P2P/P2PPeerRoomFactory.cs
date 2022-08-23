@@ -13,7 +13,7 @@ namespace Beacon.Sdk.Core.Domain.Entities.P2P
             _cryptographyService = cryptographyService;
         }
 
-        public P2PPeerRoom Create(string relayServer, HexString peerHexPublicKey, string roomId)
+        public P2PPeerRoom Create(string relayServer, HexString peerHexPublicKey, string peerName, string roomId)
         {
             byte[] hexBytes = peerHexPublicKey.ToByteArray();
             byte[] hash = _cryptographyService.Hash(hexBytes);
@@ -25,7 +25,8 @@ namespace Beacon.Sdk.Core.Domain.Entities.P2P
             {
                 P2PUserId = $"@{hexHash}:{relayServer}",
                 PeerHexPublicKey = peerHexPublicKey,
-                RoomId = roomId
+                RoomId = roomId,
+                PeerName = peerName
             };
         }
     }

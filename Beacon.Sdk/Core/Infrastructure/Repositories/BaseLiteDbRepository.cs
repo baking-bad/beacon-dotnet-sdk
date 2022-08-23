@@ -57,7 +57,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
             return new Task<T>(() => default!);
         }
-
+        
         protected Task<T?> InConnectionNullable(string collectionName, Func<LiteCollection<T>, Task<T?>> func)
         {
             try
