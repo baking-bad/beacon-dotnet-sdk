@@ -20,7 +20,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         public Task<P2PPeerRoom> CreateOrUpdateAsync(P2PPeerRoom p2PPeerRoom) =>
             InConnection(CollectionName, col =>
             {
-                // P2PPeerRoom? result = col.FindOne(x => x.PeerHexPublicKey.Value == p2PPeerRoom.PeerHexPublicKey.Value);
                 var result = col.FindOne(x => x.PeerName == p2PPeerRoom.PeerName);
                 if (result != null)
                     p2PPeerRoom.Id = result.Id;
@@ -35,25 +34,25 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         public Task<List<P2PPeerRoom>> GetAll() => InConnection(CollectionName,
             col => Task.FromResult(new List<P2PPeerRoom>(col.FindAll())));
 
+        public Task Remove(HexString peerHexPublicKey) => InConnectionAction(CollectionName, col =>
+        {
+            var peerRoom = col.FindOne(x => x.PeerHexPublicKey.Value == peerHexPublicKey.Value);
+
+            if (peerRoom != null)
+                col.Delete(peerRoom.Id);
+        });
+
         public Task<P2PPeerRoom?> TryReadAsync(string p2PUserId) =>
             InConnectionNullable(CollectionName, col =>
             {
-                // P2PPeerRoom? peerRoom = col.Query().Where(x => x.P2PUserId == p2PUserId)
-                //     .FirstOrDefault();
-
-                P2PPeerRoom? peerRoom = col.FindOne(x => x.P2PUserId == p2PUserId);
-
+                var peerRoom = col.FindOne(x => x.P2PUserId == p2PUserId);
                 return Task.FromResult(peerRoom ?? null);
             });
 
         public Task<P2PPeerRoom?> TryReadAsync(HexString peerHexPublicKey) =>
             InConnectionNullable(CollectionName, col =>
             {
-                // P2PPeerRoom? peerRoom = col.Query().Where(x => x.PeerHexPublicKey.Value == peerHexPublicKey.Value)
-                //     .FirstOrDefault();
-
                 P2PPeerRoom? peerRoom = col.FindOne(x => x.PeerHexPublicKey.Value == peerHexPublicKey.Value);
-
                 return Task.FromResult(peerRoom ?? null);
             });
     }

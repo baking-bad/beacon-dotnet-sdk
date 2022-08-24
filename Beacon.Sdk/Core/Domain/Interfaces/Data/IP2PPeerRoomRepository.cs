@@ -15,5 +15,7 @@ namespace Beacon.Sdk.Core.Domain.Interfaces.Data
         Task<P2PPeerRoom?> TryReadAsync(HexString peerHexPublicKey);
 
         Task<List<P2PPeerRoom>> GetAll();
+
+        Task Remove(HexString peerHexPublicKey);
     }
 }

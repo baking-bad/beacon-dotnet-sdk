@@ -25,7 +25,7 @@ namespace Beacon.Sdk
 
         event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
         
-        event EventHandler<DappConnectedEventArgs> OnDappConnected;
+        event EventHandler<DappConnectedEventArgs?> OnDappsListChanged;
 
         Task SendResponseAsync(string receiverId, BaseBeaconMessage response);
 
@@ -35,7 +35,7 @@ namespace Beacon.Sdk
 
         IEnumerable<Peer> GetAllPeers();
 
-        Task RemovePeerAsync(Peer peer);
+        Task RemovePeerAsync(string peerSenderId);
 
         void Connect();
 

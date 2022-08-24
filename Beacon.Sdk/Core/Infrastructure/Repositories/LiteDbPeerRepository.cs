@@ -28,13 +28,21 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             return Task.FromResult(peer);
         });
 
-        public Task<Peer?> TryReadAsync(string senderUserId) => InConnectionNullable(CollectionName, col =>
+        public Task<Peer?> TryReadAsync(string senderId) => InConnectionNullable(CollectionName, col =>
         {
-            var peer = col.FindOne(x => x.SenderId == senderUserId);
+            var peer = col.FindOne(x => x.SenderId == senderId);
             return Task.FromResult(peer ?? null);
         });
 
         public Task<List<Peer>> GetAll() =>
             InConnection(CollectionName, col => Task.FromResult(new List<Peer>(col.FindAll())));
+
+        public Task Delete(Peer peer) => InConnectionAction(CollectionName, col =>
+        {
+            var dbPeer = col.FindOne(x => x.SenderId == peer.SenderId);
+
+            if (dbPeer != null)
+                col.Delete(dbPeer.Id);
+        });
     }
 }

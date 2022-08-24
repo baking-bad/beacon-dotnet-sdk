@@ -33,12 +33,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         public Task<SeedEntity?> TryReadAsync() =>
             InConnectionNullable(CollectionName, col =>
             {
-                SeedEntity[] t = col.FindAll().ToArray();
                 SeedEntity? seedEntity = col.FindAll().FirstOrDefault();
-
-                // if (seedEntity?.Seed == null)
-                //     throw new Exception("No seed.");
-
                 return Task.FromResult(seedEntity ?? null);
             });
 

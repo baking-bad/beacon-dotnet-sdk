@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Beacon.Sdk.Beacon.Sign;
 
 namespace Beacon.Sdk.WalletBeaconClient
 {
@@ -56,10 +57,10 @@ namespace Beacon.Sdk.WalletBeaconClient
         public bool LoggedIn { get; private set; }
 
         public bool Connected { get; private set; }
-        
+
         public event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
-        
-        public event EventHandler<DappConnectedEventArgs> OnDappConnected;
+
+        public event EventHandler<DappConnectedEventArgs?> OnDappsListChanged;
 
         public async Task InitAsync()
         {
@@ -68,7 +69,8 @@ namespace Beacon.Sdk.WalletBeaconClient
             LoggedIn = _p2PCommunicationService.LoggedIn;
         }
 
-        public async Task AddPeerAsync(P2PPairingRequest pairingRequest, string addressToConnect, bool sendPairingResponse = true)
+        public async Task AddPeerAsync(P2PPairingRequest pairingRequest, string addressToConnect,
+            bool sendPairingResponse = true)
         {
             if (!HexString.TryParse(pairingRequest.PublicKey, out var peerHexPublicKey))
             {
@@ -95,21 +97,35 @@ namespace Beacon.Sdk.WalletBeaconClient
             return _peerRepository.GetAll().Result;
         }
 
-
-        public Task RemovePeerAsync(Peer peer)
+        public async Task RemovePeerAsync(string peerSenderId)
         {
-            // todo: implement remove;
-            return Task.CompletedTask;
-        }
-        
-        private async Task SendDisconnectMessage(string receiverId)
-        {
-            Peer peer = _peerRepository.TryReadAsync(receiverId).Result
-                        ?? throw new NullReferenceException(nameof(Peer));
+            var peer = _peerRepository.TryReadAsync(peerSenderId).Result
+                       ?? throw new NullReferenceException(nameof(Peer));
 
-            // string message = _responseMessageHandler.Handle(response, receiverId);
+            try
+            {
+                await SendDisconnectMessage(peer.SenderId);
+            }
+            catch (Exception)
+            {
+                _logger.LogError("{@Sender} Error during sending removing peer {@PeerId} request",
+                    "Beacon", peerSenderId);
+            }
+
+            await _p2PCommunicationService.DeleteAsync(peer);
+            await _peerRepository.Delete(peer);
+            await PermissionInfoRepository.DeleteBySenderIdAsync(peer.SenderId);
+            await AppMetadataRepository.Delete(peer.SenderId);
+
+            OnDappsListChanged?.Invoke(this, null);
         }
-        
+
+        private Task SendDisconnectMessage(string receiverId)
+        {
+            var response = new DisconnectMessage(KeyPairService.CreateGuid(), SenderId);
+            return SendResponseAsync(receiverId: receiverId, response);
+        }
+
         public void Connect()
         {
             _p2PCommunicationService.OnP2PMessagesReceived += OnP2PMessagesReceived;
@@ -121,7 +137,7 @@ namespace Beacon.Sdk.WalletBeaconClient
 
         private void _responseMessageHandler_OnDappConnected(object sender, DappConnectedEventArgs e)
         {
-            OnDappConnected?.Invoke(this, new DappConnectedEventArgs(e.dappMetadata, e.dappPermissionInfo));
+            OnDappsListChanged?.Invoke(this, new DappConnectedEventArgs(e.dappMetadata, e.dappPermissionInfo));
         }
 
         public void Disconnect()
@@ -129,20 +145,21 @@ namespace Beacon.Sdk.WalletBeaconClient
             _p2PCommunicationService.Stop();
             _p2PCommunicationService.OnP2PMessagesReceived -= OnP2PMessagesReceived;
             _responseMessageHandler.OnDappConnected -= _responseMessageHandler_OnDappConnected;
-
             Connected = _p2PCommunicationService.Syncing;
+
+            _logger.LogInformation("{@Sender}: disconnecting, is connected {Status}", "Beacon", Connected);
         }
 
         public async Task SendResponseAsync(string receiverId, BaseBeaconMessage response)
         {
             var peer = _peerRepository.TryReadAsync(receiverId).Result
-                        ?? throw new NullReferenceException(nameof(Peer));
+                       ?? throw new NullReferenceException(nameof(Peer));
 
             var message = _responseMessageHandler.Handle(response, receiverId);
 
             await _p2PCommunicationService.SendMessageAsync(peer, message);
         }
-        
+
         private async Task OnP2PMessagesReceived(object? sender, P2PMessageEventArgs e)
         {
             if (sender is not IP2PCommunicationService)
@@ -154,7 +171,8 @@ namespace Beacon.Sdk.WalletBeaconClient
 
         private async Task HandleMessage(string message)
         {
-            (AcknowledgeResponse ack, BaseBeaconMessage requestMessage) = _requestMessageHandler.Handle(message, SenderId);
+            (AcknowledgeResponse ack, BaseBeaconMessage requestMessage) =
+                _requestMessageHandler.Handle(message, SenderId);
 
             if (requestMessage.Version != "1")
                 await SendResponseAsync(requestMessage.SenderId, ack);
@@ -162,7 +180,8 @@ namespace Beacon.Sdk.WalletBeaconClient
             bool hasPermission = await HasPermission(requestMessage);
 
             if (hasPermission)
-                OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs(requestMessage.SenderId, requestMessage));
+                OnBeaconMessageReceived?.Invoke(this,
+                    new BeaconMessageEventArgs(requestMessage.SenderId, requestMessage));
             else
                 _logger.LogInformation("Received message have not permission");
         }
@@ -174,34 +193,30 @@ namespace Beacon.Sdk.WalletBeaconClient
                 case BeaconMessageType.permission_request:
                 case BeaconMessageType.broadcast_request:
                     return true;
-                
+
                 case BeaconMessageType.operation_request:
                 {
                     var request = beaconRequest as OperationRequest;
-                    var permissionInfo = await TryReadPermissionInfo(request!.SourceAddress, request.SenderId, request.Network);
+                    var permissionInfo =
+                        await TryReadPermissionInfo(request!.SourceAddress, request.SenderId, request.Network);
 
                     return permissionInfo != null && permissionInfo.Scopes.Contains(PermissionScope.operation_request);
                 }
-                // todo: handle this permission
+
                 case BeaconMessageType.sign_payload_request:
-                    return true;
+                {
+                    var permissionInfo = await PermissionInfoRepository.TryReadBySenderIdAsync(beaconRequest.SenderId);
+                    return permissionInfo != null && permissionInfo.Scopes.Contains(PermissionScope.sign);
+                }
 
                 default:
                     return false;
             }
         }
 
-        private async Task<bool> CheckOperationRequestHasPermission(OperationRequest request)
-        {
-            PermissionInfo? permissionInfo = await TryReadPermissionInfo(request.SourceAddress, request.SenderId, request.Network);
-
-            return permissionInfo != null; // && permissionInfo.Scopes.Contains(PermissionScope.operation_request);
-        }
-
         public async Task<PermissionInfo?> TryReadPermissionInfo(string sourceAddress, string senderId, Network network)
         {
             var accountId = AccountService.GetAccountId(sourceAddress, network);
-
             return await PermissionInfoRepository.TryReadAsync(senderId, accountId);
         }
     }

@@ -44,6 +44,8 @@ namespace Beacon.Sdk.Core.Domain
                     HandleOperationResponse(response as OperationResponse),
                 BeaconMessageType.sign_payload_response =>
                     HandleSignPayloadResponse(response as SignPayloadResponse),
+                BeaconMessageType.disconnect =>
+                    HandleDisconnectResponse(response as DisconnectMessage),
                 BeaconMessageType.error =>
                     HandleError(response as BaseBeaconError),
 
@@ -77,6 +79,9 @@ namespace Beacon.Sdk.Core.Domain
             _jsonSerializerService.Serialize(response);
 
         private string HandleSignPayloadResponse(SignPayloadResponse response) =>
+            _jsonSerializerService.Serialize(response);
+        
+        private string HandleDisconnectResponse(DisconnectMessage response) =>
             _jsonSerializerService.Serialize(response);
 
         private string HandleError(BaseBeaconError response)

@@ -156,6 +156,22 @@
             // ToDo: Handle room not exist.
         }
 
+        public async Task DeleteAsync(Peer peer)
+        {
+            var p2PeerRoom = _p2PPeerRoomRepository.TryReadAsync(peer.HexPublicKey).Result;
+            if (p2PeerRoom != null)
+                try
+                {
+                    await _matrixClient.LeaveRoomAsync(p2PeerRoom.RoomId);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError("{@Sender} Error during leaving room {@RoomId}", "Beacon", p2PeerRoom.RoomId);
+                }
+
+            await _p2PPeerRoomRepository.Remove(peer.HexPublicKey);
+        }
+
         private string? TryGetMessageFromEvent(BaseRoomEvent matrixRoomEvent)
         {
             if (matrixRoomEvent is not TextMessageEvent textMessageEvent) return null;

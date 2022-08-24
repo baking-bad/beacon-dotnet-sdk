@@ -8,7 +8,8 @@ namespace Beacon.Sdk.Core.Domain.Interfaces.Data
     public interface IPeerRepository
     {
         Task<Peer> CreateAsync(Peer peer);
-        Task<Peer?> TryReadAsync(string senderUserId);
+        Task<Peer?> TryReadAsync(string senderId);
         Task<List<Peer>> GetAll();
+        Task Delete(Peer peer);
     }
 }

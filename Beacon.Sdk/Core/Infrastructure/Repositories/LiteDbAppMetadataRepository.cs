@@ -17,17 +17,12 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         public Task<AppMetadata> CreateOrUpdateAsync(AppMetadata appMetadata) =>
             InConnection(CollectionName, col =>
             {
-                AppMetadata? result = col.FindOne(x => x.SenderId == appMetadata.SenderId);
-                // .Where(x => x.SenderId == appMetadata.SenderId)
-                // .FirstOrDefault();
+                var result = col.FindOne(x => x.Name == appMetadata.Name);
+                if (result != null)
+                    appMetadata.Id = result.Id;
 
-                if (result == null)
-                    col.Insert(appMetadata);
-                else
-                    col.Update(appMetadata);
-
+                col.Upsert(appMetadata);
                 col.EnsureIndex(x => x.SenderId);
-
                 return Task.FromResult(appMetadata);
             });
 
@@ -47,18 +42,16 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             InConnectionNullable(CollectionName, col =>
             {
                 AppMetadata[]? result = col.FindAll().ToArray();
-                // AppMetadata[]? result = col.Query().ToArray();
-
                 return Task.FromResult(result ?? null);
             });
 
-        public Task Delete(string senderId) =>
-            InConnection(CollectionName, col =>
-            {
-                col.Delete(senderId);
+        public Task Delete(string senderId) => InConnectionAction(CollectionName, col =>
+        {
+            var appMetaData = col.FindOne(a => a.SenderId == senderId);
 
-                return (Task<AppMetadata>) Task.CompletedTask;
-            });
+            if (appMetaData != null)
+                col.Delete(senderId);
+        });
 
         public Task DeleteAll() =>
             InConnection(CollectionName, col =>
@@ -66,7 +59,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 // col.Delete(Query.All());
                 // col.DeleteAll();
 
-                return (Task<AppMetadata>) Task.CompletedTask;
+                return (Task<AppMetadata>)Task.CompletedTask;
             });
     }
 }

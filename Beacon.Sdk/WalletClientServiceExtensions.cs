@@ -25,11 +25,10 @@ namespace Beacon.Sdk
             var beaconOptions = new BeaconOptions
             {
                 AppName = appName,
-                AppUrl = "", //string?
-                IconUrl = "", // string?
+                AppUrl = "https://atomex.me",
+                IconUrl = "https://bcd-static-assets.fra1.digitaloceanspaces.com/dapps/atomex/atomex_logo.jpg",
                 KnownRelayServers = new[]
                 {
-                    "beacon-node-0.papers.tech:8448",
                     "beacon-node-1.diamond.papers.tech",
                     "beacon-node-1.sky.papers.tech",
                     "beacon-node-2.sky.papers.tech",
@@ -92,15 +91,6 @@ namespace Beacon.Sdk
             services.AddSingleton<IP2PCommunicationService, P2PCommunicationService>();
 
             #endregion
-
-
-            // services.AddSingleton<IPeerRepository, LiteDbPeerRepository>();
-            // services.AddSingleton<ISdkStorage, SdkStorage>();
-            // services.AddSingleton<RelayServerService>();
-            // services.AddSingleton<JsonSerializerService>();
-            // services.AddSingleton<IChannelOpeningMessageBuilder, ChannelOpeningMessageBuilder>();
-            //
-            // services.AddHttpClient("test", configureClient => { });
 
             services.AddSingleton<IWalletBeaconClient, WalletBeaconClient.WalletBeaconClient>();
 

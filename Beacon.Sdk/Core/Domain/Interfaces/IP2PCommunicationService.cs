@@ -23,5 +23,7 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
         Task<P2PPeerRoom> SendChannelOpeningMessageAsync(Peer peer, string id, string appName);
 
         Task SendMessageAsync(Peer peer, string message);
+
+        Task DeleteAsync(Peer peer);
     }
 }
