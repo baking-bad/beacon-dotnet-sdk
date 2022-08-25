@@ -29,12 +29,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         public Task<AppMetadata?> TryReadAsync(string senderId) =>
             InConnectionNullable(CollectionName, col =>
             {
-                col.EnsureIndex(x => x.SenderId);
-
-                AppMetadata? appMetadata = col.FindOne(x => x.SenderId == senderId);
-                // AppMetadata? appMetadata = col.Query().Where(x => x.SenderId == senderId)
-                //     .FirstOrDefault();
-
+                var appMetadata = col.FindOne(x => x.SenderId == senderId);
                 return Task.FromResult(appMetadata ?? null);
             });
 
