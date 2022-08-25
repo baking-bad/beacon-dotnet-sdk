@@ -92,6 +92,11 @@ namespace Beacon.Sdk.WalletBeaconClient
                 _ = await _p2PCommunicationService.SendChannelOpeningMessageAsync(peer, pairingRequest.Id, AppName);
         }
 
+        public Peer? GetPeer(string senderId)
+        {
+            return _peerRepository.TryReadAsync(senderId).Result;
+        }
+
         public IEnumerable<Peer> GetAllPeers()
         {
             return _peerRepository.GetAll().Result;

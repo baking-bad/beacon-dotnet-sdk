@@ -33,6 +33,8 @@ namespace Beacon.Sdk
 
         Task AddPeerAsync(P2PPairingRequest pairingRequest, string addressToConnect, bool sendPairingResponse = true);
 
+        Peer? GetPeer(string senderId);
+
         IEnumerable<Peer> GetAllPeers();
 
         Task RemovePeerAsync(string peerSenderId);
