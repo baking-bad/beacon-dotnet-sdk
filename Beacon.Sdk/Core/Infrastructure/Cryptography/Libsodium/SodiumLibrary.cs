@@ -6,11 +6,13 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
 
     public static class SodiumLibrary
     {
-#if IOS
-        const string DllName = "__Internal";
-#else
+// #if IOS
+//         const string DllName = "__Internal";
+// #else
+//         private const string DllName = "libsodium";
+// #endif
+        
         private const string DllName = "libsodium";
-#endif
 
         //crypto_kx_client_session_keys
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -30,7 +32,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern int crypto_box_noncebytes();
 
-        [DllImport("libsodium", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         internal static extern int crypto_generichash(byte[] buffer, int bufferLength, byte[] message,
             long messageLength, byte[] key,
             int keyLength);

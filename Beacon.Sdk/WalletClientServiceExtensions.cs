@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+
 namespace Beacon.Sdk
 {
     using Core.Domain;
@@ -17,89 +19,81 @@ namespace Beacon.Sdk
 
     public static class WalletClientServiceExtensions
     {
-        public static IServiceCollection AddBeaconClient(this IServiceCollection services)
+        public static IServiceCollection AddBeaconClient(this IServiceCollection services, string pathToDb,
+            string appName = "Atomex")
         {
-            services.AddMatrixClient();
-            
-            services.AddSingleton<ICryptographyService, CryptographyService>();
-
-            services.AddSingleton<BeaconOptions>(new BeaconOptions
+            var beaconOptions = new BeaconOptions
             {
-                AppName = "Atomex Mobile",
-                AppUrl = "", //string?
-                IconUrl = "", // string?
+                AppName = appName,
+                AppUrl = "https://atomex.me",
+                IconUrl = "https://bcd-static-assets.fra1.digitaloceanspaces.com/dapps/atomex/atomex_logo.jpg",
                 KnownRelayServers = new[]
                 {
-                    "beacon-node-0.papers.tech:8448",
                     "beacon-node-1.diamond.papers.tech",
                     "beacon-node-1.sky.papers.tech",
                     "beacon-node-2.sky.papers.tech",
                     "beacon-node-1.hope.papers.tech",
                     "beacon-node-1.hope-2.papers.tech",
                     "beacon-node-1.hope-3.papers.tech",
-                    "beacon-node-1.hope-4.papers.tech",
+                    "beacon-node-1.hope-4.papers.tech"
                 },
-                // see https://github.com/mbdavid/LiteDB/issues/787
-                DatabaseConnectionString = $"Filename=test1.db; Mode=Exclusive", // mac m1
-                // DatabaseConnectionString = $"Filename={path}"
-            });
+
+                DatabaseConnectionString = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    ? $"Filename={pathToDb}/beacon.db; Connection=Shared;"
+                    : $"Filename={pathToDb}/beacon.db; Mode=Exclusive;"
+            };
+
+            services.AddMatrixClient();
+            services.AddSingleton<ICryptographyService, CryptographyService>();
+            services.AddSingleton<BeaconOptions>(beaconOptions);
+
             #region Infrastructure
 
-            services.AddSingleton<RepositorySettings>(new RepositorySettings
+            services.AddSingleton(new RepositorySettings
             {
-                ConnectionString = $"Filename=test1.db; Mode=Exclusive"
+                ConnectionString = beaconOptions.DatabaseConnectionString
             });
 
             services.AddSingleton<ISessionKeyPairRepository, InMemorySessionKeyPairRepository>();
-            
             services.AddSingleton<IPeerRepository, LiteDbPeerRepository>();
             services.AddSingleton<IP2PPeerRoomRepository, LiteDbP2PPeerRoomRepository>();
             services.AddSingleton<ISeedRepository, LiteDbSeedRepository>();
             services.AddSingleton<IAppMetadataRepository, LiteDbAppMetadataRepository>();
             services.AddSingleton<IPermissionInfoRepository, LiteDbPermissionInfoRepository>();
+            services.AddSingleton<IMatrixSyncRepository, LiteDbMatrixSyncRepository>();
             services.AddSingleton<ISdkStorage, SdkStorage>();
             services.AddSingleton<IJsonSerializerService, JsonSerializerService>();
 
             #endregion
 
-            
+
             #region Domain
-            
+
             services.AddSingleton<KeyPairService>();
             services.AddSingleton<AccountService>();
-           
+
             services.AddSingleton<PeerFactory>();
             services.AddSingleton<PermissionInfoFactory>();
-            
+
             services.AddSingleton<PermissionHandler>();
             services.AddSingleton<RequestMessageHandler>();
             services.AddSingleton<ResponseMessageHandler>();
-            
+
             #endregion
-            
+
             #region P2P
-            
+
             services.AddSingleton<IChannelOpeningMessageBuilder, ChannelOpeningMessageBuilder>();
             services.AddSingleton<P2PMessageService>();
             services.AddSingleton<ClientService>();
             services.AddSingleton<P2PLoginRequestFactory>();
             services.AddSingleton<P2PPeerRoomFactory>();
             services.AddSingleton<IP2PCommunicationService, P2PCommunicationService>();
-            
+
             #endregion
 
-
-
-            // services.AddSingleton<IPeerRepository, LiteDbPeerRepository>();
-            // services.AddSingleton<ISdkStorage, SdkStorage>();
-            // services.AddSingleton<RelayServerService>();
-            // services.AddSingleton<JsonSerializerService>();
-            // services.AddSingleton<IChannelOpeningMessageBuilder, ChannelOpeningMessageBuilder>();
-            //
-            // services.AddHttpClient("test", configureClient => { });
-            
             services.AddSingleton<IWalletBeaconClient, WalletBeaconClient.WalletBeaconClient>();
-            
+
             return services;
         }
     }

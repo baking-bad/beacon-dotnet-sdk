@@ -3,70 +3,58 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     using System.Linq;
     using System.Threading.Tasks;
     using Beacon;
-    using LiteDB;
     using Microsoft.Extensions.Logging;
 
     public class LiteDbAppMetadataRepository : BaseLiteDbRepository<AppMetadata>, IAppMetadataRepository
     {
+        private const string CollectionName = "AppMetadata";
+
         public LiteDbAppMetadataRepository(ILogger<LiteDbAppMetadataRepository> logger, RepositorySettings settings)
             : base(logger, settings)
         {
         }
 
-        public Task<AppMetadata> CreateOrUpdate(AppMetadata appMetadata) =>
-            InConnection(col =>
+        public Task<AppMetadata> CreateOrUpdateAsync(AppMetadata appMetadata) =>
+            InConnection(CollectionName, col =>
             {
-                AppMetadata? result = col.FindOne(x => x.SenderId == appMetadata.SenderId);
-                // .Where(x => x.SenderId == appMetadata.SenderId)
-                // .FirstOrDefault();
+                var result = col.FindOne(x => x.Name == appMetadata.Name);
+                if (result != null)
+                    appMetadata.Id = result.Id;
 
-                if (result == null)
-                {
-                    col.Insert(appMetadata);
-                    col.EnsureIndex(x => x.SenderId);
-                }
-                else
-                {
-                    col.Update(appMetadata);
-                }
-
+                col.Upsert(appMetadata);
+                col.EnsureIndex(x => x.SenderId);
                 return Task.FromResult(appMetadata);
             });
 
-        public Task<AppMetadata?> TryRead(string senderId) =>
-            InConnectionNullable(col =>
+        public Task<AppMetadata?> TryReadAsync(string senderId) =>
+            InConnectionNullable(CollectionName, col =>
             {
-                AppMetadata? appMetadata = col.FindOne(x => x.SenderId == senderId);
-                // AppMetadata? appMetadata = col.Query().Where(x => x.SenderId == senderId)
-                //     .FirstOrDefault();
-
+                var appMetadata = col.FindOne(x => x.SenderId == senderId);
                 return Task.FromResult(appMetadata ?? null);
             });
 
         public Task<AppMetadata[]?> ReadAll() =>
-            InConnectionNullable(col =>
+            InConnectionNullable(CollectionName, col =>
             {
                 AppMetadata[]? result = col.FindAll().ToArray();
-                // AppMetadata[]? result = col.Query().ToArray();
-
                 return Task.FromResult(result ?? null);
             });
 
-        public Task Delete(string senderId) =>
-            InConnection(col =>
-            {
-                col.Delete(senderId);
+        public Task Delete(string senderId) => InConnectionAction(CollectionName, col =>
+        {
+            var appMetaData = col.FindOne(a => a.SenderId == senderId);
 
-                return (Task<AppMetadata>) Task.CompletedTask;
-            });
+            if (appMetaData != null)
+                col.Delete(senderId);
+        });
 
         public Task DeleteAll() =>
-            InConnection(col =>
+            InConnection(CollectionName, col =>
             {
-                col.Delete(Query.All());
+                // col.Delete(Query.All());
                 // col.DeleteAll();
 
-                return (Task<AppMetadata>) Task.CompletedTask;
+                return (Task<AppMetadata>)Task.CompletedTask;
             });
     }
 }

@@ -4,13 +4,16 @@ namespace Beacon.Sdk.Core.Domain.Entities
     using System.Collections.Generic;
     using Beacon;
     using Beacon.Permission;
-    using LiteDB;
 
     public class PermissionInfo
     {
-        [BsonId] public string AccountIdentifier { get; set; }
+        public long Id { get; set; }
 
+        public string PermissionInfoId { get; set; }
+        
         public string SenderId { get; set; }
+
+        public string AccountId { get; set; }
 
         public AppMetadata AppMetadata { get; set; }
 
@@ -28,15 +31,4 @@ namespace Beacon.Sdk.Core.Domain.Entities
 
         public Threshold Threshold { get; set; }
     }
-
-    // public class Permission 
-    // {
-    //     public string Address { get; set; }
-    //     
-    //     public Network Network { get; set; }
-    //     
-    //     public List<PermissionScope> Scopes { get; set; }
-    //     
-    //     public Threshold Threshold { get; set; }
-    // }
 }

@@ -1,3 +1,6 @@
+using System.Threading.Tasks;
+using Beacon.Sdk.Beacon.Sign;
+
 namespace Beacon.Sdk.Core.Domain
 {
     using System;
@@ -8,7 +11,6 @@ namespace Beacon.Sdk.Core.Domain
     using Entities;
     using Interfaces;
     using Interfaces.Data;
-    using Netezos.Keys;
 
     public class ResponseMessageHandler
     {
@@ -30,40 +32,55 @@ namespace Beacon.Sdk.Core.Domain
             _permissionInfoFactory = permissionInfoFactory;
         }
 
-        public string Handle(BaseBeaconMessage response, string receiverId) =>
-            response.Type switch
-            {
-                BeaconMessageType.acknowledge => HandleAcknowledge(response as AcknowledgeResponse),
-                BeaconMessageType.permission_response => HandlePermissionResponse(receiverId,
-                    response as PermissionResponse),
-                BeaconMessageType.operation_response => HandleOperationResponse(response as OperationResponse),
-                BeaconMessageType.error => HandleError(response as BaseBeaconError),
+        public event EventHandler<DappConnectedEventArgs> OnDappConnected;
 
-                _ => throw new ArgumentException("Invalid beacon message type")
-            };
+        public async Task<string> Handle(BaseBeaconMessage response, string receiverId) => response.Type switch
+        {
+            BeaconMessageType.acknowledge =>
+                HandleAcknowledge(response as AcknowledgeResponse),
+            BeaconMessageType.permission_response =>
+                await HandlePermissionResponse(receiverId, response as PermissionResponse),
+            BeaconMessageType.operation_response =>
+                HandleOperationResponse(response as OperationResponse),
+            BeaconMessageType.sign_payload_response =>
+                HandleSignPayloadResponse(response as SignPayloadResponse),
+            BeaconMessageType.disconnect =>
+                HandleDisconnectResponse(response as DisconnectMessage),
+            BeaconMessageType.error =>
+                HandleError(response as BaseBeaconError),
+
+            _ => throw new ArgumentException("Invalid beacon message type")
+        };
 
         private string HandleAcknowledge(AcknowledgeResponse response) => _jsonSerializerService.Serialize(response);
 
-        private string HandlePermissionResponse(string receiverId, PermissionResponse response)
+        private async Task<string> HandlePermissionResponse(string receiverId, PermissionResponse response)
         {
-            AppMetadata? receiverAppMetadata = _appMetadataRepository.TryRead(receiverId).Result;
+            var receiverAppMetadata = _appMetadataRepository.TryReadAsync(receiverId).Result;
 
             if (receiverAppMetadata == null)
                 throw new Exception("AppMetadata not found");
 
-            PermissionInfo info = _permissionInfoFactory.Create(
+            var info = await _permissionInfoFactory.Create(
                 receiverId,
                 receiverAppMetadata,
-                PubKey.FromBase58(response.PublicKey),
+                response.Address,
+                response.PublicKey,
                 response.Network,
                 response.Scopes);
 
-            info = _permissionInfoRepository.Create(info).Result;
-
+            info = _permissionInfoRepository.CreateOrUpdateAsync(info).Result;
+            OnDappConnected?.Invoke(this, new DappConnectedEventArgs(receiverAppMetadata, info));
             return _jsonSerializerService.Serialize(response);
         }
 
         private string HandleOperationResponse(OperationResponse response) =>
+            _jsonSerializerService.Serialize(response);
+
+        private string HandleSignPayloadResponse(SignPayloadResponse response) =>
+            _jsonSerializerService.Serialize(response);
+
+        private string HandleDisconnectResponse(DisconnectMessage response) =>
             _jsonSerializerService.Serialize(response);
 
         private string HandleError(BaseBeaconError response)

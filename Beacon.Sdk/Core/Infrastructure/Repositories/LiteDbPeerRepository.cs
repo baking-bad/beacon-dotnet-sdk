@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+
+
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
     using System.Threading.Tasks;
@@ -7,28 +10,39 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
     public class LiteDbPeerRepository : BaseLiteDbRepository<Peer>, IPeerRepository
     {
-        public LiteDbPeerRepository(ILogger<LiteDbPeerRepository> logger, RepositorySettings settings) :
-            base(logger, settings)
+        private const string CollectionName = "Peer";
+
+        public LiteDbPeerRepository(ILogger<LiteDbPeerRepository> logger, RepositorySettings settings)
+            : base(logger, settings)
         {
         }
 
-        public Task<Peer> Create(Peer peer) =>
-            InConnection(col =>
-            {
-                col.Insert(peer);
-                col.EnsureIndex(x => x.SenderUserId);
+        public Task<Peer> CreateAsync(Peer peer) => InConnection(CollectionName, col =>
+        {
+            var existingPeer = col.FindOne(p => p.Name == peer.Name);
+            if (existingPeer != null)
+                peer.Id = existingPeer.Id;
 
-                return Task.FromResult(peer);
-            });
+            col.Upsert(peer);
+            col.EnsureIndex(x => x.SenderId);
+            return Task.FromResult(peer);
+        });
 
-        public Task<Peer?> TryRead(string senderUserId) =>
-            InConnectionNullable(col =>
-            {
-                // Peer? peer = col.Query().Where(x => x.SenderUserId == senderUserId).FirstOrDefault();
+        public Task<Peer?> TryReadAsync(string senderId) => InConnectionNullable(CollectionName, col =>
+        {
+            var peer = col.FindOne(x => x.SenderId == senderId);
+            return Task.FromResult(peer ?? null);
+        });
 
-                Peer? peer = col.FindOne(x => x.SenderUserId == senderUserId);
+        public Task<List<Peer>> GetAll() =>
+            InConnection(CollectionName, col => Task.FromResult(new List<Peer>(col.FindAll())));
 
-                return Task.FromResult(peer ?? null);
-            });
+        public Task Delete(Peer peer) => InConnectionAction(CollectionName, col =>
+        {
+            var dbPeer = col.FindOne(x => x.SenderId == peer.SenderId);
+
+            if (dbPeer != null)
+                col.Delete(dbPeer.Id);
+        });
     }
 }

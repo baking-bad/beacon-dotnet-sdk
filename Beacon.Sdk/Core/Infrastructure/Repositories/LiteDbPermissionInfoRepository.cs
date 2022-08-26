@@ -1,5 +1,7 @@
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Domain.Entities;
     using Domain.Interfaces.Data;
@@ -7,27 +9,68 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
     public class LiteDbPermissionInfoRepository : BaseLiteDbRepository<PermissionInfo>, IPermissionInfoRepository
     {
+        private const string CollectionName = "PermissionInfo";
+
         public LiteDbPermissionInfoRepository(ILogger<LiteDbPermissionInfoRepository> logger,
             RepositorySettings settings) : base(logger, settings)
         {
         }
 
-        public Task<PermissionInfo> Create(PermissionInfo permissionInfo) => InConnection(col =>
-        {
-            col.Insert(permissionInfo);
-            col.EnsureIndex(x => x.AccountIdentifier);
+        public Task<PermissionInfo> CreateOrUpdateAsync(PermissionInfo permissionInfo) =>
+            InConnection(CollectionName, col =>
+            {
+                var id = $"{permissionInfo.SenderId}:{permissionInfo.AccountId}";
+                permissionInfo.PermissionInfoId = id;
+                var oldPermissionInfo = col.FindOne(x => x.AppMetadata.Name == permissionInfo.AppMetadata.Name);
 
-            return Task.FromResult(permissionInfo);
-        });
+                if (oldPermissionInfo != null)
+                    permissionInfo.Id = oldPermissionInfo.Id;
 
-        public Task<PermissionInfo?> TryRead(string accountIdentifier) => InConnectionNullable(col =>
-        {
-            // PermissionInfo? permissionInfo =
-            //     col.Query().Where(x => x.AccountIdentifier == accountIdentifier).FirstOrDefault();
+                col.Upsert(permissionInfo);
+                col.EnsureIndex(x => x.PermissionInfoId);
+                return Task.FromResult(permissionInfo);
+            });
 
-            PermissionInfo? permissionInfo = col.FindOne(x => x.AccountIdentifier == accountIdentifier);
+        public Task<PermissionInfo?> TryReadAsync(string senderId, string accountId) =>
+            InConnectionNullable(CollectionName, col =>
+            {
+                var id = $"{senderId}:{accountId}";
+                var permissionInfo = col.FindOne(x => x.PermissionInfoId == id);
+                return Task.FromResult(permissionInfo ?? null);
+            });
+        
+        public Task<PermissionInfo?> TryReadBySenderIdAsync(string senderId) =>
+            InConnectionNullable(CollectionName, col =>
+            {
+                var permissionInfo = col.FindOne(x => x.SenderId == senderId);
+                return Task.FromResult(permissionInfo ?? null);
+            });
 
-            return Task.FromResult(permissionInfo ?? null);
-        });
+        public Task<List<PermissionInfo>> ReadAllAsync() =>
+            InConnection(CollectionName, col =>
+            {
+                var result = col.FindAll().ToList();
+
+                return Task.FromResult(result);
+            });
+
+        public Task DeleteByIdAsync(string id) =>
+            InConnectionAction(CollectionName, col =>
+            {
+                col.EnsureIndex(x => x.PermissionInfoId);
+
+                PermissionInfo? permissionInfo = col.FindOne(x => x.PermissionInfoId == id);
+                if (permissionInfo != null)
+                    col.Delete(permissionInfo.Id);
+            });
+        
+        public Task DeleteBySenderIdAsync(string senderId) =>
+            InConnectionAction(CollectionName, col =>
+            {
+                var permissionInfo = col.FindOne(x => x.SenderId == senderId);
+                
+                if (permissionInfo != null)
+                    col.Delete(permissionInfo.Id);
+            });
     }
 }

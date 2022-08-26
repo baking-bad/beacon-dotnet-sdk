@@ -5,9 +5,9 @@ namespace Beacon.Sdk
 
     public interface IAppMetadataRepository
     {
-        Task<AppMetadata> CreateOrUpdate(AppMetadata appMetadata);
+        Task<AppMetadata> CreateOrUpdateAsync(AppMetadata appMetadata);
 
-        Task<AppMetadata?> TryRead(string senderId);
+        Task<AppMetadata?> TryReadAsync(string senderId);
 
         Task<AppMetadata[]?> ReadAll();
 
