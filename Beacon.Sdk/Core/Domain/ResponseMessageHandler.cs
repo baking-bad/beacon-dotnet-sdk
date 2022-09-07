@@ -85,15 +85,56 @@ namespace Beacon.Sdk.Core.Domain
 
         private string HandleError(BaseBeaconError response)
         {
-            if (response!.ErrorType == BeaconErrorType.ABORTED_ERROR)
+            switch (response.ErrorType)
             {
-                BeaconAbortedError beaconAbortedError =
-                    response as BeaconAbortedError ?? throw new InvalidOperationException();
+                case BeaconErrorType.ABORTED_ERROR:
+                    return _jsonSerializerService
+                        .Serialize(response as BeaconAbortedError ?? throw new InvalidOperationException());
 
-                return _jsonSerializerService.Serialize(beaconAbortedError);
+                case BeaconErrorType.UNKNOWN_ERROR:
+                    return _jsonSerializerService
+                        .Serialize(response as UnknownBeaconError ?? throw new InvalidOperationException());
+
+                case BeaconErrorType.TRANSACTION_INVALID_ERROR:
+                    return _jsonSerializerService
+                        .Serialize(response as TransactionInvalidBeaconError ?? throw new InvalidOperationException());
+
+                case BeaconErrorType.BROADCAST_ERROR:
+                    return _jsonSerializerService
+                        .Serialize(response as BroadcastBeaconError ?? throw new InvalidOperationException());
+
+                case BeaconErrorType.NETWORK_NOT_SUPPORTED_ERROR:
+                    return _jsonSerializerService
+                        .Serialize(response as NetworkNotSupportedBeaconError ?? throw new InvalidOperationException());
+
+                case BeaconErrorType.NO_ADDRESS_ERROR:
+                    return _jsonSerializerService
+                        .Serialize(response as NoAddressBeaconError ?? throw new InvalidOperationException());
+
+                case BeaconErrorType.NO_PRIVATE_KEY_FOUND_ERROR:
+                    return _jsonSerializerService
+                        .Serialize(response as NoPrivateKeyBeaconError ?? throw new InvalidOperationException());
+
+                case BeaconErrorType.NOT_GRANTED_ERROR:
+                    return _jsonSerializerService
+                        .Serialize(response as NotGrantedBeaconError ?? throw new InvalidOperationException());
+
+                case BeaconErrorType.PARAMETERS_INVALID_ERROR:
+                    return _jsonSerializerService
+                        .Serialize(response as ParametersInvalidBeaconError ?? throw new InvalidOperationException());
+
+                case BeaconErrorType.TOO_MANY_OPERATIONS_ERROR:
+                    return _jsonSerializerService
+                        .Serialize(response as TooManyOperationsBeaconError ?? throw new InvalidOperationException());
+
+                case BeaconErrorType.SIGNATURE_TYPE_NOT_SUPPORTED:
+                    return _jsonSerializerService
+                        .Serialize(response as SignatureTypeNotSupportedBeaconError ??
+                                   throw new InvalidOperationException());
+
+                default:
+                    throw new ArgumentException("error.ErrorType");
             }
-
-            throw new ArgumentException("error.ErrorType");
         }
     }
 }
