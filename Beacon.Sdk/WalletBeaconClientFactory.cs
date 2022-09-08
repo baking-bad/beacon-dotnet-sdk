@@ -12,7 +12,6 @@ namespace Beacon.Sdk
     using Matrix.Sdk.Core.Domain.Services;
     using Matrix.Sdk.Core.Infrastructure.Services;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Logging.Abstractions;
     using WalletBeaconClient;
 
     public class WalletBeaconClientFactory
@@ -27,10 +26,6 @@ namespace Beacon.Sdk
             ILoggerFactory? loggerFactory = null)
 
         {
-            if (_client != null)
-                return _client;
-
-
             #region Infrastructure
 
             var repositorySettings = new RepositorySettings
