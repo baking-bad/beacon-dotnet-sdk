@@ -1,8 +1,7 @@
-using System.Collections.Generic;
-
-namespace Beacon.Sdk
+namespace Beacon.Sdk.BeaconClients.Abstract
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Beacon;
     using Beacon.Permission;

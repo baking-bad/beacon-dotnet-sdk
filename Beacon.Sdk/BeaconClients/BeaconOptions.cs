@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.WalletBeaconClient
+namespace Beacon.Sdk.BeaconClients
 {
     public class BeaconOptions
     {

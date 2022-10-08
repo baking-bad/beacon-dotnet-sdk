@@ -1,10 +1,9 @@
-using System.Collections.Generic;
-using Beacon.Sdk.Beacon.Sign;
-
-namespace Beacon.Sdk.WalletBeaconClient
+namespace Beacon.Sdk.BeaconClients
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Abstract;
     using Beacon;
     using Beacon.Operation;
     using Beacon.Permission;
@@ -67,6 +66,7 @@ namespace Beacon.Sdk.WalletBeaconClient
             await _p2PCommunicationService.LoginAsync(KnownRelayServers);
 
             LoggedIn = _p2PCommunicationService.LoggedIn;
+            _logger.LogDebug("Logged In {LoggedIn}", LoggedIn);
         }
 
         public async Task AddPeerAsync(P2PPairingRequest pairingRequest, string addressToConnect,

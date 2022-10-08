@@ -10,6 +10,7 @@ namespace Beacon.Sdk.Sample.Console
     using Beacon;
     using Beacon.Operation;
     using Beacon.Permission;
+    using BeaconClients.Abstract;
     using Microsoft.Extensions.DependencyInjection;
     using Netezos.Forging;
     using Netezos.Forging.Models;
@@ -140,7 +141,7 @@ namespace Beacon.Sdk.Sample.Console
 
             P2PPairingRequest pairingRequest = JsonConvert.DeserializeObject<P2PPairingRequest>(message);
 
-            await walletClient.AddPeerAsync(pairingRequest!);
+            // await walletClient.AddPeerAsync(pairingRequest!);
 
             Console.ReadLine();
 
