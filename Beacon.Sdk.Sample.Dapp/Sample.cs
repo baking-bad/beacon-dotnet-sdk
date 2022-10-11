@@ -17,8 +17,8 @@ public class Sample
         var options = new BeaconOptions
         {
             AppName = "Dapp sample",
-            AppUrl = string.Empty,
-            IconUrl = string.Empty,
+            AppUrl = "https://awesome-dapp.com",
+            IconUrl = "https://bcd-static-assets.fra1.digitaloceanspaces.com/dapps/atomex/atomex_logo.jpg",
             KnownRelayServers = Constants.KnownRelayServers,
 
             DatabaseConnectionString = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -26,18 +26,30 @@ public class Sample
                 : $"Filename={path}; Mode=Exclusive;"
         };
 
-        ILogger serilogLogger = new LoggerConfiguration()
+        ILogger logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .WriteTo.Console()
             .CreateLogger();
 
-        ILoggerProvider loggerProvider = new SerilogLoggerProvider(serilogLogger);
-
+        ILoggerProvider loggerProvider = new SerilogLoggerProvider(logger);
         IDappBeaconClient beaconDappClient = BeaconClientFactory.Create<IDappBeaconClient>(options, loggerProvider);
-        // _beaconWalletClient.OnBeaconMessageReceived += OnBeaconWalletClientMessageReceived;
-        // _beaconWalletClient.OnDappsListChanged += OnDappsListChanged;
+        beaconDappClient.OnBeaconMessageReceived += OnBeaconWalletClientMessageReceived;
+        beaconDappClient.OnDappsListChanged += OnDappsListChanged;
 
         await beaconDappClient.InitAsync();
         beaconDappClient.Connect();
+
+        string pairingRequestQrData = await beaconDappClient.GetPairingRequestInfo();
+        logger.Information("QR CODE Is\n{Qr}", pairingRequestQrData);
+    }
+
+    private void OnDappsListChanged(object? sender, DappConnectedEventArgs? e)
+    {
+        var a = 5;
+    }
+
+    private void OnBeaconWalletClientMessageReceived(object? sender, BeaconMessageEventArgs e)
+    {
+        var a = 5;
     }
 }

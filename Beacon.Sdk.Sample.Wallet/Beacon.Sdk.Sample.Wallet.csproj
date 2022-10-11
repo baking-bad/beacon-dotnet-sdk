@@ -8,7 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Base58Check" Version="0.2.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
         <PackageReference Include="Serilog" Version="2.11.0-dev-01371" />
         <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />

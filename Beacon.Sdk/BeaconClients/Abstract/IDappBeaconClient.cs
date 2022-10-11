@@ -1,6 +1,8 @@
 namespace Beacon.Sdk.BeaconClients.Abstract
 {
+    using System;
     using System.Threading.Tasks;
+    using Beacon;
 
     public interface IDappBeaconClient
     {
@@ -16,14 +18,14 @@ namespace Beacon.Sdk.BeaconClients.Abstract
         //
         // IPermissionInfoRepository PermissionInfoRepository { get; }
         //
-        // event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
-        //
-        // event EventHandler<DappConnectedEventArgs?> OnDappsListChanged;
+        event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
+        event EventHandler<DappConnectedEventArgs?> OnDappsListChanged;
         //
         // Task SendResponseAsync(string receiverId, BaseBeaconMessage response);
 
         Task InitAsync();
         void Connect();
+        Task<string> GetPairingRequestInfo();
 
         // Task AddPeerAsync(P2PPairingRequest pairingRequest, string addressToConnect, bool sendPairingResponse = true);
         //

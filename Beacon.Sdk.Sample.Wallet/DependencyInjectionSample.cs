@@ -6,12 +6,12 @@ namespace Beacon.Sdk.Sample.Console
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using Base58Check;
     using Beacon;
     using Beacon.Operation;
     using Beacon.Permission;
     using BeaconClients.Abstract;
     using Microsoft.Extensions.DependencyInjection;
+    using Netezos.Encoding;
     using Netezos.Forging;
     using Netezos.Forging.Models;
     using Netezos.Keys;
@@ -136,15 +136,17 @@ namespace Beacon.Sdk.Sample.Console
             Console.WriteLine($"client.LoggedIn: {walletClient.LoggedIn}");
             Console.WriteLine($"client.Connected: {walletClient.Connected}");
 
-            byte[] decodedBytes = Base58CheckEncoding.Decode(qrCode);
+            byte[] decodedBytes = Base58.Parse(qrCode);
             string message = Encoding.Default.GetString(decodedBytes);
 
             P2PPairingRequest pairingRequest = JsonConvert.DeserializeObject<P2PPairingRequest>(message);
 
+            string pairingString = JsonConvert.SerializeObject(pairingRequest);
+            byte[] pairingBytes = Encoding.UTF8.GetBytes(pairingString);
+
             // await walletClient.AddPeerAsync(pairingRequest!);
 
             Console.ReadLine();
-
             walletClient.Disconnect();
         }
 

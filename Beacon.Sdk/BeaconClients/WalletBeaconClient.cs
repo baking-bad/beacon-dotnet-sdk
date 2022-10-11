@@ -89,7 +89,7 @@ namespace Beacon.Sdk.BeaconClients
             peer = _peerRepository.CreateAsync(peer).Result;
 
             if (sendPairingResponse)
-                _ = await _p2PCommunicationService.SendChannelOpeningMessageAsync(peer, pairingRequest.Id, AppName);
+                _ = await _p2PCommunicationService.SendChannelOpeningMessageAsync(peer, pairingRequest.Id, AppName, AppUrl, IconUrl);
         }
 
         public Peer? GetPeer(string senderId)

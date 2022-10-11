@@ -24,7 +24,11 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
 
         byte[] ConvertEd25519PublicKeyToCurve25519PublicKey(byte[] publicKey);
 
+        byte[] ConvertEd25519SecretKeyToCurve25519SecretKey(byte[] secretKey);
+
         string EncryptMessageAsString(string message, byte[] publicKey);
+
+        string DecryptMessageAsString(string message, HexString secretKey, HexString publicKey);
 
         bool Validate(string input);
 

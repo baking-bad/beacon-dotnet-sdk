@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Beacon;
     using Entities;
     using Entities.P2P;
     using Interfaces;
@@ -16,7 +17,9 @@
     using Microsoft.Extensions.Logging;
     using P2P;
     using P2P.ChannelOpening;
+    using P2P.Dto.Handshake;
     using Utils;
+    using Constants = Constants;
 
     public class P2PCommunicationService : IP2PCommunicationService
     {
@@ -29,6 +32,9 @@
         private readonly P2PPeerRoomFactory _p2PPeerRoomFactory;
         private readonly IP2PPeerRoomRepository _p2PPeerRoomRepository;
         private readonly IMatrixSyncRepository _matrixSyncRepository;
+        private readonly IJsonSerializerService _jsonSerializerService;
+        private readonly PeerFactory _peerFactory;
+        private readonly IPeerRepository _peerRepository;
 
         public P2PCommunicationService(
             ILogger<P2PCommunicationService> logger,
@@ -37,9 +43,12 @@
             IP2PPeerRoomRepository p2PPeerRoomRepository,
             IMatrixSyncRepository matrixSyncRepository,
             ICryptographyService cryptographyService,
+            IJsonSerializerService jsonSerializerService,
+            IPeerRepository peerRepository,
             P2PLoginRequestFactory p2PLoginRequestFactory,
             P2PPeerRoomFactory p2PPeerRoomFactory,
-            P2PMessageService p2PMessageService)
+            P2PMessageService p2PMessageService,
+            PeerFactory peerFactory)
         {
             _logger = logger;
             _matrixClient = matrixClient;
@@ -50,6 +59,9 @@
             _p2PLoginRequestFactory = p2PLoginRequestFactory;
             _p2PPeerRoomFactory = p2PPeerRoomFactory;
             _p2PMessageService = p2PMessageService;
+            _jsonSerializerService = jsonSerializerService;
+            _peerFactory = peerFactory;
+            _peerRepository = peerRepository;
         }
 
         public event TaskEventHandler<P2PMessageEventArgs> OnP2PMessagesReceived;
@@ -89,7 +101,8 @@
             Syncing = _matrixClient.IsSyncing;
         }
 
-        public async Task<P2PPeerRoom> SendChannelOpeningMessageAsync(Peer peer, string id, string appName)
+        public async Task<P2PPeerRoom> SendChannelOpeningMessageAsync(Peer peer, string id, string appName,
+            string? appUrl, string? appIcon)
         {
             string senderRelayServer =
                 _matrixClient.BaseAddress?.Host ??
@@ -97,8 +110,8 @@
 
             _channelOpeningMessageBuilder.Reset();
             _channelOpeningMessageBuilder.BuildRecipientId(peer.RelayServer, peer.HexPublicKey);
-            _channelOpeningMessageBuilder.BuildPairingPayload(id, peer.Version, senderRelayServer, appName);
-
+            _channelOpeningMessageBuilder.BuildPairingPayload(id, peer.Version, senderRelayServer, appName, appUrl,
+                appIcon);
             _channelOpeningMessageBuilder.BuildEncryptedPayload(peer.HexPublicKey);
 
             ChannelOpeningMessage channelOpeningMessage = _channelOpeningMessageBuilder.Message;
@@ -125,11 +138,11 @@
                         wait = false;
             }
 
-            _ = await _matrixClient.SendMessageAsync(createRoomResponse.RoomId, channelOpeningMessage.ToString());
+            await _matrixClient.SendMessageAsync(createRoomResponse.RoomId, channelOpeningMessage.ToString());
 
-            P2PPeerRoom p2PPeerRoom =
+            var p2PPeerRoom =
                 _p2PPeerRoomFactory.Create(peer.RelayServer, peer.HexPublicKey, peer.Name, createRoomResponse.RoomId);
-            var p2PeerRoom = _p2PPeerRoomRepository.CreateOrUpdateAsync(p2PPeerRoom).Result;
+            await _p2PPeerRoomRepository.CreateOrUpdateAsync(p2PPeerRoom);
 
             var allDatabaseRoomIds = _p2PPeerRoomRepository.GetAll().Result.Select(room => room.RoomId);
             var abandonedRoomIds = (from room in _matrixClient.JoinedRooms
@@ -141,7 +154,22 @@
                 await _matrixClient.LeaveRoomAsync(abandonedRoomId);
             }
 
-            return p2PeerRoom;
+            return p2PPeerRoom;
+        }
+
+        public async Task<P2PPairingRequest> GetPairingRequestInfo(string appName,
+            string[] knownRelayServers,
+            string? iconUrl,
+            string? appUrl)
+        {
+            return new P2PPairingRequest(
+                Id: KeyPairService.CreateGuid(),
+                Name: appName,
+                Version: Constants.BeaconVersion,
+                PublicKey: _p2PLoginRequestFactory.GetPublicKeyHex(),
+                RelayServer: await _p2PLoginRequestFactory.GetRelayServer(knownRelayServers),
+                AppUrl: appUrl,
+                Icon: iconUrl);
         }
 
         public async Task SendMessageAsync(Peer peer, string message)
@@ -174,14 +202,85 @@
 
         private string? TryGetMessageFromEvent(BaseRoomEvent matrixRoomEvent)
         {
-            if (matrixRoomEvent is not TextMessageEvent textMessageEvent) return null;
-
-            string senderUserId = textMessageEvent.SenderUserId;
-            P2PPeerRoom? p2PPeerRoom = _p2PPeerRoomRepository.TryReadAsync(senderUserId).Result;
-
-            if (p2PPeerRoom == null)
-                // _logger.LogInformation("Unknown senderUserId");
+            if (matrixRoomEvent is not TextMessageEvent textMessageEvent)
                 return null;
+
+            if (!HexString.TryParse(_p2PLoginRequestFactory.GetPublicKeyHex(), out var pubKeyHexString))
+                throw new ArgumentException(nameof(pubKeyHexString));
+
+            _channelOpeningMessageBuilder.Reset();
+            _channelOpeningMessageBuilder.BuildRecipientId(_matrixClient.BaseAddress!.Host, pubKeyHexString);
+
+            // check that sender is not ourselves
+            if (textMessageEvent.SenderUserId == _channelOpeningMessageBuilder.Message.RecipientId)
+                return null;
+
+            if (textMessageEvent.Message.StartsWith(ChannelOpeningMessage.StartPrefix))
+            {
+                var payload = textMessageEvent.Message.Split(':')[^1];
+
+                if (!_cryptographyService.Validate(payload))
+                {
+                    _logger.LogInformation("Can not validate payload");
+                    return null;
+                }
+
+                if (!HexString.TryParse(_p2PLoginRequestFactory.GetPrivateKeyHex(), out HexString privateKeyHexString))
+                    throw new ArgumentException(nameof(privateKeyHexString));
+
+                var decrypted = _cryptographyService
+                    .DecryptMessageAsString(payload, privateKeyHexString, pubKeyHexString);
+
+                var pairingResponse = _jsonSerializerService.Deserialize<P2PPairingResponse>(decrypted);
+
+                foreach (var room in _matrixClient.JoinedRooms)
+                {
+                    var foundUserId = room
+                        .JoinedUserIds
+                        .FirstOrDefault(userId => userId == textMessageEvent.SenderUserId);
+
+                    if (foundUserId == null) continue;
+
+                    if (!HexString.TryParse(pairingResponse.PublicKey, out HexString peerHexPublicKey))
+                        throw new ArgumentException(nameof(peerHexPublicKey));
+
+                    var peerRelayServer = foundUserId.Split(':').Last();
+
+                    // todo: update connected address                    
+                    var peer = _peerFactory.Create(
+                        peerHexPublicKey,
+                        pairingResponse.Name,
+                        pairingResponse.Version,
+                        peerRelayServer,
+                        string.Empty
+                    );
+
+                    var p2PPeerRoom = _p2PPeerRoomFactory.Create(
+                        peerRelayServer,
+                        peerHexPublicKey,
+                        pairingResponse.Name,
+                        room.Id);
+
+                    _ = _peerRepository.CreateAsync(peer).Result;
+                    _ = _p2PPeerRoomRepository.CreateOrUpdateAsync(p2PPeerRoom);
+                    break;
+                }
+
+                // P2PPeerRoom p2PPeerRoom =
+                //     _p2PPeerRoomFactory.Create(peer.RelayServer, peer.HexPublicKey, peer.Name, createRoomResponse.RoomId);
+                // var p2PeerRoom = _p2PPeerRoomRepository.CreateOrUpdateAsync(p2PPeerRoom).Result;
+                return null;
+            }
+
+            var senderUserId = textMessageEvent.SenderUserId;
+            var p2PPeerRoomFromDb = _p2PPeerRoomRepository.TryReadAsync(senderUserId).Result;
+
+            if (p2PPeerRoomFromDb == null)
+            {
+                _logger.LogInformation("{@Sender}: Can't find P2PPeerRoom for {SenderId}",
+                    "P2PCommunicationService", senderUserId);
+                return null;
+            }
 
             if (!_cryptographyService.Validate(textMessageEvent.Message))
             {
@@ -192,27 +291,33 @@
             if (!HexString.TryParse(textMessageEvent.Message, out HexString hexMessage))
                 throw new ArgumentException(nameof(textMessageEvent.Message));
 
-            return _p2PMessageService.DecryptMessage(p2PPeerRoom.PeerHexPublicKey, hexMessage);
+            return _p2PMessageService.DecryptMessage(p2PPeerRoomFromDb.PeerHexPublicKey, hexMessage);
         }
 
-        private void OnMatrixRoomEventsReceived(object? sender, MatrixRoomEventsEventArgs e)
+        private async void OnMatrixRoomEventsReceived(object? sender, MatrixRoomEventsEventArgs e)
         {
             if (sender is not IMatrixClient)
                 throw new ArgumentException("sender is not IMatrixClient");
 
-            _matrixSyncRepository.CreateOrUpdateAsync(e.NextBatch);
+            await _matrixSyncRepository.CreateOrUpdateAsync(e.NextBatch);
 
             var messages = new List<string>();
 
             foreach (BaseRoomEvent matrixRoomEvent in e.MatrixRoomEvents)
             {
+                if (matrixRoomEvent is JoinRoomEvent joinRoomEvent)
+                {
+                    await _matrixClient.JoinTrustedPrivateRoomAsync(joinRoomEvent.RoomId);
+                    return;
+                }
+
                 string? message = TryGetMessageFromEvent(matrixRoomEvent);
 
                 if (message != null)
                     messages.Add(message);
             }
 
-            OnP2PMessagesReceived.Invoke(this, new P2PMessageEventArgs(messages));
+            _ = OnP2PMessagesReceived.Invoke(this, new P2PMessageEventArgs(messages));
         }
     }
 }

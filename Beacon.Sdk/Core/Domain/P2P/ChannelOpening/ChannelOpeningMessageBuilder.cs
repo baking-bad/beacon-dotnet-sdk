@@ -40,7 +40,7 @@ namespace Beacon.Sdk.Core.Domain.P2P.ChannelOpening
         }
 
         public void BuildPairingPayload(string pairingRequestId, string payloadVersion,
-            string senderRelayServer, string senderAppName)
+            string senderRelayServer, string senderAppName, string? senderAppUrl, string? senderAppIcon)
         {
             if (!HexString.TryParse(_keyPairService.KeyPair.PublicKey, out HexString senderHexPublicKey))
                 throw new InvalidOperationException("Can not parse sender public key.");
@@ -48,8 +48,10 @@ namespace Beacon.Sdk.Core.Domain.P2P.ChannelOpening
             _message.Payload = payloadVersion switch
             {
                 "1" => senderHexPublicKey.ToString(),
-                "2" => BuildPairingResponseV2(pairingRequestId, senderHexPublicKey, senderRelayServer, senderAppName),
-                "3" => BuildPairingResponseV3(pairingRequestId, senderHexPublicKey, senderRelayServer, senderAppName),
+                "2" => BuildPairingResponseV2(pairingRequestId, senderHexPublicKey, senderRelayServer, senderAppName,
+                    senderAppUrl, senderAppIcon),
+                "3" => BuildPairingResponseV3(pairingRequestId, senderHexPublicKey, senderRelayServer, senderAppName,
+                    senderAppUrl, senderAppIcon),
                 _ => throw new ArgumentOutOfRangeException(nameof(payloadVersion))
             };
         }
@@ -67,30 +69,38 @@ namespace Beacon.Sdk.Core.Domain.P2P.ChannelOpening
             string pairingRequestId,
             HexString senderHexPublicKey,
             string senderRelayServer,
-            string senderAppName)
+            string senderAppName,
+            string? senderAppUrl = null,
+            string? senderAppIcon = null)
         {
             var pairingResponse = new P2PPairingResponse(
                 pairingRequestId,
                 senderAppName,
                 senderHexPublicKey.Value,
                 senderRelayServer,
-                Version: "2");
+                Version: "2",
+                AppUrl: senderAppUrl,
+                Icon: senderAppIcon);
 
             return _jsonSerializerService.Serialize(pairingResponse);
         }
-        
+
         private string BuildPairingResponseV3(
             string pairingRequestId,
             HexString senderHexPublicKey,
             string senderRelayServer,
-            string senderAppName)
+            string senderAppName,
+            string? senderAppUrl = null,
+            string? senderAppIcon = null)
         {
             var pairingResponse = new P2PPairingResponse(
                 pairingRequestId,
                 senderAppName,
                 senderHexPublicKey.Value,
                 senderRelayServer,
-                Version: "3");
+                Version: "3",
+                AppUrl: senderAppUrl,
+                Icon: senderAppIcon);
 
             return _jsonSerializerService.Serialize(pairingResponse);
         }

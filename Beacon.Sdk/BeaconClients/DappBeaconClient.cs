@@ -1,7 +1,10 @@
 namespace Beacon.Sdk.BeaconClients
 {
+    using System;
+    using System.Text;
     using System.Threading.Tasks;
     using Abstract;
+    using Beacon;
     using Core.Domain;
     using Core.Domain.Entities;
     using Core.Domain.Interfaces;
@@ -9,6 +12,7 @@ namespace Beacon.Sdk.BeaconClients
     using Core.Domain.P2P;
     using Core.Domain.Services;
     using Microsoft.Extensions.Logging;
+    using Netezos.Encoding;
 
     public class DappBeaconClient : BaseBeaconClient, IDappBeaconClient
     {
@@ -17,9 +21,13 @@ namespace Beacon.Sdk.BeaconClients
         private readonly PeerFactory _peerFactory;
         private readonly IPeerRepository _peerRepository;
         private readonly PermissionHandler _permissionHandler;
-
         private readonly RequestMessageHandler _requestMessageHandler;
         private readonly ResponseMessageHandler _responseMessageHandler;
+        private readonly IJsonSerializerService _jsonSerializerService;
+
+        public event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
+
+        public event EventHandler<DappConnectedEventArgs?> OnDappsListChanged;
 
         public DappBeaconClient(
             ILogger<DappBeaconClient> logger,
@@ -28,6 +36,7 @@ namespace Beacon.Sdk.BeaconClients
             IPermissionInfoRepository permissionInfoRepository,
             ISeedRepository seedRepository,
             IP2PCommunicationService p2PCommunicationService,
+            IJsonSerializerService jsonSerializerService,
             AccountService accountService,
             KeyPairService keyPairService,
             PeerFactory peerFactory,
@@ -50,6 +59,7 @@ namespace Beacon.Sdk.BeaconClients
             _responseMessageHandler = responseMessageHandler;
             _permissionHandler = permissionHandler;
             _peerFactory = peerFactory;
+            _jsonSerializerService = jsonSerializerService;
         }
 
         public bool LoggedIn { get; private set; }
@@ -72,15 +82,52 @@ namespace Beacon.Sdk.BeaconClients
             _logger.LogInformation("Dapp client connected {Connected}", Connected);
         }
 
+        public Task<string> GetPairingRequestInfo()
+        {
+            var pairingRequestInfo = _p2PCommunicationService
+                .GetPairingRequestInfo(AppName, KnownRelayServers, IconUrl, AppUrl).Result;
+            var pairingString = _jsonSerializerService.Serialize(pairingRequestInfo);
+            byte[] pairingBytes = Encoding.UTF8.GetBytes(pairingString);
+            string? pairingQrCode = Base58.Convert(pairingBytes);
+            return Task.FromResult(pairingQrCode);
+        }
+
         private void _responseMessageHandler_OnDappConnected(object sender, DappConnectedEventArgs e)
         {
         }
 
-        private Task OnP2PMessagesReceived(object? sender, P2PMessageEventArgs e)
+        private async Task OnP2PMessagesReceived(object? sender, P2PMessageEventArgs e)
         {
-            if (e.Messages.Count > 0)
-                _logger.LogInformation("DAPP: OnP2PMessagesReceived {Message}", e.Messages.Count);
-            return Task.FromResult(true);
+            if (sender is not IP2PCommunicationService)
+                throw new ArgumentException("sender is not IP2PCommunicationClient");
+
+            foreach (string message in e.Messages)
+                await HandleMessage(message);
+        }
+
+        private async Task HandleMessage(string message)
+        {
+            (AcknowledgeResponse ack, BaseBeaconMessage requestMessage) =
+                _requestMessageHandler.Handle(message, SenderId);
+
+            if (requestMessage.Version != "1")
+                await SendResponseAsync(requestMessage.SenderId, ack);
+
+            // bool hasPermission = await HasPermission(requestMessage);
+            //
+            // if (hasPermission)
+            OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs(requestMessage.SenderId, requestMessage));
+            // else
+            //     _logger.LogInformation("Received message have not permission");
+        }
+
+        public async Task SendResponseAsync(string receiverId, BaseBeaconMessage response)
+        {
+            var peer = _peerRepository.TryReadAsync(receiverId).Result
+                       ?? throw new NullReferenceException(nameof(Peer));
+
+            var message = await _responseMessageHandler.Handle(response, receiverId);
+            await _p2PCommunicationService.SendMessageAsync(peer, message);
         }
     }
 }

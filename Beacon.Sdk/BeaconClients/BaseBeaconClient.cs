@@ -10,8 +10,8 @@ namespace Beacon.Sdk.BeaconClients
 
     public abstract class BaseBeaconClient
     {
-        private readonly string? _appUrl;
-        private readonly string? _iconUrl;
+        protected readonly string? AppUrl;
+        protected readonly string? IconUrl;
         private readonly KeyPairService _keyPairService;
 
         protected readonly string AppName;
@@ -31,8 +31,8 @@ namespace Beacon.Sdk.BeaconClients
             PermissionInfoRepository = permissionInfoRepository;
             SeedRepository = seedRepository;
 
-            _iconUrl = options.IconUrl;
-            _appUrl = options.AppUrl;
+            IconUrl = options.IconUrl;
+            AppUrl = options.AppUrl;
 
             AppName = options.AppName;
             KnownRelayServers = options.KnownRelayServers;
@@ -63,7 +63,7 @@ namespace Beacon.Sdk.BeaconClients
         {
             SenderId = SenderId,
             Name = AppName,
-            Icon = _iconUrl
+            Icon = IconUrl
         };
     }
 }
