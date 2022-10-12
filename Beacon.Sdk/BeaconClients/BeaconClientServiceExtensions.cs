@@ -1,7 +1,8 @@
-using System.Runtime.InteropServices;
-
-namespace Beacon.Sdk
+namespace Beacon.Sdk.BeaconClients
 {
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using Abstract;
     using Core.Domain;
     using Core.Domain.Entities;
     using Core.Domain.Entities.P2P;
@@ -12,38 +13,53 @@ namespace Beacon.Sdk
     using Core.Infrastructure;
     using Core.Infrastructure.Cryptography;
     using Core.Infrastructure.Repositories;
-    using Matrix.Sdk;
     using Matrix.Sdk.Core.Infrastructure.Services;
     using Microsoft.Extensions.DependencyInjection;
-    using WalletBeaconClient;
+    using Microsoft.Extensions.Logging;
+    using MatrixClientServiceExtensions = Matrix.Sdk.MatrixClientServiceExtensions;
 
-    public static class WalletClientServiceExtensions
+    public static class BeaconClientServiceExtensions
     {
-        public static IServiceCollection AddBeaconClient(this IServiceCollection services, string pathToDb,
-            string appName = "Atomex")
+        public static IServiceCollection AddBeaconWalletClient(this IServiceCollection services,
+            BeaconOptions? options = null,
+            ILoggerProvider? loggerProvider = null)
         {
-            var beaconOptions = new BeaconOptions
+            services.AddBeaconClient(options, loggerProvider);
+            services.AddSingleton<IWalletBeaconClient, WalletBeaconClient>();
+            return services;
+        }
+        
+        public static IServiceCollection AddBeaconDappClient(this IServiceCollection services,
+            BeaconOptions? options = null,
+            ILoggerProvider? loggerProvider = null)
+        {
+            services.AddBeaconClient(options, loggerProvider);
+            services.AddSingleton<IDappBeaconClient, DappBeaconClient>();
+            return services;
+        }
+
+        private static IServiceCollection AddBeaconClient(this IServiceCollection services,
+            BeaconOptions? options = null,
+            ILoggerProvider? loggerProvider = null)
+        {
+            var defaultBeaconOptions = new BeaconOptions
             {
-                AppName = appName,
-                AppUrl = "https://atomex.me",
-                IconUrl = "https://bcd-static-assets.fra1.digitaloceanspaces.com/dapps/atomex/atomex_logo.jpg",
-                KnownRelayServers = new[]
-                {
-                    "beacon-node-1.diamond.papers.tech",
-                    "beacon-node-1.sky.papers.tech",
-                    "beacon-node-2.sky.papers.tech",
-                    "beacon-node-1.hope.papers.tech",
-                    "beacon-node-1.hope-2.papers.tech",
-                    "beacon-node-1.hope-3.papers.tech",
-                    "beacon-node-1.hope-4.papers.tech"
-                },
+                AppName = "Unknown beacon-dotnet-sdk client",
+                AppUrl = string.Empty,
+                IconUrl = string.Empty,
+                KnownRelayServers = Constants.KnownRelayServers,
 
                 DatabaseConnectionString = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                    ? $"Filename={pathToDb}/beacon.db; Connection=Shared;"
-                    : $"Filename={pathToDb}/beacon.db; Mode=Exclusive;"
+                    ? $"Filename={Directory.GetCurrentDirectory()}/beacon.db; Connection=Shared;"
+                    : $"Filename={Directory.GetCurrentDirectory()}/beacon.db; Mode=Exclusive;"
             };
 
-            services.AddMatrixClient();
+            BeaconOptions beaconOptions = options ?? defaultBeaconOptions;
+
+            if (loggerProvider != null)
+                services.AddLogging(builder => builder.AddProvider(loggerProvider));
+            
+            MatrixClientServiceExtensions.AddMatrixClient(services);
             services.AddSingleton<ICryptographyService, CryptographyService>();
             services.AddSingleton<BeaconOptions>(beaconOptions);
 
@@ -91,9 +107,7 @@ namespace Beacon.Sdk
             services.AddSingleton<IP2PCommunicationService, P2PCommunicationService>();
 
             #endregion
-
-            services.AddSingleton<IWalletBeaconClient, WalletBeaconClient.WalletBeaconClient>();
-
+            
             return services;
         }
     }

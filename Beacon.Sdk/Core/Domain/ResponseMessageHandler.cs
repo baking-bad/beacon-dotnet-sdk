@@ -48,6 +48,8 @@ namespace Beacon.Sdk.Core.Domain
                 HandleDisconnectResponse(response as DisconnectMessage),
             BeaconMessageType.error =>
                 HandleError(response as BaseBeaconError),
+            BeaconMessageType.permission_request =>
+                HandlePermissionRequest(response as PermissionRequest),
 
             _ => throw new ArgumentException("Invalid beacon message type")
         };
@@ -136,5 +138,8 @@ namespace Beacon.Sdk.Core.Domain
                     throw new ArgumentException("error.ErrorType");
             }
         }
+
+        private string HandlePermissionRequest(PermissionRequest request) =>
+            _jsonSerializerService.Serialize(request);
     }
 }

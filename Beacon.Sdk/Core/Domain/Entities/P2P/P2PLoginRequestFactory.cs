@@ -37,12 +37,12 @@ namespace Beacon.Sdk.Core.Domain.Entities.P2P
         {
             KeyPair keyPair = _keyPairService.KeyPair;
 
-            string relayServer = await GetRelayServer(keyPair.PublicKey, knownRelayServers);
+            string relayServer = await GetRelayServer(knownRelayServers);
 
             byte[] loginDigest = _cryptographyService.GenerateLoginDigest();
             string hexSignature = _cryptographyService.GenerateHexSignature(loginDigest, keyPair.PrivateKey);
-            string publicKeyHex = _cryptographyService.ToHexString(keyPair.PublicKey);
-            string hexId = _cryptographyService.GenerateHexId(keyPair.PublicKey);
+            string publicKeyHex = GetPublicKeyHex();
+            string hexId = _cryptographyService.GenerateHexId(_keyPairService.KeyPair.PublicKey);
 
             var password = $"ed:{hexSignature}:{publicKeyHex}";
             string deviceId = publicKeyHex;
@@ -52,6 +52,9 @@ namespace Beacon.Sdk.Core.Domain.Entities.P2P
             return new P2PLoginRequest(address, hexId, password, deviceId);
         }
 
+        public string GetPublicKeyHex() => _cryptographyService.ToHexString(_keyPairService.KeyPair.PublicKey);
+        public string GetPrivateKeyHex() => _cryptographyService.ToHexString(_keyPairService.KeyPair.PrivateKey);
+
         private static int PublicKeyToInt(byte[] input, int modulus)
         {
             int sum = input.Select((t, i) => t + i).Sum();
@@ -59,12 +62,12 @@ namespace Beacon.Sdk.Core.Domain.Entities.P2P
             return (int) Math.Floor((decimal) (sum % modulus));
         }
 
-        private async Task<string> GetRelayServer(byte[] publicKey, string[] knownRelayServers)
+        public async Task<string> GetRelayServer(string[] knownRelayServers)
         {
             if (_sdkStorage.MatrixSelectedNode is {Length: > 0})
                 return _sdkStorage.MatrixSelectedNode;
 
-            int startIndex = PublicKeyToInt(publicKey, knownRelayServers.Length);
+            int startIndex = PublicKeyToInt(_keyPairService.KeyPair.PublicKey, knownRelayServers.Length);
             var offset = 0;
 
             while (offset < knownRelayServers.Length)

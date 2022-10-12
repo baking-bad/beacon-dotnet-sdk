@@ -36,6 +36,7 @@ namespace Beacon.Sdk.Core.Domain.Entities
                 ConnectedAt = DateTime.UtcNow
             };
 
+            // todo: not only for dapps
             try
             {
                 var dappResponse = await new HttpClient().GetAsync(

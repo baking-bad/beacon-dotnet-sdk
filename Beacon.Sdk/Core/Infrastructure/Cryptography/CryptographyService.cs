@@ -49,7 +49,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
         public KeyPair GenerateEd25519KeyPair(string seed)
         {
-            byte[] hash = GenericHash.Hash(seed, (byte[]?) null, 32);
+            byte[] hash = GenericHash.Hash(seed, (byte[]?)null, 32);
 
             return PublicKeyAuth.GenerateKeyPair(hash);
         }
@@ -99,14 +99,31 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(publicKey) ??
             throw new NullReferenceException("Can not convert public key.");
 
+        public byte[] ConvertEd25519SecretKeyToCurve25519SecretKey(byte[] secretKey) =>
+            PublicKeyAuth.ConvertEd25519SecretKeyToCurve25519SecretKey(secretKey) ??
+            throw new NullReferenceException("Can not convert secret key.");
+
         public string EncryptMessageAsString(string message, byte[] publicKey)
         {
-            byte[]? result = SealedPublicKeyBox.Create(message, publicKey);
+            byte[] encrypted = SealedPublicKeyBox.Create(message, publicKey);
 
-            if (!HexString.TryParse(result, out HexString k))
+            if (!HexString.TryParse(encrypted, out HexString encryptedHex))
                 throw new Exception("HexString.TryParse(result, out var k)");
 
-            return k.Value;
+            return encryptedHex.Value;
+        }
+
+        public string DecryptMessageAsString(string message, HexString secretKey, HexString publicKey)
+        {
+            if (!HexString.TryParse(message, out HexString encryptedMessageHex))
+                throw new Exception("Can't parse message in DecryptMessageAsString");
+
+            byte[] curve25519PublicKey = ConvertEd25519PublicKeyToCurve25519PublicKey(publicKey.ToByteArray());
+            byte[] curve25519SecretKey = ConvertEd25519SecretKeyToCurve25519SecretKey(secretKey.ToByteArray());
+            byte[] decrypted = SealedPublicKeyBox.Open(encryptedMessageHex.ToByteArray(), curve25519SecretKey,
+                curve25519PublicKey);
+
+            return Encoding.UTF8.GetString(decrypted);
         }
 
         public bool Validate(string input) =>
@@ -119,7 +136,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds() * 1000;
             var message = $"login:{now / 1000 / (5 * 60)}";
 
-            return GenericHash.Hash(message, (byte[]?) null, 32);
+            return GenericHash.Hash(message, (byte[]?)null, 32);
         }
 
         public string GenerateHexSignature(byte[] loginDigest, byte[] secretKey)

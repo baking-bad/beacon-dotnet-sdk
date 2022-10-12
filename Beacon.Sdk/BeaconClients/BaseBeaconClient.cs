@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.WalletBeaconClient
+namespace Beacon.Sdk.BeaconClients
 {
     using System;
     using Beacon;
@@ -10,11 +10,11 @@ namespace Beacon.Sdk.WalletBeaconClient
 
     public abstract class BaseBeaconClient
     {
-        private readonly string? _appUrl;
-        private readonly string? _iconUrl;
+        protected readonly string? AppUrl;
+        protected readonly string? IconUrl;
         private readonly KeyPairService _keyPairService;
 
-        protected readonly string AppName;
+        public readonly string AppName;
         protected readonly string[] KnownRelayServers;
 
         protected BaseBeaconClient(
@@ -31,8 +31,8 @@ namespace Beacon.Sdk.WalletBeaconClient
             PermissionInfoRepository = permissionInfoRepository;
             SeedRepository = seedRepository;
 
-            _iconUrl = options.IconUrl;
-            _appUrl = options.AppUrl;
+            IconUrl = options.IconUrl;
+            AppUrl = options.AppUrl;
 
             AppName = options.AppName;
             KnownRelayServers = options.KnownRelayServers;
@@ -63,7 +63,8 @@ namespace Beacon.Sdk.WalletBeaconClient
         {
             SenderId = SenderId,
             Name = AppName,
-            Icon = _iconUrl
+            Icon = IconUrl,
+            AppUrl = AppUrl
         };
     }
 }

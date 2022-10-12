@@ -3,6 +3,7 @@ namespace Beacon.Sdk.Core.Domain
     using System.Threading.Tasks;
     using Beacon;
     using Beacon.Operation;
+    using Beacon.Permission;
     using Entities;
     using Interfaces.Data;
     using Services;

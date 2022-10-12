@@ -1,6 +1,7 @@
 namespace Beacon.Sdk.Core.Domain.Interfaces
 {
     using System.Threading.Tasks;
+    using Beacon;
     using Entities;
     using Entities.P2P;
     using P2P;
@@ -20,7 +21,11 @@ namespace Beacon.Sdk.Core.Domain.Interfaces
 
         void Stop();
 
-        Task<P2PPeerRoom> SendChannelOpeningMessageAsync(Peer peer, string id, string appName);
+        Task<P2PPeerRoom> SendChannelOpeningMessageAsync(Peer peer, string id, string appName, string? appUrl,
+            string? appIcon);
+
+        Task<P2PPairingRequest> GetPairingRequestInfo(string appName, string[] knownRelayServers, string? iconUrl,
+            string? appUrl);
 
         Task SendMessageAsync(Peer peer, string message);
 

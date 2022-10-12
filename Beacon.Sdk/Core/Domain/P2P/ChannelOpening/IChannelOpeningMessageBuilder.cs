@@ -14,7 +14,7 @@ namespace Beacon.Sdk.Core.Domain.P2P.ChannelOpening
         void BuildRecipientId(string relayServer, HexString hexPublicKey);
 
         void BuildPairingPayload(string pairingRequestId, string payloadVersion,
-            string senderRelayServer, string senderAppName);
+            string senderRelayServer, string senderAppName, string? senderAppUrl, string? senderAppIcon);
 
         void BuildEncryptedPayload(HexString receiverHexPublicKey);
     }
