@@ -252,7 +252,8 @@
                         pairingResponse.Name,
                         pairingResponse.Version,
                         peerRelayServer,
-                        string.Empty
+                        string.Empty,
+                        isActive: true
                     );
 
                     var p2PPeerRoom = _p2PPeerRoomFactory.Create(
@@ -261,14 +262,16 @@
                         pairingResponse.Name,
                         room.Id);
 
-                    _ = _peerRepository.CreateAsync(peer).Result;
-                    _ = _p2PPeerRoomRepository.CreateOrUpdateAsync(p2PPeerRoom);
+                    _ = Task.Run(async () =>
+                    {
+                        await _peerRepository.MarkAllInactive();
+                        await _peerRepository.CreateAsync(peer);
+                        await _p2PPeerRoomRepository.CreateOrUpdateAsync(p2PPeerRoom);
+                        _ = OnP2PMessagesReceived.Invoke(this, new P2PMessageEventArgs(null, pairingResponse));
+                    });
                     break;
                 }
-
-                // P2PPeerRoom p2PPeerRoom =
-                //     _p2PPeerRoomFactory.Create(peer.RelayServer, peer.HexPublicKey, peer.Name, createRoomResponse.RoomId);
-                // var p2PeerRoom = _p2PPeerRoomRepository.CreateOrUpdateAsync(p2PPeerRoom).Result;
+                
                 return null;
             }
 

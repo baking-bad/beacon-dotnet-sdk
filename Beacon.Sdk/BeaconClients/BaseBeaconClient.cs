@@ -14,7 +14,7 @@ namespace Beacon.Sdk.BeaconClients
         protected readonly string? IconUrl;
         private readonly KeyPairService _keyPairService;
 
-        protected readonly string AppName;
+        public readonly string AppName;
         protected readonly string[] KnownRelayServers;
 
         protected BaseBeaconClient(
@@ -63,7 +63,8 @@ namespace Beacon.Sdk.BeaconClients
         {
             SenderId = SenderId,
             Name = AppName,
-            Icon = IconUrl
+            Icon = IconUrl,
+            AppUrl = AppUrl
         };
     }
 }

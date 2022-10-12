@@ -6,8 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Beacon.Sdk.Tests", "Beacon.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Beacon.Sdk.Sample.Wallet", "Beacon.Sdk.Sample.Wallet\Beacon.Sdk.Sample.Wallet.csproj", "{81B0EB43-48E8-4FD7-B99A-EF98420B60A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Matrix.Sdk", "..\matrix-dotnet-sdk\Matrix.Sdk\Matrix.Sdk.csproj", "{234CE1F7-3B01-42C0-8F35-09146CAB6919}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Beacon.Sdk.Sample.Dapp", "Beacon.Sdk.Sample.Dapp\Beacon.Sdk.Sample.Dapp.csproj", "{46CF5B42-25DA-41EA-8A9D-78DD988EADD2}"
 EndProject
 Global

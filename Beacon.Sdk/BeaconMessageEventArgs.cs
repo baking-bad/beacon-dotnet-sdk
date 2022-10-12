@@ -6,15 +6,17 @@ namespace Beacon.Sdk
 
     public class BeaconMessageEventArgs : EventArgs
     {
-        public BeaconMessageEventArgs(string senderId, BaseBeaconMessage request)
+        public BeaconMessageEventArgs(string senderId, BaseBeaconMessage request, bool pairingDone = false)
         {
             SenderId = senderId;
             Request = request;
+            PairingDone = pairingDone;
         }
 
         public string SenderId { get; }
 
         public BaseBeaconMessage Request { get; }
+        public bool PairingDone { get; }
     }
 
     public class DappConnectedEventArgs : EventArgs

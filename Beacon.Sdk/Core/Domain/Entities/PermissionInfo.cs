@@ -17,6 +17,7 @@ namespace Beacon.Sdk.Core.Domain.Entities
 
         public AppMetadata AppMetadata { get; set; }
 
+        // todo: migrate to AppMetadata AppUrl
         public string Website { get; set; }
 
         public string PublicKey { get; set; }

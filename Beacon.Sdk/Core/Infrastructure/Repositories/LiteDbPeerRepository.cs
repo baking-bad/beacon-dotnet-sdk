@@ -34,6 +34,12 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             return Task.FromResult(peer ?? null);
         });
 
+        public Task<Peer?> TryGetActive() => InConnectionNullable(CollectionName, col =>
+        {
+            var peer = col.FindOne(x => x.IsActive);
+            return Task.FromResult(peer ?? null);
+        });
+
         public Task<List<Peer>> GetAll() =>
             InConnection(CollectionName, col => Task.FromResult(new List<Peer>(col.FindAll())));
 
@@ -43,6 +49,16 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
             if (dbPeer != null)
                 col.Delete(dbPeer.Id);
+        });
+        
+        public Task MarkAllInactive() => InConnectionAction(CollectionName, col =>
+        {
+            var allPeers = col.FindAll();
+            foreach (var peer in allPeers)
+            {
+                peer.IsActive = false;
+                col.Update(peer);
+            }
         });
     }
 }

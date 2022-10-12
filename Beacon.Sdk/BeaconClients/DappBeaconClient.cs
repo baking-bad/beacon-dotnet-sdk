@@ -5,6 +5,7 @@ namespace Beacon.Sdk.BeaconClients
     using System.Threading.Tasks;
     using Abstract;
     using Beacon;
+    using Beacon.Permission;
     using Core.Domain;
     using Core.Domain.Entities;
     using Core.Domain.Interfaces;
@@ -92,6 +93,11 @@ namespace Beacon.Sdk.BeaconClients
             return Task.FromResult(pairingQrCode);
         }
 
+        public Task<Peer?> GetActivePeer()
+        {
+            return _peerRepository.TryGetActive();
+        }
+
         private void _responseMessageHandler_OnDappConnected(object sender, DappConnectedEventArgs e)
         {
         }
@@ -101,24 +107,35 @@ namespace Beacon.Sdk.BeaconClients
             if (sender is not IP2PCommunicationService)
                 throw new ArgumentException("sender is not IP2PCommunicationClient");
 
+            if (e.PairingResponse != null)
+            {
+                var peer = _peerRepository.TryGetActive().Result;
+                if (peer == null) return;
+
+                var appMetaData = new AppMetadata
+                {
+                    SenderId = peer.SenderId,
+                    Name = e.PairingResponse.Name,
+                    Icon = e.PairingResponse.Icon,
+                    AppUrl = e.PairingResponse.AppUrl
+                };
+                await AppMetadataRepository.CreateOrUpdateAsync(appMetaData);
+                
+                OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs(null, null, true));
+                return;
+            }
+
             foreach (string message in e.Messages)
                 await HandleMessage(message);
         }
 
         private async Task HandleMessage(string message)
         {
-            (AcknowledgeResponse ack, BaseBeaconMessage requestMessage) =
+            (_, BaseBeaconMessage requestMessage) =
                 _requestMessageHandler.Handle(message, SenderId);
-
-            if (requestMessage.Version != "1")
-                await SendResponseAsync(requestMessage.SenderId, ack);
-
-            // bool hasPermission = await HasPermission(requestMessage);
-            //
-            // if (hasPermission)
+            
+            await _responseMessageHandler.Handle(requestMessage, requestMessage.SenderId);
             OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs(requestMessage.SenderId, requestMessage));
-            // else
-            //     _logger.LogInformation("Received message have not permission");
         }
 
         public async Task SendResponseAsync(string receiverId, BaseBeaconMessage response)

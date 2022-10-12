@@ -6,7 +6,9 @@ namespace Beacon.Sdk.Core.Domain
     using Beacon;
     using Beacon.Operation;
     using Beacon.Permission;
+    using Entities;
     using Interfaces;
+    using Interfaces.Data;
 
     public class RequestMessageHandler
     {
@@ -30,6 +32,8 @@ namespace Beacon.Sdk.Core.Domain
                 BeaconMessageType.permission_request => (ack, HandlePermissionRequest(message)),
                 BeaconMessageType.operation_request => (ack, HandleOperationRequest(message)),
                 BeaconMessageType.sign_payload_request => (ack, HandleSignPayloadRequest(message)),
+                
+                BeaconMessageType.permission_response => (ack, HandlePermissionResponse(message)),
                 _ => throw new Exception("Unknown beaconMessage.Type.")
             };
         }
@@ -55,6 +59,13 @@ namespace Beacon.Sdk.Core.Domain
         {
             var signPayloadRequest = _jsonSerializerService.Deserialize<SignPayloadRequest>(message);
             return signPayloadRequest;
+        }
+        
+        // todo: remove this to response handler
+        private BaseBeaconMessage HandlePermissionResponse(string message)
+        {
+            var permissionResponse = _jsonSerializerService.Deserialize<PermissionResponse>(message);
+            return permissionResponse;
         }
     }
 }

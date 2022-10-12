@@ -3,6 +3,7 @@ namespace Beacon.Sdk.BeaconClients.Abstract
     using System;
     using System.Threading.Tasks;
     using Beacon;
+    using Core.Domain.Entities;
 
     public interface IDappBeaconClient
     {
@@ -26,6 +27,7 @@ namespace Beacon.Sdk.BeaconClients.Abstract
         Task InitAsync();
         void Connect();
         Task<string> GetPairingRequestInfo();
+        Task<Peer?> GetActivePeer();
 
         // Task AddPeerAsync(P2PPairingRequest pairingRequest, string addressToConnect, bool sendPairingResponse = true);
         //
