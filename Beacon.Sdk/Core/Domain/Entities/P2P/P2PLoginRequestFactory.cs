@@ -88,7 +88,7 @@ namespace Beacon.Sdk.Core.Domain.Entities.P2P
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogInformation($"Ignoring server \"{relayServer}\", trying another one...");
+                    _logger?.LogInformation(ex, "Ignoring server \"{RelayServer}\", trying another one", relayServer);
                     offset++;
                 }
             }
