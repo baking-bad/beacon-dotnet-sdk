@@ -14,7 +14,7 @@
         <Authors>Mikhail Tatarenko</Authors>
         <Product>Beacon.Sdk</Product>
         <Description>Beacon .NET SDK for Tezos wallet developers to seamlessly connect to multiple dApps.</Description>
-        <Version>1.0.7</Version>
+        <Version>1.0.8</Version>
         <Copyright>Copyright © Baking Bad 2019-2022</Copyright>
         <Nullable>enable</Nullable>
         <TargetFramework>netstandard2.0</TargetFramework>
