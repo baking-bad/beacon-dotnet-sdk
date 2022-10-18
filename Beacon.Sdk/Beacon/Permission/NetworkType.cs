@@ -9,12 +9,17 @@ namespace Beacon.Sdk.Beacon.Permission
     public enum NetworkType
     {
         mainnet,
+        ghostnet, // Long running testnet
+        mondaynet, // Testnet, resets every monday
+        dailynet, // Testnet, resets every day
         delphinet,
         edonet,
         florencenet,
         granadanet,
         hangzhounet,
         ithacanet,
+        jakartanet,
+        kathmandunet,
         custom
     }
 }

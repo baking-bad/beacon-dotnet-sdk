@@ -100,13 +100,6 @@ public class Sample
                 }
                 case "operation":
                 {
-                    var network = new Network
-                    {
-                        Type = NetworkType.mainnet,
-                        Name = "mainnet",
-                        RpcUrl = "https://rpc.tzkt.io/mainnet"
-                    };
-
                     var operationDetails = new List<PartialTezosTransactionOperation>
                     {
                         new(
@@ -127,7 +120,7 @@ public class Sample
                         version: Constants.BeaconVersion,
                         id: KeyPairService.CreateGuid(),
                         senderId: BeaconDappClient.SenderId,
-                        network: network,
+                        network: permissions.Network,
                         operationDetails: operationDetails,
                         sourceAddress: pubKey.Address);
 
@@ -198,6 +191,7 @@ public class Sample
                 if (message is not OperationResponse operationResponse)
                     return;
 
+                Logger.Debug("Operation completed with transaction hash {Tx}", operationResponse.TransactionHash);
                 break;
             }
 
