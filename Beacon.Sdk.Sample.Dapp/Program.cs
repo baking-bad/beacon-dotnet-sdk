@@ -7,7 +7,6 @@
         private static async Task<int> Main(string[] args)
         {
             await Sample.Run();
-            Console.ReadLine();
             return 0;
         }
     }   

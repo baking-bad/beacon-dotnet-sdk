@@ -32,8 +32,11 @@ namespace Beacon.Sdk.Core.Domain
                 BeaconMessageType.permission_request => (ack, HandlePermissionRequest(message)),
                 BeaconMessageType.operation_request => (ack, HandleOperationRequest(message)),
                 BeaconMessageType.sign_payload_request => (ack, HandleSignPayloadRequest(message)),
-                
+
+                // todo: remove this to response handler
                 BeaconMessageType.permission_response => (ack, HandlePermissionResponse(message)),
+                BeaconMessageType.operation_response => (ack, HandleOperationResponse(message)),
+                BeaconMessageType.sign_payload_response => (ack, HandleSignPayloadResponse(message)),
                 _ => throw new Exception("Unknown beaconMessage.Type.")
             };
         }
@@ -54,18 +57,17 @@ namespace Beacon.Sdk.Core.Domain
             return operationRequest;
         }
 
-
-        private BaseBeaconMessage HandleSignPayloadRequest(string message)
-        {
-            var signPayloadRequest = _jsonSerializerService.Deserialize<SignPayloadRequest>(message);
-            return signPayloadRequest;
-        }
+        private BaseBeaconMessage HandleSignPayloadRequest(string message) =>
+            _jsonSerializerService.Deserialize<SignPayloadRequest>(message);
         
-        // todo: remove this to response handler
-        private BaseBeaconMessage HandlePermissionResponse(string message)
-        {
-            var permissionResponse = _jsonSerializerService.Deserialize<PermissionResponse>(message);
-            return permissionResponse;
-        }
+        
+        private BaseBeaconMessage HandlePermissionResponse(string message) =>
+            _jsonSerializerService.Deserialize<PermissionResponse>(message);
+        
+        private BaseBeaconMessage HandleOperationResponse(string message) =>
+            _jsonSerializerService.Deserialize<OperationResponse>(message);
+        
+        private BaseBeaconMessage HandleSignPayloadResponse(string message) =>
+            _jsonSerializerService.Deserialize<SignPayloadResponse>(message);
     }
 }

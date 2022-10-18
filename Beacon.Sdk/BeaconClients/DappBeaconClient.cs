@@ -126,15 +126,17 @@ namespace Beacon.Sdk.BeaconClients
             }
 
             foreach (string message in e.Messages)
-                await HandleMessage(message);
+                await HandleReceivedMessage(message);
         }
 
-        private async Task HandleMessage(string message)
+        private async Task HandleReceivedMessage(string message)
         {
             (_, BaseBeaconMessage requestMessage) =
                 _requestMessageHandler.Handle(message, SenderId);
             
-            await _responseMessageHandler.Handle(requestMessage, requestMessage.SenderId);
+            if (requestMessage.Type == BeaconMessageType.permission_response)
+                await _responseMessageHandler.Handle(requestMessage, requestMessage.SenderId);
+            
             OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs(requestMessage.SenderId, requestMessage));
         }
 
