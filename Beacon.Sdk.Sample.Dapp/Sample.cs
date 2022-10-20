@@ -19,9 +19,6 @@ using ILogger = Serilog.ILogger;
 public class Sample
 {
     const string DbPath = "dapp-sample.db";
-    private const string TzButtonColorsContract = "KT1RPW5kTX6WFxg8JK34rGEU24gqEEudyfvz";
-    private const string TokenId = "925";
-
     private const string PayloadToSign =
         "05010000008654657a6f73205369676e6564204d6573736167653a20436f6e6669726d696e67206d79206964656e7469747920617320747a31524445344a64556f37336278323363776a72393767446b6350363362344e664744206f6e206f626a6b742e636f6d2c207369673a6f5252764f6374513638726463457555394965782d72496b45516d46426652";
 
@@ -57,12 +54,12 @@ public class Sample
         string pairingRequestQrData = await BeaconDappClient.GetPairingRequestInfo();
         Logger.Information("Pairing data is Is\n{Data}", pairingRequestQrData);
         var activePeer = await BeaconDappClient.GetActivePeer();
-        if (activePeer == null) return;
+        if (activePeer == null) Console.ReadLine();
 
         var permissions = await BeaconDappClient
             .PermissionInfoRepository
             .TryReadBySenderIdAsync(activePeer.SenderId);
-        if (permissions == null) return;
+        if (permissions == null) Console.ReadLine();
 
         var permissionsString = permissions?.Scopes.Aggregate(string.Empty,
             (res, scope) => res + $"{scope}, ") ?? string.Empty;
@@ -100,19 +97,19 @@ public class Sample
                 }
                 case "operation":
                 {
+                    var stringParams = @"{
+	                    'entrypoint': 'login',
+	                        'value': {
+		                        'prim': 'Unit'
+	                        }
+                        }";
+                    
                     var operationDetails = new List<PartialTezosTransactionOperation>
                     {
                         new(
                             Amount: "0",
-                            Destination: TzButtonColorsContract,
-                            Parameters: new JObject
-                            {
-                                ["entrypoint"] = "set_color",
-                                ["value"] = new JObject
-                                {
-                                    ["int"] = TokenId
-                                }
-                            })
+                            Destination: "KT1WguzxyLmuKbJhz3jNuoRzzaUCncfp6PFE",
+                            Parameters: JObject.Parse(stringParams))
                     };
 
                     var operationRequest = new OperationRequest(
@@ -140,9 +137,9 @@ public class Sample
 
             var network = new Network
             {
-                Type = NetworkType.mainnet,
-                Name = "mainnet",
-                RpcUrl = "https://rpc.tzkt.io/mainnet"
+                Type = NetworkType.ghostnet,
+                Name = "ghostnet",
+                RpcUrl = "https://rpc.tzkt.io/ghostnet"
             };
 
             var permissionScopes = new List<PermissionScope>
