@@ -82,8 +82,7 @@ namespace Beacon.Sdk.BeaconClients
                 peerHexPublicKey,
                 pairingRequest.Name,
                 pairingRequest.Version,
-                pairingRequest.RelayServer,
-                addressToConnect
+                pairingRequest.RelayServer
             );
 
             peer = _peerRepository.CreateAsync(peer).Result;

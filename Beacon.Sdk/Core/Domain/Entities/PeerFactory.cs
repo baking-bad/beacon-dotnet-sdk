@@ -23,8 +23,7 @@ namespace Beacon.Sdk.Core.Domain.Entities
             return buffer;
         }
 
-        public Peer Create(HexString hexPublicKey, string name, string version, string relayServer, string addressToConnect,
-            bool isActive = false)
+        public Peer Create(HexString hexPublicKey, string name, string version, string relayServer, bool isActive = false)
         {
             var hash = _cryptographyService.Hash(hexPublicKey.ToByteArray(), 5);
             var senderId = Base58.Convert(hash);
@@ -36,7 +35,6 @@ namespace Beacon.Sdk.Core.Domain.Entities
                 Name = name,
                 Version = version,
                 RelayServer = relayServer,
-                ConnectedAddress = addressToConnect,
                 IsActive = isActive
             };
         }

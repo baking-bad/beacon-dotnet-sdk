@@ -174,10 +174,10 @@
 
         public async Task SendMessageAsync(Peer peer, string message)
         {
-            P2PPeerRoom p2PPeerRoom = _p2PPeerRoomRepository.TryReadAsync(peer.HexPublicKey).Result
-                                      ?? throw new NullReferenceException(nameof(P2PPeerRoom));
+            var p2PPeerRoom = _p2PPeerRoomRepository.TryReadAsync(peer.HexPublicKey).Result
+                              ?? throw new NullReferenceException(nameof(P2PPeerRoom));
 
-            string encryptedMessage = _p2PMessageService.EncryptMessage(peer.HexPublicKey, message).Value;
+            var encryptedMessage = _p2PMessageService.EncryptMessage(peer.HexPublicKey, message).Value;
 
             _ = await _matrixClient.SendMessageAsync(p2PPeerRoom.RoomId, encryptedMessage);
 
@@ -245,14 +245,12 @@
                         throw new ArgumentException(nameof(peerHexPublicKey));
 
                     var peerRelayServer = foundUserId.Split(':').Last();
-
-                    // todo: update connected address                    
+                    
                     var peer = _peerFactory.Create(
                         peerHexPublicKey,
                         pairingResponse.Name,
                         pairingResponse.Version,
                         peerRelayServer,
-                        string.Empty,
                         isActive: true
                     );
 
