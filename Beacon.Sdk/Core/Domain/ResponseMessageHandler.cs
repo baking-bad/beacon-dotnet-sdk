@@ -69,16 +69,15 @@ namespace Beacon.Sdk.Core.Domain
             if (receiverAppMetadata == null)
                 throw new Exception("AppMetadata not found");
 
-            var info = await _permissionInfoFactory.Create(
+            var permissionInfo = await _permissionInfoFactory.Create(
                 receiverId,
                 receiverAppMetadata,
-                response.Address,
                 response.PublicKey,
                 response.Network,
                 response.Scopes);
 
-            info = _permissionInfoRepository.CreateOrUpdateAsync(info).Result;
-            OnDappConnected?.Invoke(this, new DappConnectedEventArgs(receiverAppMetadata, info));
+            permissionInfo = _permissionInfoRepository.CreateOrUpdateAsync(permissionInfo).Result;
+            OnDappConnected?.Invoke(this, new DappConnectedEventArgs(receiverAppMetadata, permissionInfo));
             return _jsonSerializerService.Serialize(response);
         }
 

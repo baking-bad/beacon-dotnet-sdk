@@ -19,6 +19,7 @@ using ILogger = Serilog.ILogger;
 public class Sample
 {
     const string DbPath = "dapp-sample.db";
+
     private const string PayloadToSign =
         "05010000008654657a6f73205369676e6564204d6573736167653a20436f6e6669726d696e67206d79206964656e7469747920617320747a31524445344a64556f37336278323363776a72393767446b6350363362344e664744206f6e206f626a6b742e636f6d2c207369673a6f5252764f6374513638726463457555394965782d72496b45516d46426652";
 
@@ -103,7 +104,7 @@ public class Sample
 		                        'prim': 'Unit'
 	                        }
                         }";
-                    
+
                     var operationDetails = new List<PartialTezosTransactionOperation>
                     {
                         new(
@@ -137,9 +138,9 @@ public class Sample
 
             var network = new Network
             {
-                Type = NetworkType.ghostnet,
-                Name = "ghostnet",
-                RpcUrl = "https://rpc.tzkt.io/ghostnet"
+                Type = NetworkType.mainnet,
+                Name = "mainnet",
+                RpcUrl = "https://rpc.tzkt.io/mainnet"
             };
 
             var permissionScopes = new List<PermissionScope>
@@ -170,16 +171,21 @@ public class Sample
                 if (message is not PermissionResponse permissionResponse)
                     return;
 
-                var permissionsString = permissionResponse.Scopes.Aggregate(string.Empty,
+                var senderPermissions = await BeaconDappClient
+                    .PermissionInfoRepository
+                    .TryReadBySenderIdAsync(permissionResponse.SenderId);
+                if (senderPermissions == null) return;
+
+                var permissionsString = senderPermissions.Scopes.Aggregate(string.Empty,
                     (res, scope) => res + $"{scope}, ");
 
                 Logger.Information(
                     "{DappName} received permissions {Permissions} from {From} with address {Address} and public key {Pk}",
                     BeaconDappClient.AppName,
                     permissionsString,
-                    permissionResponse.AppMetadata.Name,
-                    permissionResponse.Address,
-                    permissionResponse.PublicKey);
+                    senderPermissions.AppMetadata.Name,
+                    senderPermissions.Address,
+                    senderPermissions.PublicKey);
                 break;
             }
 

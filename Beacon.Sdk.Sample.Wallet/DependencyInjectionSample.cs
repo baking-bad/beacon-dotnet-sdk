@@ -75,7 +75,6 @@ namespace Beacon.Sdk.Sample.Console
                             network: network,
                             scopes: scopes,
                             publicKey: publicKey.ToString(),
-                            address: publicKey.Address,
                             version: request.Version);
 
                         // var response = new BeaconAbortedError(message.Id, walletClient.SenderId);

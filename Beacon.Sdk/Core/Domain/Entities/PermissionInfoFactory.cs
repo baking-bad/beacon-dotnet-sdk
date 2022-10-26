@@ -9,26 +9,31 @@ namespace Beacon.Sdk.Core.Domain.Entities
     using System.Collections.Generic;
     using Beacon;
     using Beacon.Permission;
+    using Interfaces.Data;
+    using Netezos.Keys;
     using Services;
 
     public class PermissionInfoFactory
     {
         private readonly AccountService _accountService;
+        private readonly IPeerRepository _peerRepository;
 
-        public PermissionInfoFactory(AccountService accountService)
+        public PermissionInfoFactory(AccountService accountService, IPeerRepository peerRepository)
         {
             _accountService = accountService;
+            _peerRepository = peerRepository;
         }
 
-        public async Task<PermissionInfo> Create(string receiverId, AppMetadata metadata, string address,
-            string publicKey, Network network, List<PermissionScope> scopes)
+        public async Task<PermissionInfo> Create(string receiverId, AppMetadata metadata, string publicKey,
+            Network network, List<PermissionScope> scopes)
         {
+            var address = PubKey.FromBase58(publicKey).Address;
+
             var permissionInfo = new PermissionInfo
             {
                 AccountId = _accountService.GetAccountId(address, network),
                 SenderId = receiverId,
                 AppMetadata = metadata,
-                Website = string.Empty,
                 Address = address,
                 PublicKey = publicKey,
                 Network = network,
@@ -36,7 +41,10 @@ namespace Beacon.Sdk.Core.Domain.Entities
                 ConnectedAt = DateTime.UtcNow
             };
 
-            // todo: not only for dapps
+            // active peers can be only in DappClient, so we don't need to fetch additional Dapp metadata.
+            if (_peerRepository.TryGetActive().Result != null)
+                return permissionInfo;
+
             try
             {
                 var dappResponse = await new HttpClient().GetAsync(
@@ -55,13 +63,13 @@ namespace Beacon.Sdk.Core.Domain.Entities
 
                         if (dapp["name"]!.ToString().ToLower().Contains(dappName))
                         {
-                            permissionInfo.Website = dapp["dapp_url"]!.ToString();
+                            permissionInfo.AppMetadata.AppUrl = dapp["dapp_url"]!.ToString();
                             permissionInfo.AppMetadata.Icon = dapp["logo_url"]!.ToString();
                         }
-                        
+
                         if (dappName == "rarible")
                         {
-                            permissionInfo.Website = "https://rarible.com";
+                            permissionInfo.AppMetadata.AppUrl = "https://rarible.com";
                             permissionInfo.AppMetadata.Icon =
                                 "https://services.tzkt.io/v1/avatars/KT18pVpRXKPY2c4U2yFEGSH3ZnhB2kL8kwXS";
                         }
