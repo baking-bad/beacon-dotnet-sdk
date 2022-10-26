@@ -42,7 +42,7 @@ namespace Beacon.Sdk.Core.Domain.Entities
             };
 
             // active peers can be only in DappClient, so we don't need to fetch additional Dapp metadata.
-            if (_peerRepository.TryGetActive().Result != null)
+            if (_peerRepository.TryGetActive().Result != null || (metadata.AppUrl != null && metadata.Icon != null))
                 return permissionInfo;
 
             try

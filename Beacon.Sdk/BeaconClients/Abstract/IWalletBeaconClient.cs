@@ -24,17 +24,15 @@ namespace Beacon.Sdk.BeaconClients.Abstract
 
         event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
         
-        event EventHandler<DappConnectedEventArgs?> OnDappsListChanged;
+        event EventHandler<ConnectedClientsListChangedEventArgs?> OnConnectedClientsListChanged;
 
         Task SendResponseAsync(string receiverId, BaseBeaconMessage response);
 
         Task InitAsync();
 
-        Task AddPeerAsync(P2PPairingRequest pairingRequest, string addressToConnect, bool sendPairingResponse = true);
+        Task AddPeerAsync(P2PPairingRequest pairingRequest, bool sendPairingResponse = true);
 
         Peer? GetPeer(string senderId);
-
-        IEnumerable<Peer> GetAllPeers();
 
         Task RemovePeerAsync(string peerSenderId);
 

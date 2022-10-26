@@ -20,14 +20,14 @@ namespace Beacon.Sdk.BeaconClients.Abstract
         // IPermissionInfoRepository PermissionInfoRepository { get; }
         //
         event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
-        event EventHandler<DappConnectedEventArgs?> OnDappsListChanged;
+        event EventHandler<ConnectedClientsListChangedEventArgs?> OnConnectedClientsListChanged;
         //
         // Task SendResponseAsync(string receiverId, BaseBeaconMessage response);
 
         Task InitAsync();
         void Connect();
-        Task<string> GetPairingRequestInfo();
-        Task<Peer?> GetActivePeer();
+        string GetPairingRequestInfo();
+        Peer? GetActivePeer();
 
         // Task AddPeerAsync(P2PPairingRequest pairingRequest, string addressToConnect, bool sendPairingResponse = true);
         //

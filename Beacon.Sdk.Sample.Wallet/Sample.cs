@@ -44,8 +44,7 @@ namespace Beacon.Sdk.Sample.Console
             ILoggerProvider loggerProvider = new SerilogLoggerProvider(serilogLogger);
             IWalletBeaconClient beaconWalletClient = BeaconClientFactory.Create<IWalletBeaconClient>(options, loggerProvider);
             // _beaconWalletClient.OnBeaconMessageReceived += OnBeaconWalletClientMessageReceived;
-            // _beaconWalletClient.OnDappsListChanged += OnDappsListChanged;
-            
+
             await beaconWalletClient.InitAsync();
             beaconWalletClient.Connect();
 
@@ -53,9 +52,9 @@ namespace Beacon.Sdk.Sample.Console
             var qrCodeString = System.Console.ReadLine();
             var decodedQr = Base58.Parse(qrCodeString);
             var message = Encoding.UTF8.GetString(decodedQr.ToArray());
-            P2PPairingRequest pairingRequest = JsonConvert.DeserializeObject<P2PPairingRequest>(message);
+            var pairingRequest = JsonConvert.DeserializeObject<P2PPairingRequest>(message);
             
-            await beaconWalletClient.AddPeerAsync(pairingRequest, "");
+            await beaconWalletClient.AddPeerAsync(pairingRequest);
         }
     }
 }

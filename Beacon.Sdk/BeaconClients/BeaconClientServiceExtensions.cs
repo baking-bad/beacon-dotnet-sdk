@@ -90,10 +90,9 @@ namespace Beacon.Sdk.BeaconClients
 
             services.AddSingleton<PeerFactory>();
             services.AddSingleton<PermissionInfoFactory>();
-
-            services.AddSingleton<PermissionHandler>();
-            services.AddSingleton<RequestMessageHandler>();
-            services.AddSingleton<ResponseMessageHandler>();
+            
+            services.AddSingleton<DeserializeMessageHandler>();
+            services.AddSingleton<SerializeMessageHandler>();
 
             #endregion
 
