@@ -31,7 +31,7 @@ namespace Beacon.Sdk.Sample.Console
                 AppUrl = string.Empty,
                 IconUrl = string.Empty,
                 KnownRelayServers = Constants.KnownRelayServers,
-                
+
                 DatabaseConnectionString = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                     ? $"Filename={path}; Connection=Shared;"
                     : $"Filename={path}; Mode=Exclusive;"
@@ -42,7 +42,8 @@ namespace Beacon.Sdk.Sample.Console
                 .WriteTo.Console()
                 .CreateLogger();
             ILoggerProvider loggerProvider = new SerilogLoggerProvider(serilogLogger);
-            IWalletBeaconClient beaconWalletClient = BeaconClientFactory.Create<IWalletBeaconClient>(options, loggerProvider);
+            IWalletBeaconClient beaconWalletClient =
+                BeaconClientFactory.Create<IWalletBeaconClient>(options, loggerProvider);
             // _beaconWalletClient.OnBeaconMessageReceived += OnBeaconWalletClientMessageReceived;
 
             await beaconWalletClient.InitAsync();
@@ -53,7 +54,7 @@ namespace Beacon.Sdk.Sample.Console
             var decodedQr = Base58.Parse(qrCodeString);
             var message = Encoding.UTF8.GetString(decodedQr.ToArray());
             var pairingRequest = JsonConvert.DeserializeObject<P2PPairingRequest>(message);
-            
+
             await beaconWalletClient.AddPeerAsync(pairingRequest);
         }
     }

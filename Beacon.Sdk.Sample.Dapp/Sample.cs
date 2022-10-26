@@ -24,7 +24,7 @@ public class Sample
     private const string PayloadToSign =
         "05010000008654657a6f73205369676e6564204d6573736167653a20436f6e6669726d696e67206d79206964656e7469747920617320747a31524445344a64556f37336278323363776a72393767446b6350363362344e664744206f6e206f626a6b742e636f6d2c207369673a6f5252764f6374513638726463457555394965782d72496b45516d46426652";
 
-    private DappBeaconClient BeaconDappClient { get; set; }
+    private IDappBeaconClient BeaconDappClient { get; set; }
     private ILogger Logger { get; set; }
 
     public async Task Run()
@@ -47,10 +47,11 @@ public class Sample
             .CreateLogger();
 
         ILoggerProvider loggerProvider = new SerilogLoggerProvider(Logger);
-        BeaconDappClient = (DappBeaconClient)BeaconClientFactory.Create<IDappBeaconClient>(options, loggerProvider);
+        BeaconDappClient = BeaconClientFactory.Create<IDappBeaconClient>(options, loggerProvider);
         BeaconDappClient.OnBeaconMessageReceived += OnBeaconDappClientMessageReceived;
         BeaconDappClient.OnConnectedClientsListChanged += OnConnectedClientsListChanged;
 
+        // todo: fix
         await BeaconDappClient.InitAsync();
         BeaconDappClient.Connect();
 
@@ -128,7 +129,7 @@ public class Sample
         ConnectedClientsListChangedEventArgs? e)
     {
         if (sender is not DappBeaconClient) return;
-        Logger.Information("Connected wallet {Name}", e.Metadata.Name);
+        Logger.Information("Connected wallet {Name}", e?.Metadata.Name);
     }
 
     private async void OnBeaconDappClientMessageReceived(object? sender, BeaconMessageEventArgs e)
@@ -140,9 +141,9 @@ public class Sample
 
             var network = new Network
             {
-                Type = NetworkType.mainnet,
-                Name = "mainnet",
-                RpcUrl = "https://rpc.tzkt.io/mainnet"
+                Type = NetworkType.ghostnet,
+                Name = "ghostnet",
+                RpcUrl = "https://rpc.tzkt.io/ghostnet"
             };
 
             var permissionScopes = new List<PermissionScope>
@@ -166,6 +167,7 @@ public class Sample
         }
 
         var message = e.Request;
+        if (message == null) return;
 
         var senderPermissions = await BeaconDappClient
             .PermissionInfoRepository
