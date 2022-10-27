@@ -1,46 +1,19 @@
 namespace Beacon.Sdk.BeaconClients.Abstract
 {
-    using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Beacon;
+    using Beacon.Operation;
+    using Beacon.Permission;
+    using Beacon.Sign;
     using Core.Domain.Entities;
 
-    public interface IDappBeaconClient
+    public interface IDappBeaconClient : IBaseBeaconClient
     {
-        // string SenderId { get; }
-        //
-        // bool LoggedIn { get; }
-        //
-        // bool Connected { get; }
-        //
-        // AppMetadata Metadata { get; }
-        //
-        // IAppMetadataRepository AppMetadataRepository { get; }
-        //
-        // IPermissionInfoRepository PermissionInfoRepository { get; }
-        //
-        event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
-        event EventHandler<DappConnectedEventArgs?> OnDappsListChanged;
-        //
-        // Task SendResponseAsync(string receiverId, BaseBeaconMessage response);
-
-        Task InitAsync();
-        void Connect();
-        Task<string> GetPairingRequestInfo();
-        Task<Peer?> GetActivePeer();
-
-        // Task AddPeerAsync(P2PPairingRequest pairingRequest, string addressToConnect, bool sendPairingResponse = true);
-        //
-        // Peer? GetPeer(string senderId);
-        //
-        // IEnumerable<Peer> GetAllPeers();
-        //
-        // Task RemovePeerAsync(string peerSenderId);
-        //
-        // void Connect();
-        //
-        // void Disconnect();
-        //
-        // Task<PermissionInfo?> TryReadPermissionInfo(string sourceAddress, string senderId, Network network);
+        string GetPairingRequestInfo();
+        Peer? GetActivePeer();
+        PermissionInfo? GetActiveAccount();
+        Task RequestPermissions(IEnumerable<PermissionScope> permissions, Network network);
+        Task RequestOperation(IEnumerable<PartialTezosTransactionOperation> operations);
+        Task RequestSign(string payload, SignPayloadType payloadType);
     }
 }

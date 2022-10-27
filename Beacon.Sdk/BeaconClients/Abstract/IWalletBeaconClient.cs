@@ -1,47 +1,14 @@
 namespace Beacon.Sdk.BeaconClients.Abstract
 {
-    using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Beacon;
     using Beacon.Permission;
     using Core.Domain.Entities;
-    using Core.Domain.Interfaces.Data;
 
-    public interface IWalletBeaconClient
+    public interface IWalletBeaconClient : IBaseBeaconClient
     {
-        string SenderId { get; }
-
-        bool LoggedIn { get; }
-
-        bool Connected { get; }
-
-        AppMetadata Metadata { get; }
-
-        IAppMetadataRepository AppMetadataRepository { get; }
-
-        IPermissionInfoRepository PermissionInfoRepository { get; }
-
-        event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
-        
-        event EventHandler<DappConnectedEventArgs?> OnDappsListChanged;
-
-        Task SendResponseAsync(string receiverId, BaseBeaconMessage response);
-
-        Task InitAsync();
-
-        Task AddPeerAsync(P2PPairingRequest pairingRequest, string addressToConnect, bool sendPairingResponse = true);
-
-        Peer? GetPeer(string senderId);
-
-        IEnumerable<Peer> GetAllPeers();
-
-        Task RemovePeerAsync(string peerSenderId);
-
-        void Connect();
-
-        void Disconnect();
-
+        Task AddPeerAsync(P2PPairingRequest pairingRequest, bool sendPairingResponse = true);
         Task<PermissionInfo?> TryReadPermissionInfo(string sourceAddress, string senderId, Network network);
+        P2PPairingRequest GetPairingRequest(string pairingData);
     }
 }

@@ -1,11 +1,14 @@
 namespace Beacon.Sdk.BeaconClients
 {
     using System;
+    using System.Collections.Generic;
     using System.Text;
     using System.Threading.Tasks;
     using Abstract;
     using Beacon;
+    using Beacon.Operation;
     using Beacon.Permission;
+    using Beacon.Sign;
     using Core.Domain;
     using Core.Domain.Entities;
     using Core.Domain.Interfaces;
@@ -18,17 +21,6 @@ namespace Beacon.Sdk.BeaconClients
     public class DappBeaconClient : BaseBeaconClient, IDappBeaconClient
     {
         private readonly ILogger<DappBeaconClient> _logger;
-        private readonly IP2PCommunicationService _p2PCommunicationService;
-        private readonly PeerFactory _peerFactory;
-        private readonly IPeerRepository _peerRepository;
-        private readonly PermissionHandler _permissionHandler;
-        private readonly RequestMessageHandler _requestMessageHandler;
-        private readonly ResponseMessageHandler _responseMessageHandler;
-        private readonly IJsonSerializerService _jsonSerializerService;
-
-        public event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
-
-        public event EventHandler<DappConnectedEventArgs?> OnDappsListChanged;
 
         public DappBeaconClient(
             ILogger<DappBeaconClient> logger,
@@ -40,76 +32,109 @@ namespace Beacon.Sdk.BeaconClients
             IJsonSerializerService jsonSerializerService,
             AccountService accountService,
             KeyPairService keyPairService,
-            PeerFactory peerFactory,
-            RequestMessageHandler requestMessageHandler,
-            ResponseMessageHandler responseMessageHandler,
-            PermissionHandler permissionHandler,
+            DeserializeMessageHandler deserializeMessageHandler,
+            SerializeMessageHandler serializeMessageHandler,
             BeaconOptions options)
             : base(keyPairService,
                 accountService,
                 appMetadataRepository,
                 permissionInfoRepository,
                 seedRepository,
+                p2PCommunicationService,
+                peerRepository,
+                serializeMessageHandler,
+                deserializeMessageHandler,
+                jsonSerializerService,
                 options)
         {
             _logger = logger;
-
-            _peerRepository = peerRepository;
-            _p2PCommunicationService = p2PCommunicationService;
-            _requestMessageHandler = requestMessageHandler;
-            _responseMessageHandler = responseMessageHandler;
-            _permissionHandler = permissionHandler;
-            _peerFactory = peerFactory;
-            _jsonSerializerService = jsonSerializerService;
         }
 
-        public bool LoggedIn { get; private set; }
-        public bool Connected { get; private set; }
-
-        public async Task InitAsync()
+        public string GetPairingRequestInfo()
         {
-            await _p2PCommunicationService.LoginAsync(KnownRelayServers);
-            LoggedIn = _p2PCommunicationService.LoggedIn;
-            _logger.LogInformation("Dapp client Logged In {LoggedIn}", LoggedIn);
+            var pairingRequestInfo = P2PCommunicationService
+                .GetPairingRequestInfo(AppName, KnownRelayServers, IconUrl, AppUrl)
+                .Result;
+            var pairingString = JsonSerializerService.Serialize(pairingRequestInfo);
+            var pairingBytes = Encoding.UTF8.GetBytes(pairingString);
+            var pairingQrCode = Base58.Convert(pairingBytes);
+            return pairingQrCode;
         }
 
-        public void Connect()
+        public Peer? GetActivePeer()
         {
-            _p2PCommunicationService.OnP2PMessagesReceived += OnP2PMessagesReceived;
-            _responseMessageHandler.OnDappConnected += _responseMessageHandler_OnDappConnected;
-            _p2PCommunicationService.Start();
-            Connected = _p2PCommunicationService.Syncing;
-
-            _logger.LogInformation("Dapp client connected {Connected}", Connected);
+            return PeerRepository.TryGetActive().Result;
         }
 
-        public Task<string> GetPairingRequestInfo()
+        public PermissionInfo? GetActiveAccount()
         {
-            var pairingRequestInfo = _p2PCommunicationService
-                .GetPairingRequestInfo(AppName, KnownRelayServers, IconUrl, AppUrl).Result;
-            var pairingString = _jsonSerializerService.Serialize(pairingRequestInfo);
-            byte[] pairingBytes = Encoding.UTF8.GetBytes(pairingString);
-            string? pairingQrCode = Base58.Convert(pairingBytes);
-            return Task.FromResult(pairingQrCode);
+            var activePeer = GetActivePeer();
+            if (activePeer == null) return null;
+
+            return PermissionInfoRepository
+                .TryReadBySenderIdAsync(activePeer.SenderId)
+                .Result;
         }
 
-        public Task<Peer?> GetActivePeer()
+        public Task RequestPermissions(IEnumerable<PermissionScope> permissions, Network network)
         {
-            return _peerRepository.TryGetActive();
+            var activePeer = GetActivePeer();
+            if (activePeer == null) return Task.CompletedTask;
+
+            var permissionRequest = new PermissionRequest(
+                type: BeaconMessageType.permission_request,
+                version: Constants.BeaconVersion,
+                id: KeyPairService.CreateGuid(),
+                senderId: SenderId,
+                appMetadata: Metadata,
+                network: network,
+                scopes: new List<PermissionScope>(permissions)
+            );
+
+            return SendResponseAsync(activePeer.SenderId, permissionRequest);
         }
 
-        private void _responseMessageHandler_OnDappConnected(object sender, DappConnectedEventArgs e)
+        public Task RequestOperation(IEnumerable<PartialTezosTransactionOperation> operations)
         {
+            var activeAccount = GetActiveAccount();
+            if (activeAccount == null) return Task.CompletedTask;
+
+            var operationRequest = new OperationRequest(
+                type: BeaconMessageType.operation_request,
+                version: Constants.BeaconVersion,
+                id: KeyPairService.CreateGuid(),
+                senderId: SenderId,
+                network: activeAccount.Network,
+                operationDetails: new List<PartialTezosTransactionOperation>(operations),
+                sourceAddress: activeAccount.Address);
+
+            return SendResponseAsync(activeAccount.SenderId, operationRequest);
         }
 
-        private async Task OnP2PMessagesReceived(object? sender, P2PMessageEventArgs e)
+        public Task RequestSign(string payload, SignPayloadType payloadType)
+        {
+            var activeAccount = GetActiveAccount();
+            if (activeAccount == null) return Task.CompletedTask;
+
+            var signPayloadRequest = new SignPayloadRequest(
+                id: KeyPairService.CreateGuid(),
+                version: Constants.BeaconVersion,
+                senderId: SenderId,
+                signingType: payloadType,
+                payload: payload,
+                sourceAddress: activeAccount.Address);
+
+            return SendResponseAsync(activeAccount.SenderId, signPayloadRequest);
+        }
+
+        protected override async Task OnP2PMessagesReceived(object? sender, P2PMessageEventArgs e)
         {
             if (sender is not IP2PCommunicationService)
                 throw new ArgumentException("sender is not IP2PCommunicationClient");
 
             if (e.PairingResponse != null)
             {
-                var peer = _peerRepository.TryGetActive().Result;
+                var peer = PeerRepository.TryGetActive().Result;
                 if (peer == null) return;
 
                 var appMetaData = new AppMetadata
@@ -120,33 +145,27 @@ namespace Beacon.Sdk.BeaconClients
                     AppUrl = e.PairingResponse.AppUrl
                 };
                 await AppMetadataRepository.CreateOrUpdateAsync(appMetaData);
-                
-                OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs(null, null, true));
+
+                RaiseOnBeaconMessageReceived(new BeaconMessageEventArgs(null, true));
                 return;
             }
 
-            foreach (string message in e.Messages)
+            foreach (var message in e.Messages)
                 await HandleReceivedMessage(message);
         }
 
         private async Task HandleReceivedMessage(string message)
         {
-            (_, BaseBeaconMessage requestMessage) =
-                _requestMessageHandler.Handle(message, SenderId);
-            
-            if (requestMessage.Type == BeaconMessageType.permission_response)
-                await _responseMessageHandler.Handle(requestMessage, requestMessage.SenderId);
-            
-            OnBeaconMessageReceived?.Invoke(this, new BeaconMessageEventArgs(requestMessage.SenderId, requestMessage));
-        }
+            var (_, receivedMessage) =
+                DeserializeMessageHandler.Handle(message, SenderId);
 
-        public async Task SendResponseAsync(string receiverId, BaseBeaconMessage response)
-        {
-            var peer = _peerRepository.TryReadAsync(receiverId).Result
-                       ?? throw new NullReferenceException(nameof(Peer));
+            if (receivedMessage.Type == BeaconMessageType.permission_response)
+                await SerializeMessageHandler.Handle(receivedMessage, receivedMessage.SenderId);
 
-            var message = await _responseMessageHandler.Handle(response, receiverId);
-            await _p2PCommunicationService.SendMessageAsync(peer, message);
+            if (receivedMessage.Type == BeaconMessageType.disconnect)
+                await RemovePeerAsync(receivedMessage.SenderId);
+
+            RaiseOnBeaconMessageReceived(new BeaconMessageEventArgs(receivedMessage));
         }
     }
 }

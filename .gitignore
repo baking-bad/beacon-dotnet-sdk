@@ -488,3 +488,6 @@ BeaconSdk/.idea/.idea.BeaconSdk/.idea/misc.xml
 .idea/.idea.Beacon.Sdk/.idea/misc.xml
 .idea/.idea.Beacon.Sdk/.idea/indexLayout.xml
 .idea/.idea.Beacon.Sdk/.idea/.name
+
+.idea/
+.DS_Store

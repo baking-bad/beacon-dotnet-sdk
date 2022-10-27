@@ -10,7 +10,6 @@ namespace Beacon.Sdk.Core.Domain.Entities
         public string Name { get; set; }
         public string Version { get; set; }
         public string RelayServer { get; set; }
-        public string ConnectedAddress { get; set; }
         public bool IsActive { get; set; }
     }
 }

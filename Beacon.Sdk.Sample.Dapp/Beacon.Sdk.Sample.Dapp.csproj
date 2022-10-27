@@ -16,7 +16,5 @@
         <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
         <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1-dev-00879" />
         <PackageReference Include="Netezos" Version="2.6.2" />
-        <PackageReference Include="Beacon.Sdk" Version="1.0.8" />
     </ItemGroup>
-
 </Project>
