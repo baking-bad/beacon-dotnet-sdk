@@ -50,8 +50,7 @@ public class Sample
         BeaconDappClient = BeaconClientFactory.Create<IDappBeaconClient>(options, loggerProvider);
         BeaconDappClient.OnBeaconMessageReceived += OnBeaconDappClientMessageReceived;
         BeaconDappClient.OnConnectedClientsListChanged += OnConnectedClientsListChanged;
-
-        // todo: fix
+        
         await BeaconDappClient.InitAsync();
         BeaconDappClient.Connect();
 

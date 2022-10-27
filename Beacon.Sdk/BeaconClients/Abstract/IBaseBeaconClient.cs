@@ -10,6 +10,12 @@
         event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
         event EventHandler<ConnectedClientsListChangedEventArgs?> OnConnectedClientsListChanged;
 
+        Task InitAsync();
+        void Connect();
+        void Disconnect();
+        Task SendResponseAsync(string receiverId, BaseBeaconMessage response);
+        Task RemovePeerAsync(string peerSenderId);
+
         string AppName { get; }
         string SenderId { get; }
         bool LoggedIn { get; }
@@ -17,10 +23,5 @@
         AppMetadata Metadata { get; }
         IAppMetadataRepository AppMetadataRepository { get; }
         IPermissionInfoRepository PermissionInfoRepository { get; }
-        Task SendResponseAsync(string receiverId, BaseBeaconMessage response);
-        Task InitAsync();
-        Task RemovePeerAsync(string peerSenderId);
-        void Connect();
-        void Disconnect();
     }
 }
