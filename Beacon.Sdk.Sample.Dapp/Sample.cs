@@ -63,6 +63,7 @@ public class Sample
             if (activeAccountPermissions == null)
             {
                 Logger.Information("We don't have active account, you can pair this dApp with some wallet");
+                Console.ReadLine();
                 return;
             }
 
