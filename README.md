@@ -120,7 +120,7 @@ beaconWalletClient.OnBeaconMessageReceived += async (object? sender, BeaconMessa
 };
 ```
 
-You can although subscribe to
+You can also subscribe to
 
 ```cs
 beaconWalletClient.OnConnectedClientsListChanged += (object sender, ConnectedClientsListChangedEventArgs e) => {}
@@ -149,8 +149,8 @@ beaconWalletClient.Connect();
 ```cs
 string pairingQrCode = "paste-qrcode-here";
 
- var pairingRequest = beaconWalletClient.GetPairingRequest(pairingQrCode);
- await beaconWalletClient.AddPeerAsync(pairingRequest);
+var pairingRequest = beaconWalletClient.GetPairingRequest(pairingQrCode);
+await beaconWalletClient.AddPeerAsync(pairingRequest);
 ```
 
 #### 6. Disconnect
@@ -239,7 +239,7 @@ beaconDappClient.OnBeaconMessageReceived += async (object? sender, BeaconMessage
 };
 ```
 
-`OnConnectedClientsListChanged` although available as in `DappBeaconClient`. They both inherited from `BaseBeaconClient`
+`OnConnectedClientsListChanged` also available as in `DappBeaconClient`. They both inherited from `BaseBeaconClient`
 class
 
 #### 3. Init

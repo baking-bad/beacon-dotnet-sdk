@@ -1,9 +1,7 @@
-using System.Runtime.InteropServices;
-using Serilog;
-
-namespace Beacon.Sdk.Sample.Console
+namespace Beacon.Sdk.Sample.Wallet
 {
     using System.Linq;
+    using System.Runtime.InteropServices;
     using System.Threading.Tasks;
     using Beacon;
     using Beacon.Error;
@@ -16,8 +14,9 @@ namespace Beacon.Sdk.Sample.Console
     using Microsoft.Extensions.Logging;
     using Netezos.Encoding;
     using Netezos.Keys;
+    using Serilog;
     using Serilog.Extensions.Logging;
-    using ILogger = ILogger;
+    using ILogger = Serilog.ILogger;
 
     public class Sample
     {

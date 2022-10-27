@@ -1,4 +1,4 @@
-﻿namespace Beacon.Sdk.Sample.Console
+﻿namespace Beacon.Sdk.Sample.Wallet
 {
     using System.Threading.Tasks;
 
@@ -12,5 +12,5 @@
             System.Console.ReadLine();
             return 0;
         }
-    }   
+    }
 }
