@@ -31,8 +31,8 @@ public class Sample
         var options = new BeaconOptions
         {
             AppName = "Dapp sample",
-            AppUrl = "https://awesome-dapp.com",
-            IconUrl = "https://bcd-static-assets.fra1.digitaloceanspaces.com/dapps/atomex/atomex_logo.jpg",
+            AppUrl = "https://awesome-dapp.io",
+            IconUrl = "https://services.tzkt.io/v1/avatars/KT1TxqZ8QtKvLu3V3JH7Gx58n7Co8pgtpQU5",
             KnownRelayServers = Constants.KnownRelayServers,
 
             DatabaseConnectionString = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -169,7 +169,7 @@ public class Sample
                 if (message is not OperationResponse operationResponse)
                     return;
 
-                Logger.Debug("Operation completed with transaction hash {Tx}", operationResponse.TransactionHash);
+                Logger.Information("Operation completed with transaction hash {Tx}", operationResponse.TransactionHash);
                 break;
             }
 
