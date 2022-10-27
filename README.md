@@ -239,7 +239,8 @@ beaconDappClient.OnBeaconMessageReceived += async (object? sender, BeaconMessage
 };
 ```
 
-`OnConnectedClientsListChanged` although available as in `DappBeaconClient`. They both inherited from `BaseBeaconClient` class
+`OnConnectedClientsListChanged` although available as in `DappBeaconClient`. They both inherited from `BaseBeaconClient`
+class
 
 #### 3. Init
 
@@ -253,9 +254,7 @@ await beaconDappClient.InitAsync()
 beaconDappClient.Connect();
 ```
 
-#### 5. Add Peer
-
-Get pairing request data
+#### 5. Get pairing request data if we need pairing
 
 ```cs
 var pairingRequestQrData = beaconDappClient.GetPairingRequestInfo();
@@ -263,7 +262,21 @@ var pairingRequestQrData = beaconDappClient.GetPairingRequestInfo();
 
 Copy `pairingRequestQrData` and paste it to Beacon wallet
 
-#### 6. Disconnect
+#### 6. Try get active account
+
+```cs
+var activeAccountPermissions = beaconDappClient.GetActiveAccount();
+```
+
+#### 7. If active account is not null we can
+
+```cs
+beaconDappClient.RequestPermissions(permissionScopes, network);
+beaconDappClient.RequestSign(PayloadToSign, SignPayloadType.raw);
+beaconDappClient.RequestOperation(operationDetails);
+```
+
+#### 8. Disconnect
 
 ```cs
 beaconDappClient.Disconnect();
