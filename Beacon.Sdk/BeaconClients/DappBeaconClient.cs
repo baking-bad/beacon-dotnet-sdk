@@ -1,10 +1,14 @@
 namespace Beacon.Sdk.BeaconClients
 {
     using System;
+    using System.Collections.Generic;
     using System.Text;
     using System.Threading.Tasks;
     using Abstract;
     using Beacon;
+    using Beacon.Operation;
+    using Beacon.Permission;
+    using Beacon.Sign;
     using Core.Domain;
     using Core.Domain.Entities;
     using Core.Domain.Interfaces;
@@ -62,7 +66,7 @@ namespace Beacon.Sdk.BeaconClients
             return PeerRepository.TryGetActive().Result;
         }
 
-        public PermissionInfo? GetActivePeerPermissions()
+        public PermissionInfo? GetActiveAccount()
         {
             var activePeer = GetActivePeer();
             if (activePeer == null) return null;
@@ -70,6 +74,57 @@ namespace Beacon.Sdk.BeaconClients
             return PermissionInfoRepository
                 .TryReadBySenderIdAsync(activePeer.SenderId)
                 .Result;
+        }
+
+        public Task RequestPermissions(IEnumerable<PermissionScope> permissions, Network network)
+        {
+            var activePeer = GetActivePeer();
+            if (activePeer == null) return Task.CompletedTask;
+
+            var permissionRequest = new PermissionRequest(
+                type: BeaconMessageType.permission_request,
+                version: Constants.BeaconVersion,
+                id: KeyPairService.CreateGuid(),
+                senderId: SenderId,
+                appMetadata: Metadata,
+                network: network,
+                scopes: new List<PermissionScope>(permissions)
+            );
+
+            return SendResponseAsync(activePeer.SenderId, permissionRequest);
+        }
+
+        public Task RequestOperation(IEnumerable<PartialTezosTransactionOperation> operations)
+        {
+            var activeAccount = GetActiveAccount();
+            if (activeAccount == null) return Task.CompletedTask;
+
+            var operationRequest = new OperationRequest(
+                type: BeaconMessageType.operation_request,
+                version: Constants.BeaconVersion,
+                id: KeyPairService.CreateGuid(),
+                senderId: SenderId,
+                network: activeAccount.Network,
+                operationDetails: new List<PartialTezosTransactionOperation>(operations),
+                sourceAddress: activeAccount.Address);
+
+            return SendResponseAsync(activeAccount.SenderId, operationRequest);
+        }
+
+        public Task RequestSign(string payload, SignPayloadType payloadType)
+        {
+            var activeAccount = GetActiveAccount();
+            if (activeAccount == null) return Task.CompletedTask;
+
+            var signPayloadRequest = new SignPayloadRequest(
+                id: KeyPairService.CreateGuid(),
+                version: Constants.BeaconVersion,
+                senderId: SenderId,
+                signingType: payloadType,
+                payload: payload,
+                sourceAddress: activeAccount.Address);
+
+            return SendResponseAsync(activeAccount.SenderId, signPayloadRequest);
         }
 
         protected override async Task OnP2PMessagesReceived(object? sender, P2PMessageEventArgs e)

@@ -1,7 +1,3 @@
-// ReSharper disable ArgumentsStyleNamedExpression
-// ReSharper disable ArgumentsStyleOther
-// ReSharper disable ArgumentsStyleStringLiteral
-
 using System.Runtime.InteropServices;
 using Serilog;
 
@@ -17,7 +13,7 @@ namespace Beacon.Sdk.Sample.Console
     using Netezos.Encoding;
     using Newtonsoft.Json;
     using Serilog.Extensions.Logging;
-    using ILogger = Serilog.ILogger;
+    using ILogger = ILogger;
 
     public class Sample
     {

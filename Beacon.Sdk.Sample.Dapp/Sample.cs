@@ -8,7 +8,6 @@ using Beacon.Permission;
 using Beacon.Sign;
 using BeaconClients;
 using BeaconClients.Abstract;
-using Core.Domain.Services;
 using Microsoft.Extensions.Logging;
 using Netezos.Keys;
 using Newtonsoft.Json.Linq;
@@ -50,7 +49,7 @@ public class Sample
         BeaconDappClient = BeaconClientFactory.Create<IDappBeaconClient>(options, loggerProvider);
         BeaconDappClient.OnBeaconMessageReceived += OnBeaconDappClientMessageReceived;
         BeaconDappClient.OnConnectedClientsListChanged += OnConnectedClientsListChanged;
-        
+
         await BeaconDappClient.InitAsync();
         BeaconDappClient.Connect();
 
@@ -60,17 +59,20 @@ public class Sample
         var requestCommand = true;
         while (requestCommand)
         {
-            var command = Console.ReadLine();
-            
-            var activePeerPermissions = BeaconDappClient.GetActivePeerPermissions();
-            if (activePeerPermissions == null) return;
-            
-            var pubKey = PubKey.FromBase58(activePeerPermissions.PublicKey);
-            var permissionsString = activePeerPermissions.Scopes.Aggregate(string.Empty,
-                (res, scope) => res + $"{scope}, ");
-            Logger.Information("We have active peer {Peer} with permissions {Permissions} and address {Address}",
-                activePeerPermissions.AppMetadata.Name, permissionsString, pubKey.Address);
+            var activeAccountPermissions = BeaconDappClient.GetActiveAccount();
+            if (activeAccountPermissions == null)
+            {
+                Logger.Information("We don't have active account, you can pair this dApp with some wallet");
+                return;
+            }
 
+            var pubKey = PubKey.FromBase58(activeAccountPermissions.PublicKey);
+            var permissionsString = activeAccountPermissions.Scopes.Aggregate(string.Empty,
+                (res, scope) => res + $"{scope}, ");
+            Logger.Information("We have active account {Address} in wallet {Wallet} with permissions {Permissions}",
+                pubKey.Address, activeAccountPermissions.AppMetadata.Name, permissionsString);
+
+            var command = Console.ReadLine();
             switch (command)
             {
                 case "exit":
@@ -80,20 +82,12 @@ public class Sample
                 }
                 case "sign":
                 {
-                    var signPayloadRequest = new SignPayloadRequest(
-                        id: KeyPairService.CreateGuid(),
-                        version: Constants.BeaconVersion,
-                        senderId: BeaconDappClient.SenderId,
-                        signingType: SignPayloadType.raw,
-                        payload: PayloadToSign,
-                        sourceAddress: pubKey.Address);
-
-                    await BeaconDappClient.SendResponseAsync(activePeerPermissions.SenderId, signPayloadRequest);
+                    await BeaconDappClient.RequestSign(PayloadToSign, SignPayloadType.raw);
                     break;
                 }
                 case "operation":
                 {
-                    var stringParams = @"{
+                    const string stringParams = @"{
 	                    'entrypoint': 'login',
 	                        'value': {
 		                        'prim': 'Unit'
@@ -108,24 +102,14 @@ public class Sample
                             Parameters: JObject.Parse(stringParams))
                     };
 
-                    var operationRequest = new OperationRequest(
-                        type: BeaconMessageType.operation_request,
-                        version: Constants.BeaconVersion,
-                        id: KeyPairService.CreateGuid(),
-                        senderId: BeaconDappClient.SenderId,
-                        network: activePeerPermissions.Network,
-                        operationDetails: operationDetails,
-                        sourceAddress: pubKey.Address);
-
-                    await BeaconDappClient.SendResponseAsync(activePeerPermissions.SenderId, operationRequest);
+                    await BeaconDappClient.RequestOperation(operationDetails);
                     break;
                 }
             }
         }
     }
 
-    private void OnConnectedClientsListChanged(object? sender,
-        ConnectedClientsListChangedEventArgs? e)
+    private void OnConnectedClientsListChanged(object? sender, ConnectedClientsListChangedEventArgs? e)
     {
         if (sender is not DappBeaconClient) return;
         Logger.Information("Connected wallet {Name}", e?.Metadata.Name);
@@ -135,14 +119,11 @@ public class Sample
     {
         if (e.PairingDone)
         {
-            var peer = BeaconDappClient.GetActivePeer();
-            if (peer == null) return;
-
             var network = new Network
             {
-                Type = NetworkType.ghostnet,
-                Name = "ghostnet",
-                RpcUrl = "https://rpc.tzkt.io/ghostnet"
+                Type = NetworkType.mainnet,
+                Name = "mainnet",
+                RpcUrl = "https://rpc.tzkt.io/mainnet"
             };
 
             var permissionScopes = new List<PermissionScope>
@@ -151,17 +132,7 @@ public class Sample
                 PermissionScope.sign
             };
 
-            var permissionRequest = new PermissionRequest(
-                type: BeaconMessageType.permission_request,
-                version: Constants.BeaconVersion,
-                id: KeyPairService.CreateGuid(),
-                senderId: BeaconDappClient.SenderId,
-                appMetadata: BeaconDappClient.Metadata,
-                network: network,
-                scopes: permissionScopes
-            );
-
-            await BeaconDappClient.SendResponseAsync(peer.SenderId, permissionRequest);
+            await BeaconDappClient.RequestPermissions(permissionScopes, network);
             return;
         }
 
