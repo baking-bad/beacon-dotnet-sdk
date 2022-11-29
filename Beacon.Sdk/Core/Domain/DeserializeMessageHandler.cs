@@ -8,6 +8,7 @@ namespace Beacon.Sdk.Core.Domain
     using Beacon.Operation;
     using Beacon.Permission;
     using Interfaces;
+    using Newtonsoft.Json.Linq;
 
     public class DeserializeMessageHandler
     {
@@ -28,10 +29,8 @@ namespace Beacon.Sdk.Core.Domain
 
             return (ack, baseBeaconMessage.Type switch
             {
-                BeaconMessageType.permission_request =>
-                    HandlePermissionRequest(message),
-                BeaconMessageType.operation_request =>
-                    _jsonSerializerService.Deserialize<OperationRequest>(message),
+                BeaconMessageType.permission_request => HandlePermissionRequest(message),
+                BeaconMessageType.operation_request => HandleOperationRequest(message),
                 BeaconMessageType.sign_payload_request =>
                     _jsonSerializerService.Deserialize<SignPayloadRequest>(message),
                 BeaconMessageType.permission_response =>
@@ -49,6 +48,31 @@ namespace Beacon.Sdk.Core.Domain
 
                 _ => throw new Exception("Unsupported Beacon message.")
             });
+        }
+
+        private BaseBeaconMessage HandleOperationRequest(string message)
+        {
+            var operationRequest = _jsonSerializerService.Deserialize<OperationRequest>(message);
+
+            var nullEqParams = new JObject
+            {
+                ["entrypoint"] = "default",
+                ["value"] = new JObject
+                {
+                    ["prim"] = "Unit"
+                }
+            };
+
+            for (var i = 0; i < operationRequest.OperationDetails.Count; i++)
+            {
+                if (JToken.DeepEquals(operationRequest.OperationDetails[i].Parameters, nullEqParams))
+                    operationRequest.OperationDetails[i] = new PartialTezosTransactionOperation(
+                        operationRequest.OperationDetails[i].Amount,
+                        operationRequest.OperationDetails[i].Destination,
+                        null);
+            }
+
+            return operationRequest;
         }
 
         private BaseBeaconMessage HandlePermissionRequest(string message)
