@@ -1,10 +1,11 @@
+using Beacon.Sdk.Core.Infrastructure.Cryptography;
+
 namespace Beacon.Sdk.Core.Domain.P2P.ChannelOpening
 {
     using System;
     using Dto.Handshake;
     using Interfaces;
     using Services;
-    using Sodium;
     using Utils;
 
     public class ChannelOpeningMessageBuilder : IChannelOpeningMessageBuilder

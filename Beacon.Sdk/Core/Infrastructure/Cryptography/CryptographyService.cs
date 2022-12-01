@@ -5,7 +5,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     using System.Text;
     using Domain.Interfaces;
     using Libsodium;
-    using Sodium;
     using Utils;
     using SodiumLibrary = Libsodium.SodiumLibrary;
 
@@ -56,7 +55,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
         public HexString Encrypt(string input, byte[] key)
         {
-            byte[] nonce = SodiumCore.GetRandomBytes(NonceBytes)!;
+            byte[] nonce = SecureRandom.GetRandomBytes(NonceBytes)!;
             byte[] e = SecretBox.Create(input, nonce, key);
 
             byte[] payload = nonce.Concat(e).ToArray();

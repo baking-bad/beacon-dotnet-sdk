@@ -1,3 +1,5 @@
+using Beacon.Sdk.Core.Infrastructure.Cryptography;
+
 namespace Beacon.Sdk.Core.Domain.Services
 {
     using System;
@@ -5,7 +7,6 @@ namespace Beacon.Sdk.Core.Domain.Services
     using Entities;
     using Interfaces;
     using Interfaces.Data;
-    using Sodium;
     using Utils;
 
     public class KeyPairService
@@ -44,7 +45,7 @@ namespace Beacon.Sdk.Core.Domain.Services
             // var bytes = new byte[SeedBytes]; 
             // generator.GetBytes(bytes); 
 
-            byte[] bytes = SodiumCore.GetRandomBytes(SeedBytes);
+            byte[] bytes = SecureRandom.GetRandomBytes(SeedBytes);
             byte[][] b = {bytes[..4], bytes[4..6], bytes[6..8], bytes[8..10], bytes[10..16]};
 
             string[] hexStrings = b.Select(x =>
