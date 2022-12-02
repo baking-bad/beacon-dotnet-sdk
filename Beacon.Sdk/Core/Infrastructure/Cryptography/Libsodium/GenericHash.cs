@@ -7,10 +7,10 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 {
     public static partial class GenericHash
     {
-        private const int BYTES_MIN = SodiumLibrary.crypto_generichash_blake2b_BYTES_MIN;
-        private const int BYTES_MAX = SodiumLibrary.crypto_generichash_blake2b_BYTES_MAX;
-        private const int KEY_BYTES_MIN = SodiumLibrary.crypto_generichash_blake2b_KEYBYTES_MIN;
-        private const int KEY_BYTES_MAX = SodiumLibrary.crypto_generichash_blake2b_KEYBYTES_MAX;
+        private const int BYTES_MIN = Sodium.crypto_generichash_blake2b_BYTES_MIN;
+        private const int BYTES_MAX = Sodium.crypto_generichash_blake2b_BYTES_MAX;
+        private const int KEY_BYTES_MIN = Sodium.crypto_generichash_blake2b_KEYBYTES_MIN;
+        private const int KEY_BYTES_MAX = Sodium.crypto_generichash_blake2b_KEYBYTES_MAX;
 
         /// <summary>Generates a random 64 byte key.</summary>
         /// <returns>Returns a byte array with 64 random bytes</returns>
@@ -61,8 +61,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             var buffer = new byte[bytes];
 
-            SodiumCore.Initialize();
-            SodiumLibrary.crypto_generichash_blake2b(buffer, (nuint)buffer.Length, message, (nuint)message.Length, key, (nuint)key.Length);
+            Sodium.Initialize();
+            Sodium.CryptoGenericHashBlake2b(buffer, (nuint)buffer.Length, message, (nuint)message.Length, key, (nuint)key.Length);
 
             return buffer;
         }

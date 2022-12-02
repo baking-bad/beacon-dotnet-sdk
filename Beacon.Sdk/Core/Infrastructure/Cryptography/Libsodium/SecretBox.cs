@@ -8,9 +8,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     /// <summary>Create and Open Secret Boxes.</summary>
     public static class SecretBox
     {
-        private const int KEY_BYTES = SodiumLibrary.crypto_secretbox_xsalsa20poly1305_KEYBYTES;
-        private const int NONCE_BYTES = SodiumLibrary.crypto_secretbox_xsalsa20poly1305_NONCEBYTES;
-        private const int MAC_BYTES = SodiumLibrary.crypto_secretbox_xsalsa20poly1305_MACBYTES;
+        private const int KEY_BYTES = Sodium.crypto_secretbox_xsalsa20poly1305_KEYBYTES;
+        private const int NONCE_BYTES = Sodium.crypto_secretbox_xsalsa20poly1305_NONCEBYTES;
+        private const int MAC_BYTES = Sodium.crypto_secretbox_xsalsa20poly1305_MACBYTES;
 
         /// <summary>Generates a random 32 byte key.</summary>
         /// <returns>Returns a byte array with 32 random bytes</returns>
@@ -56,8 +56,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             var buffer = new byte[message.Length + MAC_BYTES];
 
-            SodiumCore.Initialize();
-            var ret = SodiumLibrary.crypto_secretbox_easy(buffer, message, (ulong)message.Length, nonce, key);
+            Sodium.Initialize();
+            var ret = Sodium.CryptoSecretBoxEasy(buffer, message, (ulong)message.Length, nonce, key);
 
             if (ret != 0)
                 throw new Exception("Failed to create SecretBox");
@@ -110,8 +110,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             var buffer = new byte[cipherText.Length - MAC_BYTES];
 
-            SodiumCore.Initialize();
-            var ret = SodiumLibrary.crypto_secretbox_open_easy(buffer, cipherText, (ulong)cipherText.Length, nonce, key);
+            Sodium.Initialize();
+            var ret = Sodium.CryptoSecretBoxOpenEasy(buffer, cipherText, (ulong)cipherText.Length, nonce, key);
 
             if (ret != 0)
                 throw new Exception("Failed to open SecretBox");

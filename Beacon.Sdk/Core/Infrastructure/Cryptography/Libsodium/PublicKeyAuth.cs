@@ -8,10 +8,10 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     /// <summary>Public-key signatures</summary>
     public static class PublicKeyAuth
     {
-        private const int SECRET_KEY_BYTES = SodiumLibrary.crypto_sign_ed25519_SECRETKEYBYTES;
-        private const int PUBLIC_KEY_BYTES = SodiumLibrary.crypto_sign_ed25519_PUBLICKEYBYTES;
-        private const int BYTES = SodiumLibrary.crypto_sign_ed25519_BYTES;
-        private const int SEED_BYTES = SodiumLibrary.crypto_sign_ed25519_SEEDBYTES;
+        private const int SECRET_KEY_BYTES = Sodium.crypto_sign_ed25519_SECRETKEYBYTES;
+        private const int PUBLIC_KEY_BYTES = Sodium.crypto_sign_ed25519_PUBLICKEYBYTES;
+        private const int BYTES = Sodium.crypto_sign_ed25519_BYTES;
+        private const int SEED_BYTES = Sodium.crypto_sign_ed25519_SEEDBYTES;
 
         public static int SecretKeyBytes { get; } = SECRET_KEY_BYTES;
         public static int PublicKeyBytes { get; } = PUBLIC_KEY_BYTES;
@@ -25,8 +25,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             var publicKey = new byte[PUBLIC_KEY_BYTES];
             var privateKey = new byte[SECRET_KEY_BYTES];
 
-            SodiumCore.Initialize();
-            SodiumLibrary.crypto_sign_ed25519_keypair(publicKey, privateKey);
+            Sodium.Initialize();
+            Sodium.CryptoSignEd25519KeyPair(publicKey, privateKey);
 
             return new KeyPair(publicKey, privateKey);
         }
@@ -43,8 +43,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             var publicKey = new byte[PUBLIC_KEY_BYTES];
             var privateKey = new byte[SECRET_KEY_BYTES];
 
-            SodiumCore.Initialize();
-            SodiumLibrary.crypto_sign_ed25519_seed_keypair(publicKey, privateKey, seed);
+            Sodium.Initialize();
+            Sodium.CryptoSignEd25519SeedKeyPair(publicKey, privateKey, seed);
 
             return new KeyPair(publicKey, privateKey);
         }
@@ -72,8 +72,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             var buffer = new byte[message.Length + BYTES];
             ulong bufferLength = 0;
 
-            SodiumCore.Initialize();
-            SodiumLibrary.crypto_sign_ed25519(buffer, ref bufferLength, message, (ulong)message.Length, key);
+            Sodium.Initialize();
+            Sodium.CryptoSignEd25519(buffer, ref bufferLength, message, (ulong)message.Length, key);
 
             Array.Resize(ref buffer, (int)bufferLength);
             return buffer;
@@ -96,8 +96,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             var buffer = new byte[signedMessage.Length - BYTES];
             ulong bufferLength = 0;
 
-            SodiumCore.Initialize();
-            var ret = SodiumLibrary.crypto_sign_ed25519_open(buffer, ref bufferLength, signedMessage, (ulong)signedMessage.Length, key);
+            Sodium.Initialize();
+            var ret = Sodium.CryptoSignEd25519Open(buffer, ref bufferLength, signedMessage, (ulong)signedMessage.Length, key);
 
             if (ret != 0)
                 throw new Exception("Failed to verify signature.");
@@ -129,8 +129,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             var signature = new byte[BYTES];
             ulong signatureLength = 0;
 
-            SodiumCore.Initialize();
-            SodiumLibrary.crypto_sign_ed25519_detached(signature, ref signatureLength, message, (ulong)message.Length, key);
+            Sodium.Initialize();
+            Sodium.CryptoSignEd25519Detached(signature, ref signatureLength, message, (ulong)message.Length, key);
 
             return signature;
         }
@@ -149,8 +149,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             if (key == null || key.Length != PUBLIC_KEY_BYTES)
                 throw new ArgumentOutOfRangeException(nameof(key), key?.Length ?? 0, $"key must be {PUBLIC_KEY_BYTES} bytes in length.");
 
-            SodiumCore.Initialize();
-            var ret = SodiumLibrary.crypto_sign_ed25519_verify_detached(signature, message, (ulong)message.Length, key);
+            Sodium.Initialize();
+            var ret = Sodium.CryptoSignEd25519VerifyDetached(signature, message, (ulong)message.Length, key);
 
             return ret == 0;
         }
@@ -165,10 +165,10 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             if (ed25519PublicKey == null || ed25519PublicKey.Length != PUBLIC_KEY_BYTES)
                 throw new ArgumentOutOfRangeException(nameof(ed25519PublicKey), ed25519PublicKey?.Length ?? 0, $"ed25519PublicKey must be {PUBLIC_KEY_BYTES} bytes in length.");
 
-            var buffer = new byte[SodiumLibrary.crypto_scalarmult_curve25519_BYTES];
+            var buffer = new byte[Sodium.crypto_scalarmult_curve25519_BYTES];
 
-            SodiumCore.Initialize();
-            var ret = SodiumLibrary.crypto_sign_ed25519_pk_to_curve25519(buffer, ed25519PublicKey);
+            Sodium.Initialize();
+            var ret = Sodium.CryptoSignEd25519PkToCurve25519(buffer, ed25519PublicKey);
 
             if (ret != 0)
                 throw new Exception("Failed to convert public key.");
@@ -187,10 +187,10 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             if (ed25519SecretKey == null || (ed25519SecretKey.Length != PUBLIC_KEY_BYTES && ed25519SecretKey.Length != SECRET_KEY_BYTES))
                 throw new ArgumentOutOfRangeException(nameof(ed25519SecretKey), ed25519SecretKey?.Length ?? 0, $"ed25519SecretKey must be either {PUBLIC_KEY_BYTES} or {SECRET_KEY_BYTES} bytes in length.");
 
-            var buffer = new byte[SodiumLibrary.crypto_scalarmult_curve25519_SCALARBYTES];
+            var buffer = new byte[Sodium.crypto_scalarmult_curve25519_SCALARBYTES];
 
-            SodiumCore.Initialize();
-            var ret = SodiumLibrary.crypto_sign_ed25519_sk_to_curve25519(buffer, ed25519SecretKey);
+            Sodium.Initialize();
+            var ret = Sodium.CryptoSignEd25519SkToCurve25519(buffer, ed25519SecretKey);
 
             if (ret != 0)
                 throw new Exception("Failed to convert secret key.");
@@ -210,8 +210,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             var buffer = new byte[SEED_BYTES];
 
-            SodiumCore.Initialize();
-            var ret = SodiumLibrary.crypto_sign_ed25519_sk_to_seed(buffer, ed25519SecretKey);
+            Sodium.Initialize();
+            var ret = Sodium.CryptoSignEd25519SkToSeed(buffer, ed25519SecretKey);
 
             if (ret != 0)
                 throw new Exception("Failed to extract seed from secret key.");
@@ -231,8 +231,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             var buffer = new byte[PUBLIC_KEY_BYTES];
 
-            SodiumCore.Initialize();
-            var ret = SodiumLibrary.crypto_sign_ed25519_sk_to_pk(buffer, ed25519SecretKey);
+            Sodium.Initialize();
+            var ret = Sodium.CryptoSignEd25519SkToPk(buffer, ed25519SecretKey);
 
             if (ret != 0)
                 throw new Exception("Failed to extract public key from secret key.");

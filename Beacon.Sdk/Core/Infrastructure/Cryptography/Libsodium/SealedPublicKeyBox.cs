@@ -8,9 +8,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     /// <summary> Create and Open SealedPublicKeyBoxes. </summary>
     public static class SealedPublicKeyBox
     {
-        public const int RecipientPublicKeyBytes = SodiumLibrary.crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES;
-        public const int RecipientSecretKeyBytes = SodiumLibrary.crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES;
-        private const int CryptoBoxSealbytes = SodiumLibrary.crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES + SodiumLibrary.crypto_box_curve25519xsalsa20poly1305_MACBYTES;
+        public const int RecipientPublicKeyBytes = Sodium.crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES;
+        public const int RecipientSecretKeyBytes = Sodium.crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES;
+        private const int CryptoBoxSealbytes = Sodium.crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES + Sodium.crypto_box_curve25519xsalsa20poly1305_MACBYTES;
 
         /// <summary> Creates a SealedPublicKeyBox</summary>
         /// <param name="message">The message.</param>
@@ -36,8 +36,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             var buffer = new byte[message.Length + CryptoBoxSealbytes];
 
-            SodiumCore.Initialize();
-            var ret = SodiumLibrary.crypto_box_seal(buffer, message, (ulong)message.Length, recipientPublicKey);
+            Sodium.Initialize();
+            var ret = Sodium.CryptoBoxSeal(buffer, message, (ulong)message.Length, recipientPublicKey);
 
             if (ret != 0)
                 throw new Exception("Failed to create SealedBox");
@@ -64,8 +64,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             var buffer = new byte[cipherText.Length - CryptoBoxSealbytes];
 
-            SodiumCore.Initialize();
-            var ret = SodiumLibrary.crypto_box_seal_open(buffer, cipherText, (ulong)cipherText.Length, recipientPublicKey,
+            Sodium.Initialize();
+            var ret = Sodium.CryptoBoxSealOpen(buffer, cipherText, (ulong)cipherText.Length, recipientPublicKey,
                 recipientSecretKey);
 
             if (ret != 0)
