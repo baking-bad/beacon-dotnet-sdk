@@ -65,36 +65,6 @@ using Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium;
 Sodium.SetLibraryType(SodiumLibraryType.StaticInternal);
 ```
 
-#### iOS dynamic linking as framework
-
-`libsodium.dylib` dynamic library files must be compiled for all required architectures (arm64, armv7, i386 e.t.c).
-
-Binaries for all architectures must be concatenated to universal (fat) binary file:
-```
-lipo -create -output libsodium.dylib libsodium-i386.dylib libsodium-arm64.dylib libsodium-armv7.dylib
-```
-
-According to Apple's restrictions iOS dynamic libraries (*.dylib) cannot be included in your project. An error will be received at the stage of loading the application to AppStore TestFlight. 
-
-The only (and possibly temporary) way around the limitation is to wrap the dynamic library in a framework:
-```
-lipo -create libsodium.dylib -output libsodium
-```
-and add it to project:
-```
-Project
-└── libsodium.framework
-     └── libsodium
-```
-After that it is also required to add a **Native Reference** to the library file to the project.
-
-And the last step is to specify how the library will be used by your application at startup:
-```Csharp
-using Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium;
-
-Sodium.SetLibraryType(SodiumLibraryType.DynamicFramework);
-```
-
 ## Use the SDK in your app
 
 For a complete example, refer

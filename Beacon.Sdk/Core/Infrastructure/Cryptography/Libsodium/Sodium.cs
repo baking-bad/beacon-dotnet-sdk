@@ -17,13 +17,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
         /// </remarks>
         Dynamic,
         /// <summary>
-        /// Dynamic library as part of the iOS framework
-        /// </summary>
-        /// <remarks>
-        /// Library name: libsodium.framework/libsodium
-        /// </remarks>
-        DynamicFramework,
-        /// <summary>
         /// Static library (default for iOS)
         /// </summary>
         /// <remarks>
@@ -61,7 +54,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
             _impl = type switch
             {
                 SodiumLibraryType.Dynamic => new LibsodiumImpl(),
-                SodiumLibraryType.DynamicFramework => new FrameworkLibsodiumImpl(),
                 SodiumLibraryType.StaticInternal => new InternalLibsodiumImpl(),
                 _ => new LibsodiumImpl(),
             };

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 
 using Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium;
 
@@ -17,19 +16,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         public static int PublicKeyBytes { get; } = PUBLIC_KEY_BYTES;
         public static int SignatureBytes { get; } = BYTES;
         public static int SeedBytes { get; } = SEED_BYTES;
-
-        /// <summary>Creates a new key pair based on a random seed.</summary>
-        /// <returns>A KeyPair.</returns>
-        public static KeyPair GenerateKeyPair()
-        {
-            var publicKey = new byte[PUBLIC_KEY_BYTES];
-            var privateKey = new byte[SECRET_KEY_BYTES];
-
-            Sodium.Initialize();
-            Sodium.CryptoSignEd25519KeyPair(publicKey, privateKey);
-
-            return new KeyPair(publicKey, privateKey);
-        }
 
         /// <summary>Creates a new key pair based on the provided seed.</summary>
         /// <param name="seed">The seed.</param>
@@ -54,16 +40,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         /// <param name="key">The 64 byte private key.</param>
         /// <returns>Signed message.</returns>
         /// <exception cref="KeyOutOfRangeException"></exception>
-        public static byte[] Sign(string message, byte[] key)
-        {
-            return Sign(Encoding.UTF8.GetBytes(message), key);
-        }
-
-        /// <summary>Signs a message with Ed25519.</summary>
-        /// <param name="message">The message.</param>
-        /// <param name="key">The 64 byte private key.</param>
-        /// <returns>Signed message.</returns>
-        /// <exception cref="KeyOutOfRangeException"></exception>
         public static byte[] Sign(byte[] message, byte[] key)
         {
             if (key == null || key.Length != SECRET_KEY_BYTES)
@@ -77,43 +53,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             Array.Resize(ref buffer, (int)bufferLength);
             return buffer;
-        }
-
-        /// <summary>Verifies a message signed with the Sign method.</summary>
-        /// <param name="signedMessage">The signed message.</param>
-        /// <param name="key">The 32 byte public key.</param>
-        /// <returns>Message.</returns>
-        /// <exception cref="KeyOutOfRangeException"></exception>
-        /// <exception cref="CryptographicException"></exception>
-        public static byte[] Verify(byte[] signedMessage, byte[] key)
-        {
-            if (key == null || key.Length != PUBLIC_KEY_BYTES)
-                throw new ArgumentOutOfRangeException(nameof(key), key?.Length ?? 0, $"key must be {PUBLIC_KEY_BYTES} bytes in length.");
-
-            if (signedMessage.Length < BYTES)
-                throw new Exception("Failed to verify signature.");
-
-            var buffer = new byte[signedMessage.Length - BYTES];
-            ulong bufferLength = 0;
-
-            Sodium.Initialize();
-            var ret = Sodium.CryptoSignEd25519Open(buffer, ref bufferLength, signedMessage, (ulong)signedMessage.Length, key);
-
-            if (ret != 0)
-                throw new Exception("Failed to verify signature.");
-
-            Array.Resize(ref buffer, (int)bufferLength);
-            return buffer;
-        }
-
-        /// <summary>Signs a message with Ed25519.</summary>
-        /// <param name="message">The message.</param>
-        /// <param name="key">The 64 byte private key.</param>
-        /// <returns>The signature.</returns>
-        /// <exception cref="KeyOutOfRangeException"></exception>
-        public static byte[] SignDetached(string message, byte[] key)
-        {
-            return SignDetached(Encoding.UTF8.GetBytes(message), key);
         }
 
         /// <summary>Signs a message with Ed25519.</summary>
@@ -133,26 +72,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             Sodium.CryptoSignEd25519Detached(signature, ref signatureLength, message, (ulong)message.Length, key);
 
             return signature;
-        }
-
-        /// <summary>Verifies a message signed with the SignDetached method.</summary>
-        /// <param name="signature">The signature.</param>
-        /// <param name="message">The message.</param>
-        /// <param name="key">The 32 byte public key.</param>
-        /// <returns><c>true</c> on success; otherwise, <c>false</c>.</returns>
-        /// <exception cref="SignatureOutOfRangeException"></exception>
-        /// <exception cref="KeyOutOfRangeException"></exception>
-        public static bool VerifyDetached(byte[] signature, byte[] message, byte[] key)
-        {
-            if (signature == null || signature.Length != BYTES)
-                throw new ArgumentOutOfRangeException(nameof(signature), signature?.Length ?? 0, $"signature must be {BYTES} bytes in length.");
-            if (key == null || key.Length != PUBLIC_KEY_BYTES)
-                throw new ArgumentOutOfRangeException(nameof(key), key?.Length ?? 0, $"key must be {PUBLIC_KEY_BYTES} bytes in length.");
-
-            Sodium.Initialize();
-            var ret = Sodium.CryptoSignEd25519VerifyDetached(signature, message, (ulong)message.Length, key);
-
-            return ret == 0;
         }
 
         /// <summary>Converts the ed25519 public key to curve25519 public key.</summary>
@@ -194,48 +113,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             if (ret != 0)
                 throw new Exception("Failed to convert secret key.");
-
-            return buffer;
-        }
-
-        /// <summary>
-        /// Extracts the seed from the Ed25519 secret key.
-        /// </summary>
-        /// <param name="ed25519SecretKey">The 64 byte Ed25519 secret key.</param>
-        /// <returns>The associated seed.</returns>
-        public static byte[] ExtractEd25519SeedFromEd25519SecretKey(byte[] ed25519SecretKey)
-        {
-            if (ed25519SecretKey == null || ed25519SecretKey.Length != SECRET_KEY_BYTES)
-                throw new ArgumentOutOfRangeException(nameof(ed25519SecretKey), ed25519SecretKey?.Length ?? 0, $"ed25519SecretKey must be {SECRET_KEY_BYTES} bytes in length.");
-
-            var buffer = new byte[SEED_BYTES];
-
-            Sodium.Initialize();
-            var ret = Sodium.CryptoSignEd25519SkToSeed(buffer, ed25519SecretKey);
-
-            if (ret != 0)
-                throw new Exception("Failed to extract seed from secret key.");
-
-            return buffer;
-        }
-
-        /// <summary>
-        /// Extracts the Ed25519 public key from the Ed25519 secret key.
-        /// </summary>
-        /// <param name="ed25519SecretKey">The 64 byte Ed25519 secret key.</param>
-        /// <returns>The associated ed25519PublicKey.</returns>
-        public static byte[] ExtractEd25519PublicKeyFromEd25519SecretKey(byte[] ed25519SecretKey)
-        {
-            if (ed25519SecretKey == null || ed25519SecretKey.Length != SECRET_KEY_BYTES)
-                throw new ArgumentOutOfRangeException(nameof(ed25519SecretKey), ed25519SecretKey?.Length ?? 0, $"ed25519SecretKey must be {SECRET_KEY_BYTES} bytes in length.");
-
-            var buffer = new byte[PUBLIC_KEY_BYTES];
-
-            Sodium.Initialize();
-            var ret = Sodium.CryptoSignEd25519SkToPk(buffer, ed25519SecretKey);
-
-            if (ret != 0)
-                throw new Exception("Failed to extract public key from secret key.");
 
             return buffer;
         }

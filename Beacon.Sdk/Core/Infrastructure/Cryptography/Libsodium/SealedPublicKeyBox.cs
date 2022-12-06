@@ -37,7 +37,11 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             var buffer = new byte[message.Length + CryptoBoxSealbytes];
 
             Sodium.Initialize();
-            var ret = Sodium.CryptoBoxSeal(buffer, message, (ulong)message.Length, recipientPublicKey);
+            var ret = Sodium.CryptoBoxSeal(
+                buffer,
+                message,
+                (ulong)message.Length,
+                recipientPublicKey);
 
             if (ret != 0)
                 throw new Exception("Failed to create SealedBox");
@@ -65,7 +69,11 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             var buffer = new byte[cipherText.Length - CryptoBoxSealbytes];
 
             Sodium.Initialize();
-            var ret = Sodium.CryptoBoxSealOpen(buffer, cipherText, (ulong)cipherText.Length, recipientPublicKey,
+            var ret = Sodium.CryptoBoxSealOpen(
+                buffer,
+                cipherText,
+                (ulong)cipherText.Length,
+                recipientPublicKey,
                 recipientSecretKey);
 
             if (ret != 0)

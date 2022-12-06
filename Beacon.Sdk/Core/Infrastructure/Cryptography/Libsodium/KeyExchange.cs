@@ -31,9 +31,15 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
                 throw new ArgumentException(
                     $"{nameof(clientPublicKey)} size must be {PublicKeyBytes} bytes in length.");
 
-            if (Sodium.CryptoKxClientSessionKeys(rx, tx, serverPublicKey, serverSecretKey,
+            if (Sodium.CryptoKxClientSessionKeys(
+                    rx,
+                    tx,
+                    serverPublicKey,
+                    serverSecretKey,
                     clientPublicKey) != 0)
+            {
                 throw new Exception($"{nameof(Sodium)}: {nameof(KeyExchange)} error.");
+            }
 
             return new SessionKeyPair(rx, tx);
         }
@@ -56,9 +62,15 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
                 throw new ArgumentException(
                     $"{nameof(clientPublicKey)} size must be {PublicKeyBytes} bytes in length.");
 
-            if (Sodium.CryptoKxServerSessionKeys(rx, tx, serverPublicKey, serverSecretKey,
+            if (Sodium.CryptoKxServerSessionKeys(
+                    rx,
+                    tx,
+                    serverPublicKey,
+                    serverSecretKey,
                     clientPublicKey) != 0)
+            {
                 throw new Exception($"{nameof(Sodium)}: {nameof(KeyExchange)} error.");
+            }
 
             return new SessionKeyPair(rx, tx);
         }

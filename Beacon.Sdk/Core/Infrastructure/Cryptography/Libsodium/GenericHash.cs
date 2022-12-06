@@ -26,18 +26,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         /// <returns>Returns a byte array.</returns>
         /// <exception cref="KeyOutOfRangeException"></exception>
         /// <exception cref="BytesOutOfRangeException"></exception>
-        public static byte[] Hash(string message, string? key, int bytes)
-        {
-            return Hash(message, key != null ? Encoding.UTF8.GetBytes(key) : null, bytes);
-        }
-
-        /// <summary>Hashes a message, with an optional key, using the BLAKE2b primitive.</summary>
-        /// <param name="message">The message to be hashed.</param>
-        /// <param name="key">The key; may be null, otherwise between 16 and 64 bytes.</param>
-        /// <param name="bytes">The size (in bytes) of the desired result.</param>
-        /// <returns>Returns a byte array.</returns>
-        /// <exception cref="KeyOutOfRangeException"></exception>
-        /// <exception cref="BytesOutOfRangeException"></exception>
         public static byte[] Hash(string message, byte[]? key, int bytes)
         {
             return Hash(Encoding.UTF8.GetBytes(message), key, bytes);

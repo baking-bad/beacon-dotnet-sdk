@@ -12,20 +12,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         private const int NONCE_BYTES = Sodium.crypto_secretbox_xsalsa20poly1305_NONCEBYTES;
         private const int MAC_BYTES = Sodium.crypto_secretbox_xsalsa20poly1305_MACBYTES;
 
-        /// <summary>Generates a random 32 byte key.</summary>
-        /// <returns>Returns a byte array with 32 random bytes</returns>
-        public static byte[] GenerateKey()
-        {
-            return SecureRandom.GetRandomBytes(KEY_BYTES);
-        }
-
-        /// <summary>Generates a random 24 byte nonce.</summary>
-        /// <returns>Returns a byte array with 24 random bytes</returns>
-        public static byte[] GenerateNonce()
-        {
-            return SecureRandom.GetRandomBytes(NONCE_BYTES);
-        }
-
         /// <summary>Creates a Secret Box</summary>
         /// <param name="message">Hex-encoded string to be encrypted.</param>
         /// <param name="nonce">The 24 byte nonce.</param>

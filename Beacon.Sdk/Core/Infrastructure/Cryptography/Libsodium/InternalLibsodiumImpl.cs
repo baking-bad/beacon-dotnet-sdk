@@ -30,7 +30,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
         public int CryptoSignEd25519(byte[] sm, ref ulong smlen_p, byte[] m, ulong mlen, byte[] sk) =>
             crypto_sign_ed25519(sm, ref smlen_p, m, mlen, sk);
         public int CryptoSignEd25519Detached(byte[] sig, ref ulong siglen_p, byte[] m, ulong mlen, byte[] sk) =>
-            crypto_sign_ed25519_detached(sig, ref siglen_p, m, mlen, sig);
+            crypto_sign_ed25519_detached(sig, ref siglen_p, m, mlen, sk);
         public int CryptoSignEd25519KeyPair(byte[] pk, byte[] sk) =>
             crypto_sign_ed25519_keypair(pk, sk);
         public int CryptoSignEd25519Open(byte[] m, ref ulong mlen_p, byte[] sm, ulong smlen, byte[] pk) =>
