@@ -5,14 +5,13 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     using System.Text;
     using Domain.Interfaces;
     using Libsodium;
-    using Sodium;
     using Utils;
-    using SodiumLibrary = Libsodium.SodiumLibrary;
+    using Sodium = Libsodium.Sodium;
 
     public class CryptographyService : ICryptographyService
     {
-        private static readonly int MacBytes = SodiumLibrary.crypto_box_macbytes();
-        private static readonly int NonceBytes = SodiumLibrary.crypto_box_noncebytes();
+        private static readonly int MacBytes = Sodium.CryptoBoxMacBytes();
+        private static readonly int NonceBytes = Sodium.CryptoBoxNonceBytes();
 
         public SessionKeyPair CreateClientSessionKeyPair(byte[] clientPublicKey, byte[] serverPrivateKey)
         {
@@ -42,7 +41,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         {
             var buffer = new byte[bufferLength];
 
-            SodiumLibrary.crypto_generichash(buffer, bufferLength, message, message.Length, Array.Empty<byte>(), 0);
+            Sodium.CryptoGenericHash(buffer, bufferLength, message, message.Length, Array.Empty<byte>(), 0);
 
             return buffer;
         }
@@ -56,7 +55,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
         public HexString Encrypt(string input, byte[] key)
         {
-            byte[] nonce = SodiumCore.GetRandomBytes(NonceBytes)!;
+            byte[] nonce = SecureRandom.GetRandomBytes(NonceBytes)!;
             byte[] e = SecretBox.Create(input, nonce, key);
 
             byte[] payload = nonce.Concat(e).ToArray();

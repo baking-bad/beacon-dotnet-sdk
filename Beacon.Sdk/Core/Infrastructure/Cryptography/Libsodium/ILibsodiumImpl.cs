@@ -1,0 +1,106 @@
+﻿using System;
+
+namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
+{
+    interface ILibsodiumImpl
+    {
+        int SodiumInit();
+        int SodiumSetMisuseHandler(Action handler);
+        int SodiumLibraryVersionMajor();
+        int SodiumLibraryVersionMinor();
+        IntPtr SodiumVersionString();
+        int CryptoSignEd25519(
+            byte[] sm,
+            ref ulong smlen_p,
+            byte[] m,
+            ulong mlen,
+            byte[] sk);
+        int CryptoSignEd25519Detached(
+            byte[] sig,
+            ref ulong siglen_p,
+            byte[] m,
+            ulong mlen,
+            byte[] sk);
+        int CryptoSignEd25519KeyPair(
+            byte[] pk,
+            byte[] sk);
+        int CryptoSignEd25519Open(
+            byte[] m,
+            ref ulong mlen_p,
+            byte[] sm,
+            ulong smlen,
+            byte[] pk);
+        int CryptoSignEd25519PkToCurve25519(
+            byte[] curve25519_pk,
+            byte[] ed25519_pk);
+        int CryptoSignEd25519SeedKeyPair(
+            byte[] pk,
+            byte[] sk,
+            byte[] seed);
+        int CryptoSignEd25519SkToCurve25519(
+            byte[] curve25519_sk,
+            byte[] ed25519_sk);
+        int CryptoSignEd25519SkToPk(
+            byte[] pk,
+            byte[] sk);
+        int CryptoSignEd25519SkToSeed(
+            byte[] seed,
+            byte[] sk);
+        int CryptoSignEd25519VerifyDetached(
+            byte[] sig,
+            byte[] m,
+            ulong mlen,
+            byte[] pk);
+        int CryptoGenericHashBlake2b(
+            byte[] @out,
+            nuint outlen,
+            byte[] @in,
+            ulong inlen,
+            byte[] key,
+            nuint keylen);
+        int CryptoSecretBoxEasy(
+            byte[] c,
+            byte[] m,
+            ulong mlen,
+            byte[] n,
+            byte[] k);
+        int CryptoSecretBoxOpenEasy(
+           byte[] m,
+           byte[] c,
+           ulong clen,
+           byte[] n,
+           byte[] k);
+        int CryptoBoxSeal(
+            byte[] c,
+            byte[] m,
+            ulong mlen,
+            byte[] pk);
+        int CryptoBoxSealOpen(
+            byte[] m,
+            byte[] c,
+            ulong clen,
+            byte[] pk,
+            byte[] sk);
+        int CryptoKxClientSessionKeys(
+            byte[] rx,
+            byte[] tx,
+            byte[] client_pk,
+            byte[] client_sk,
+            byte[] server_pk);
+        int CryptoKxServerSessionKeys(
+            byte[] rx,
+            byte[] tx,
+            byte[] server_pk,
+            byte[] server_sk,
+            byte[] client_pk);
+        int CryptoBoxMacBytes();
+        int CryptoBoxNonceBytes();
+        int CryptoGenericHash(
+            byte[] buffer,
+            int bufferLength,
+            byte[] message,
+            long messageLength,
+            byte[] key,
+            int keyLength);
+    }
+}

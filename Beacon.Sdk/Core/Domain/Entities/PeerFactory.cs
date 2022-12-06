@@ -18,7 +18,7 @@ namespace Beacon.Sdk.Core.Domain.Entities
         public static byte[] Hash(byte[] message, int bufferLength)
         {
             var buffer = new byte[bufferLength];
-            SodiumLibrary.crypto_generichash(buffer, bufferLength, message, message.Length, Array.Empty<byte>(), 0);
+            Sodium.CryptoGenericHash(buffer, bufferLength, message, message.Length, Array.Empty<byte>(), 0);
 
             return buffer;
         }

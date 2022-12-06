@@ -1,3 +1,5 @@
+using Beacon.Sdk.Core.Infrastructure.Cryptography;
+
 namespace Beacon.Sdk.Core.Domain.Entities.P2P
 {
     using System;
@@ -9,7 +11,6 @@ namespace Beacon.Sdk.Core.Domain.Entities.P2P
     using Matrix.Sdk.Core.Infrastructure.Services;
     using Microsoft.Extensions.Logging;
     using Services;
-    using Sodium;
 
     public class P2PLoginRequestFactory
     {
