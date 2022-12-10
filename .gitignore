@@ -491,3 +491,4 @@ BeaconSdk/.idea/.idea.BeaconSdk/.idea/misc.xml
 
 .idea/
 .DS_Store
+*.db

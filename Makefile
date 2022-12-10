@@ -4,5 +4,8 @@ install:
 clean:
 	dotnet clean
 
-sample:
-	dotnet run -p Beacon.Sdk.Sample.Console -v normal
+wallet-sample:
+	dotnet run -p Beacon.Sdk.Sample.Wallet -v normal
+
+dapp-sample:
+	dotnet run -p Beacon.Sdk.Sample.Dapp -v normal

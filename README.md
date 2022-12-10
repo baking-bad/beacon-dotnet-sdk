@@ -214,7 +214,7 @@ Follow these steps to reproduce the typical wallet workflow:
 2. Open Beacon [playground](https://docs.walletbeacon.io/getting-started/first-dapp#setup), scroll to Setup and press "
    Run Code"
 3. Choose "Pair wallet on another device" and click on the QR code to copy
-4. Start `Beacon.Sdk.Sample.Wallet` sample project
+4. Start `Beacon.Sdk.Sample.Wallet` sample project (`make wallet-sample`)
 5. Paste copied QR code to console
 6. In the browser you should see "Got permissions" message, sample project response with all requested permissions to
    dApp
@@ -336,10 +336,11 @@ beaconDappClient.Disconnect();
 Follow these steps to reproduce a typical dapp workflow:
 
 1. Clone this repo and restore nuget packages
-2. Start `Beacon.Sdk.Sample.Dapp` project
-3. Copy pairing data string from console and paste it to Beacon wallet
-4. You should see that Beacon wallet received permissions from `Beacon.Sdk.Sample.Dapp`
-5. You can print `sign` command in console to send `sign request` to the wallet
-6. You can print `operation` command in console to send `operation request` to the wallet
+2. Start `Beacon.Sdk.Sample.Dapp` project (`make dapp-sample`)
+3. Go to https://debug.walletbeacon.io/ and create account (or connect your wallet)
+4. Copy pairing data string from console, paste it to the site, and press "Connect"
+5. You should see that Beacon wallet received permissions from `Beacon.Sdk.Sample.Dapp` ("Messages" section)
+6. You can print `sign` command in console to send `sign request` to the wallet
+7. You can print `operation` command in console to send `operation request` to the wallet
 
 Take a look at the [`Dapp sample`](https://github.com/baking-bad/beacon-dotnet-sdk/blob/main/Beacon.Sdk.Sample.Dapp/Sample.cs) project.
