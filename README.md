@@ -65,13 +65,13 @@ using Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium;
 Sodium.SetLibraryType(SodiumLibraryType.StaticInternal);
 ```
 
-## Use the SDK in your app
+## Usage
 
 For a complete example, refer
 to [`Dapp sample`](https://github.com/baking-bad/beacon-dotnet-sdk/blob/main/Beacon.Sdk.Sample.Dapp/Sample.cs)
 or to [`Wallet sample`](https://github.com/baking-bad/beacon-dotnet-sdk/blob/main/Beacon.Sdk.Sample.Wallet/Sample.cs).
 
-## **Wallet**
+### Wallet workflow
 
 Here is step by step **guide** how to create and use `WalletBeaconClient`:
 
@@ -206,7 +206,7 @@ await beaconWalletClient.AddPeerAsync(pairingRequest);
 beaconWalletClient.Disconnect();
 ```
 
-## Demo app
+### Wallet demo
 
 Follow these steps to reproduce the typical wallet workflow:
 
@@ -221,7 +221,9 @@ Follow these steps to reproduce the typical wallet workflow:
 7. Scroll down to "Operation Request" item and do the "Run Code" thing again
 8. You should see the successful operation message
 
-## **Dapp**
+Take a look at the [`Wallet sample`](https://github.com/baking-bad/beacon-dotnet-sdk/blob/main/Beacon.Sdk.Sample.Wallet/Sample.cs) project.
+
+### Dapp workflow
 
 Here is step by step **guide** how to create and use `DappBeaconClient`:
 
@@ -329,9 +331,9 @@ beaconDappClient.RequestOperation(operationDetails);
 beaconDappClient.Disconnect();
 ```
 
-## Demo app
+### Dapp demo
 
-Follow these steps to reproduce the typical wallet workflow:
+Follow these steps to reproduce a typical dapp workflow:
 
 1. Clone this repo and restore nuget packages
 2. Start `Beacon.Sdk.Sample.Dapp` project
@@ -340,7 +342,4 @@ Follow these steps to reproduce the typical wallet workflow:
 5. You can print `sign` command in console to send `sign request` to the wallet
 6. You can print `operation` command in console to send `operation request` to the wallet
 
-Take a look
-at [`Dapp sample`](https://github.com/baking-bad/beacon-dotnet-sdk/blob/main/Beacon.Sdk.Sample.Dapp/Sample.cs)
-or at [`Wallet sample`](https://github.com/baking-bad/beacon-dotnet-sdk/blob/main/Beacon.Sdk.Sample.Wallet/Sample.cs)
-for complete examples
+Take a look at the [`Dapp sample`](https://github.com/baking-bad/beacon-dotnet-sdk/blob/main/Beacon.Sdk.Sample.Dapp/Sample.cs) project.
