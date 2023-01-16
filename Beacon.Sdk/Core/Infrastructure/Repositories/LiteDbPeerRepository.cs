@@ -60,5 +60,10 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 col.Update(peer);
             }
         });
+
+        public Task DropAsync() => InConnection(CollectionName, (db, col) =>
+        {
+            db.DropCollection(col.Name);
+        });
     }
 }

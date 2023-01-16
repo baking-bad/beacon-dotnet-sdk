@@ -3,6 +3,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+
     using LiteDB;
     using Microsoft.Extensions.Logging;
 
@@ -55,9 +56,29 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 _logger.LogError(e, "error in repository");
             }
 
-            return new Task<T>(() => default!);
+            return Task.FromResult<T>(default!);
         }
-        
+
+        protected Task InConnection(string collectionName, Action<LiteDatabase, LiteCollection<T>> func)
+        {
+            try
+            {
+                lock (_syncRoot)
+                {
+                    using var db = new LiteDatabase(_connectionString);
+                    LiteCollection<T> col = db.GetCollection<T>(collectionName);
+
+                    func(db, col);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "error in repository");
+            }
+
+            return Task.CompletedTask;
+        }
+
         protected Task<T?> InConnectionNullable(string collectionName, Func<LiteCollection<T>, Task<T?>> func)
         {
             try
@@ -75,7 +96,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 _logger.LogError(e, "error in repository");
             }
 
-            return new Task<T?>(() => default);
+            return Task.FromResult<T?>(default);
         }
 
         protected Task<T[]?> InConnectionNullable(string collectionName, Func<LiteCollection<T>, Task<T[]?>> func)
@@ -95,7 +116,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 _logger.LogError(e, "error in repository");
             }
 
-            return new Task<T[]?>(() => default);
+            return Task.FromResult<T[]?>(default);
         }
 
         protected Task<List<T>> InConnection(string collectionName, Func<LiteCollection<T>, Task<List<T>>> func)
@@ -115,7 +136,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 _logger.LogError(e, "error in repository");
             }
 
-            return new Task<List<T>>(() => default);
+            return Task.FromResult<List<T>>(default!);
         }
     }
 }

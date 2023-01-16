@@ -53,12 +53,12 @@ namespace Beacon.Sdk.BeaconClients
             _peerFactory = peerFactory;
         }
 
-        public async Task AddPeerAsync(P2PPairingRequest pairingRequest, bool sendPairingResponse = true)
+        public async Task<bool> AddPeerAsync(P2PPairingRequest pairingRequest, bool sendPairingResponse = true)
         {
             if (!HexString.TryParse(pairingRequest.PublicKey, out var peerHexPublicKey))
             {
                 _logger.LogError("Can not parse receiver public key");
-                return;
+                return false;
             }
 
             var peer = _peerFactory.Create(
@@ -68,11 +68,28 @@ namespace Beacon.Sdk.BeaconClients
                 pairingRequest.RelayServer
             );
 
-            peer = PeerRepository.CreateAsync(peer).Result;
+            var createdPeer = await PeerRepository.CreateAsync(peer);
+
+            if (createdPeer == null)
+            {
+                _logger.LogWarning("Peers collection corrupted. Trying drop and create again");
+
+                await PeerRepository.DropAsync();
+
+                createdPeer = await PeerRepository.CreateAsync(peer);
+
+                if (createdPeer == null)
+                {
+                    _logger?.LogError("Can't create peer");
+                    return false;
+                }
+            }
 
             if (sendPairingResponse)
                 await P2PCommunicationService
-                    .SendChannelOpeningMessageAsync(peer, pairingRequest.Id, AppName, AppUrl, IconUrl);
+                    .SendChannelOpeningMessageAsync(createdPeer, pairingRequest.Id, AppName, AppUrl, IconUrl);
+
+            return true;
         }
 
         protected override async Task OnP2PMessagesReceived(object? sender, P2PMessageEventArgs e)
