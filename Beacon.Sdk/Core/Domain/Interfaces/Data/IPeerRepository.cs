@@ -13,5 +13,6 @@ namespace Beacon.Sdk.Core.Domain.Interfaces.Data
         Task<List<Peer>> GetAll();
         Task Delete(Peer peer);
         Task MarkAllInactive();
+        Task DropAsync();
     }
 }
