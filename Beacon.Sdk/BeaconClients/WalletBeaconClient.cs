@@ -69,22 +69,7 @@ namespace Beacon.Sdk.BeaconClients
             );
 
             var createdPeer = await PeerRepository.CreateAsync(peer);
-
-            if (createdPeer == null)
-            {
-                _logger.LogWarning("Peers collection corrupted. Trying drop and create again");
-
-                await PeerRepository.DropAsync();
-
-                createdPeer = await PeerRepository.CreateAsync(peer);
-
-                if (createdPeer == null)
-                {
-                    _logger?.LogError("Can't create peer");
-                    return false;
-                }
-            }
-
+            
             if (sendPairingResponse)
                 await P2PCommunicationService
                     .SendChannelOpeningMessageAsync(createdPeer, pairingRequest.Id, AppName, AppUrl, IconUrl);
@@ -94,11 +79,20 @@ namespace Beacon.Sdk.BeaconClients
 
         protected override async Task OnP2PMessagesReceived(object? sender, P2PMessageEventArgs e)
         {
-            if (sender is not IP2PCommunicationService)
-                throw new ArgumentException("sender is not IP2PCommunicationClient");
+            Console.WriteLine($"OnP2PMessagesReceived {e.Messages.Count} messages received");
+            
+            try
+            {
+                if (sender is not IP2PCommunicationService)
+                    throw new ArgumentException("sender is not IP2PCommunicationClient");
 
-            foreach (string message in e.Messages)
-                await HandleMessage(message);
+                foreach (string message in e.Messages)
+                    await HandleMessage(message);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "OnP2PMessagesReceived error");
+            }
         }
 
         private async Task HandleMessage(string message)
@@ -106,6 +100,8 @@ namespace Beacon.Sdk.BeaconClients
             (AcknowledgeResponse ack, BaseBeaconMessage requestMessage) =
                 DeserializeMessageHandler.Handle(message, SenderId);
 
+            Console.WriteLine($"HandleMessage from senderId {requestMessage.SenderId}");
+            
             if (requestMessage.Version != "1")
                 await SendResponseAsync(requestMessage.SenderId, ack);
 

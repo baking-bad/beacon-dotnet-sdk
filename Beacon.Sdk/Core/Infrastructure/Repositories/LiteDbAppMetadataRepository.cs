@@ -1,3 +1,6 @@
+using System;
+using LiteDB;
+
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
     using System.Linq;
@@ -14,8 +17,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
         }
 
-        public Task<AppMetadata> CreateOrUpdateAsync(AppMetadata appMetadata) =>
-            InConnection(CollectionName, col =>
+        public async Task<AppMetadata> CreateOrUpdateAsync(AppMetadata appMetadata)
+        {
+            var func = new Func<LiteCollection<AppMetadata>, Task<AppMetadata>>(col =>
             {
                 var result = col.FindOne(x => x.Name == appMetadata.Name);
                 if (result != null)
@@ -25,6 +29,18 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 col.EnsureIndex(x => x.SenderId);
                 return Task.FromResult(appMetadata);
             });
+
+            try
+            {
+                return await InConnection(CollectionName, func);
+            }
+            catch
+            {
+                await DropAsync(CollectionName);
+
+                return await InConnection(CollectionName, func);
+            }
+        }
 
         public Task<AppMetadata?> TryReadAsync(string senderId) =>
             InConnectionNullable(CollectionName, col =>
