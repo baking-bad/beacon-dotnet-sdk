@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using LiteDB;
 
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
@@ -17,8 +19,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
         }
 
-        public Task<P2PPeerRoom> CreateOrUpdateAsync(P2PPeerRoom p2PPeerRoom) =>
-            InConnection(CollectionName, col =>
+        public async Task<P2PPeerRoom> CreateOrUpdateAsync(P2PPeerRoom p2PPeerRoom)
+        {
+            var func = new Func<LiteCollection<P2PPeerRoom>, Task<P2PPeerRoom>>(col =>
             {
                 var result = col.FindOne(x => x.PeerName == p2PPeerRoom.PeerName);
                 if (result != null)
@@ -30,6 +33,17 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
                 return Task.FromResult(p2PPeerRoom);
             });
+
+            try
+            {
+                return await InConnection(CollectionName, func);
+            }
+            catch
+            {
+                await DropAsync(CollectionName);
+                return await InConnection(CollectionName, func);
+            }
+        }
 
         public Task<List<P2PPeerRoom>> GetAll() => InConnection(CollectionName,
             col => Task.FromResult(new List<P2PPeerRoom>(col.FindAll())));

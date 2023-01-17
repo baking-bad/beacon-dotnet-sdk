@@ -1,3 +1,6 @@
+using System;
+using LiteDB;
+
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
     using System.Collections.Generic;
@@ -16,8 +19,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
         }
 
-        public Task<PermissionInfo> CreateOrUpdateAsync(PermissionInfo permissionInfo) =>
-            InConnection(CollectionName, col =>
+        public async Task<PermissionInfo> CreateOrUpdateAsync(PermissionInfo permissionInfo)
+        {
+            var func = new Func<LiteCollection<PermissionInfo>, Task<PermissionInfo>>(col =>
             {
                 var id = $"{permissionInfo.SenderId}:{permissionInfo.AccountId}";
                 permissionInfo.PermissionInfoId = id;
@@ -30,6 +34,17 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 col.EnsureIndex(x => x.PermissionInfoId);
                 return Task.FromResult(permissionInfo);
             });
+
+            try
+            {
+                return await InConnection(CollectionName, func);
+            }
+            catch
+            {
+                await DropAsync(CollectionName);
+                return await InConnection(CollectionName, func);
+            }
+        }
 
         public Task<PermissionInfo?> TryReadAsync(string senderId, string accountId) =>
             InConnectionNullable(CollectionName, col =>

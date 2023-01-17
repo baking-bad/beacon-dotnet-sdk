@@ -1,3 +1,6 @@
+using System;
+using LiteDB;
+
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
     using System.Collections.Generic;
@@ -17,8 +20,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
         }
 
-        public Task<SeedEntity> CreateAsync(string seed) =>
-            InConnection(CollectionName, col =>
+        public async Task<SeedEntity> CreateAsync(string seed)
+        {
+            var func = new Func<LiteCollection<SeedEntity>, Task<SeedEntity>>(col =>
             {
                 var data = new SeedEntity
                 {
@@ -29,6 +33,18 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
                 return Task.FromResult(data);
             });
+
+            try
+            {
+                return await InConnection(CollectionName, func);
+            }
+            catch
+            {
+                await DropAsync(CollectionName);
+
+                return await InConnection(CollectionName, func);
+            }
+        }
 
         public Task<SeedEntity?> TryReadAsync() =>
             InConnectionNullable(CollectionName, col =>

@@ -54,9 +54,11 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             catch (Exception e)
             {
                 _logger.LogError(e, "error in repository");
+
+                throw;
             }
 
-            return Task.FromResult<T>(default!);
+            //return Task.FromResult<T>(default!);
         }
 
         protected Task InConnection(string collectionName, Action<LiteDatabase, LiteCollection<T>> func)
@@ -138,5 +140,10 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
             return Task.FromResult<List<T>>(default!);
         }
+        
+        protected Task DropAsync(string collectionName) => InConnection(collectionName, (db, col) =>
+        {
+            db.DropCollection(col.Name);
+        });
     }
 }

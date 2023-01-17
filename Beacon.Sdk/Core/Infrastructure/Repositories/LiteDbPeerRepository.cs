@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using LiteDB;
 
 
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
@@ -17,16 +19,30 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
         }
 
-        public Task<Peer> CreateAsync(Peer peer) => InConnection(CollectionName, col =>
+        public async Task<Peer> CreateAsync(Peer peer)
         {
-            var existingPeer = col.FindOne(p => p.Name == peer.Name);
-            if (existingPeer != null)
-                peer.Id = existingPeer.Id;
+            var func = new Func<LiteCollection<Peer>, Task<Peer>>(col =>
+            {
+                var existingPeer = col.FindOne(p => p.Name == peer.Name);
+                if (existingPeer != null)
+                    peer.Id = existingPeer.Id;
 
-            col.Upsert(peer);
-            col.EnsureIndex(x => x.SenderId);
-            return Task.FromResult(peer);
-        });
+                col.Upsert(peer);
+                col.EnsureIndex(x => x.SenderId);
+                return Task.FromResult(peer);
+            });
+            
+            try
+            {
+                return await InConnection(CollectionName, func);
+            }
+            catch
+            {
+                await DropAsync(CollectionName);
+
+                return await InConnection(CollectionName, func);
+            }
+        }
 
         public Task<Peer?> TryReadAsync(string senderId) => InConnectionNullable(CollectionName, col =>
         {
@@ -59,11 +75,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
                 peer.IsActive = false;
                 col.Update(peer);
             }
-        });
-
-        public Task DropAsync() => InConnection(CollectionName, (db, col) =>
-        {
-            db.DropCollection(col.Name);
         });
     }
 }
