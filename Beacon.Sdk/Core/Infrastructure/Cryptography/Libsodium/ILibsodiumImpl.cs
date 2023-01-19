@@ -53,11 +53,11 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
             byte[] pk);
         int CryptoGenericHashBlake2b(
             byte[] @out,
-            nuint outlen,
+            int outlen,
             byte[] @in,
             ulong inlen,
             byte[] key,
-            nuint keylen);
+            int keylen);
         int CryptoSecretBoxEasy(
             byte[] c,
             byte[] m,
@@ -99,7 +99,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
             byte[] buffer,
             int bufferLength,
             byte[] message,
-            long messageLength,
+            ulong messageLength,
             byte[] key,
             int keyLength);
     }
