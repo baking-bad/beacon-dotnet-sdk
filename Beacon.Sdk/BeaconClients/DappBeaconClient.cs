@@ -94,7 +94,7 @@ namespace Beacon.Sdk.BeaconClients
             return SendResponseAsync(activePeer.SenderId, permissionRequest);
         }
 
-        public Task RequestOperation(IEnumerable<PartialTezosTransactionOperation> operations)
+        public Task RequestOperation(IEnumerable<TezosBaseOperation> operations)
         {
             var activeAccount = GetActiveAccount();
             if (activeAccount == null) return Task.CompletedTask;
@@ -105,7 +105,7 @@ namespace Beacon.Sdk.BeaconClients
                 id: KeyPairService.CreateGuid(),
                 senderId: SenderId,
                 network: activeAccount.Network,
-                operationDetails: new List<PartialTezosTransactionOperation>(operations),
+                operationDetails: new List<TezosBaseOperation>(operations),
                 sourceAddress: activeAccount.Address);
 
             return SendResponseAsync(activeAccount.SenderId, operationRequest);

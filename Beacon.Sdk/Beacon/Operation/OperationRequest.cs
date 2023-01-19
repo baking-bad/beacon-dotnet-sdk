@@ -11,7 +11,7 @@ namespace Beacon.Sdk.Beacon.Operation
             string id,
             string senderId,
             Network network,
-            List<PartialTezosTransactionOperation> operationDetails,
+            List<TezosBaseOperation> operationDetails,
             string sourceAddress
         ) : base(type, version, id, senderId)
         {
@@ -25,7 +25,7 @@ namespace Beacon.Sdk.Beacon.Operation
         /// </summary>
         public Network Network { get; }
 
-        public List<PartialTezosTransactionOperation> OperationDetails { get; }
+        public List<TezosBaseOperation> OperationDetails { get; set; }
 
         public string SourceAddress { get; }
     }
