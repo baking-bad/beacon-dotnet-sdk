@@ -41,8 +41,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         {
             var buffer = new byte[bufferLength];
 
-            Sodium.CryptoGenericHash(buffer, bufferLength, message, message.Length, Array.Empty<byte>(), 0);
-
+            Sodium.Initialize();
+            Sodium.CryptoGenericHash(buffer, bufferLength, message, (ulong)message.Length, Array.Empty<byte>(), 0);
+ 
             return buffer;
         }
 

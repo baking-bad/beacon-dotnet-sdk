@@ -50,7 +50,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             var buffer = new byte[bytes];
 
             Sodium.Initialize();
-            Sodium.CryptoGenericHashBlake2b(buffer, (nuint)buffer.Length, message, (nuint)message.Length, key, (nuint)key.Length);
+            Sodium.CryptoGenericHashBlake2b(buffer, buffer.Length, message, (ulong)message.Length, key, key.Length);
 
             return buffer;
         }

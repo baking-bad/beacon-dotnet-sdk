@@ -82,8 +82,8 @@ namespace Beacon.Sdk.BeaconClients
         public async Task SendResponseAsync(string receiverId, BaseBeaconMessage response)
         {
             var peer = PeerRepository.TryReadAsync(receiverId).Result
-                       ?? throw new NullReferenceException(nameof(Peer));
-            
+                   ?? throw new NullReferenceException(nameof(Peer) + "is null");
+
             var message = await SerializeMessageHandler.Handle(response, receiverId);
             await P2PCommunicationService.SendMessageAsync(peer, message);
         }
