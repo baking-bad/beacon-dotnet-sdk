@@ -20,7 +20,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.BouncyCastle
             if (ed25519PublicKey == null || ed25519PublicKey.Length != PUBLIC_KEY_BYTES)
                 throw new ArgumentOutOfRangeException(nameof(ed25519PublicKey), ed25519PublicKey?.Length ?? 0, $"ed25519PublicKey must be {PUBLIC_KEY_BYTES} bytes in length.");
             
-            var result = new byte[32];
+            var result = new byte[PUBLIC_KEY_BYTES];
             MontgomeryCurve25519.EdwardsToMontgomery(result, ed25519PublicKey);
             return result;
         }
