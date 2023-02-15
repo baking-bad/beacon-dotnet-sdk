@@ -1,6 +1,7 @@
 namespace Beacon.Sdk.Tests
 {
     using Core.Infrastructure.Cryptography;
+    using Core.Infrastructure.Cryptography.NaCl;
     using Xunit;
 
     public class CryptoTests
@@ -20,8 +21,16 @@ namespace Beacon.Sdk.Tests
         [Fact]
         public void TestSodiumConvertEd25519PublicKeyToCurve25519PublicKey()
         {
-            var result = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(randomPubKeyBytes);
-            Assert.Equal(convertedPubKeyBytes, result);
+            var actual = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(randomPubKeyBytes);
+            Assert.Equal(convertedPubKeyBytes, actual);
+        }
+
+        [Fact]
+        public void TestConvertEd25519PublicKeyToCurve25519PublicKey()
+        {
+            var actual = new byte[32];
+            MontgomeryCurve25519.EdwardsToMontgomery(actual, randomPubKeyBytes);
+            Assert.Equal(convertedPubKeyBytes, actual);
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text;
 
-using Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium;
 using NaCl;
 
 namespace Beacon.Sdk.Core.Infrastructure.Cryptography
