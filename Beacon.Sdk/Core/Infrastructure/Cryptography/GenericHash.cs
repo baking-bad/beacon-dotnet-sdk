@@ -7,7 +7,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 {
     public static partial class GenericHash
     {
-        private const int BYTES_MIN = 16;
+        private const int BYTES_MIN = 0;
         private const int BYTES_MAX = 64;
 
         /// <summary>Hashes a message, using the BLAKE2b primitive.</summary>
