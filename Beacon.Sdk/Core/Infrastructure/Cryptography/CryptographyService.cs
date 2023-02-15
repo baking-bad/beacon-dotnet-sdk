@@ -3,7 +3,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     using System;
     using System.Linq;
     using System.Text;
-
     using Domain.Interfaces;
     using Utils;
 
@@ -14,7 +13,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
         public SessionKeyPair CreateClientSessionKeyPair(byte[] clientPublicKey, byte[] serverPrivateKey)
         {
-            byte[] serverPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(serverPrivateKey[32..64])!;
+            byte[] serverPublicKeyCurve =
+                PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(serverPrivateKey[32..64])!;
             byte[] serverSecretKeyCurve = PublicKeyAuth.ConvertEd25519SecretKeyToCurve25519SecretKey(serverPrivateKey)!;
             byte[] clientPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(clientPublicKey)!;
 
@@ -26,7 +26,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
         public SessionKeyPair CreateServerSessionKeyPair(byte[] clientPublicKey, byte[] serverPrivateKey)
         {
-            byte[] serverPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(serverPrivateKey[32..64])!;
+            byte[] serverPublicKeyCurve =
+                PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(serverPrivateKey[32..64])!;
             byte[] serverSecretKeyCurve = PublicKeyAuth.ConvertEd25519SecretKeyToCurve25519SecretKey(serverPrivateKey)!;
             byte[] clientPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(clientPublicKey)!;
 
@@ -112,7 +113,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         }
 
         public bool Validate(string input) =>
-            HexString.TryParse(input, out HexString hexString) && // content can be non-hex if it's a connection open request
+            HexString.TryParse(input,
+                out HexString hexString) && // content can be non-hex if it's a connection open request
             hexString.ToString().Length >= NonceBytes + MacBytes;
 
         public byte[] GenerateLoginDigest()

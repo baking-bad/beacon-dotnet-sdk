@@ -13,7 +13,7 @@ namespace Beacon.Sdk.BeaconClients.Abstract
         Peer? GetActivePeer();
         PermissionInfo? GetActiveAccount();
         Task RequestPermissions(IEnumerable<PermissionScope> permissions, Network network);
-        Task RequestOperation(IEnumerable<PartialTezosTransactionOperation> operations);
+        Task RequestOperation(IEnumerable<TezosBaseOperation> operations);
         Task RequestSign(string payload, SignPayloadType payloadType);
     }
 }

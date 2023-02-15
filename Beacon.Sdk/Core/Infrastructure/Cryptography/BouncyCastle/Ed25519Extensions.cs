@@ -1,12 +1,10 @@
 ﻿using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Math.EC.Rfc7748;
 using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Beacon.Sdk.Core.Infrastructure.Cryptography.BouncyCastle
 {
+    using NaCl;
+
     internal static class Ed25519Extensions
     {
         private const int PUBLIC_KEY_BYTES = 32;
@@ -21,20 +19,10 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.BouncyCastle
         {
             if (ed25519PublicKey == null || ed25519PublicKey.Length != PUBLIC_KEY_BYTES)
                 throw new ArgumentOutOfRangeException(nameof(ed25519PublicKey), ed25519PublicKey?.Length ?? 0, $"ed25519PublicKey must be {PUBLIC_KEY_BYTES} bytes in length.");
-
-            throw new NotImplementedException();
-
-            //var A = new PointExt();
-            //var x = X25519Field.Create();
-            //var one_minus_y = X25519Field.Create();
-
-            //X25519Field.One(one_minus_y);                   // one_minux_y = 1
-            //X25519Field.Sub(one_minus_y, A.y, one_minus_y); // one_minux_y = one_minux_y - A.y
-            //X25519Field.One(x);                             // x = 1
-            //X25519Field.Add(x, A.y, x);                     // x = x + A.y
-            //X25519Field.Inv(one_minus_y, one_minus_y);      // inv one_minus_y
-            //X25519Field.Mul(x, one_minus_y, x);             //x = x * one_minus_y
-            //return X25519FieldExtensions.ToBytes(x);
+            
+            var result = new byte[PUBLIC_KEY_BYTES];
+            MontgomeryCurve25519.EdwardsToMontgomery(result, ed25519PublicKey);
+            return result;
         }
 
         /// <summary>Converts the ed25519 secret key to curve25519 secret key.</summary>

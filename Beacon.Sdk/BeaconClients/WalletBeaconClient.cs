@@ -69,7 +69,7 @@ namespace Beacon.Sdk.BeaconClients
             );
 
             var createdPeer = await PeerRepository.CreateAsync(peer);
-            
+
             if (sendPairingResponse)
                 await P2PCommunicationService
                     .SendChannelOpeningMessageAsync(createdPeer, pairingRequest.Id, AppName, AppUrl, IconUrl);
@@ -79,8 +79,6 @@ namespace Beacon.Sdk.BeaconClients
 
         protected override async Task OnP2PMessagesReceived(object? sender, P2PMessageEventArgs e)
         {
-            Console.WriteLine($"OnP2PMessagesReceived {e.Messages.Count} messages received");
-            
             try
             {
                 if (sender is not IP2PCommunicationService)

@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using Beacon.Sdk.Beacon.Sign;
+using Newtonsoft.Json;
 
 namespace Beacon.Sdk.Core.Domain
 {
@@ -52,7 +54,19 @@ namespace Beacon.Sdk.Core.Domain
 
         private BaseBeaconMessage HandleOperationRequest(string message)
         {
+            var jObjOperationRequest = JsonConvert.DeserializeObject<JObject>(message);
             var operationRequest = _jsonSerializerService.Deserialize<OperationRequest>(message);
+            var parsedOperationDetails = new List<TezosBaseOperation>();
+
+            foreach (var jObjOperation in jObjOperationRequest["operationDetails"]!)
+            {
+                if (jObjOperation["kind"]?.ToString() == "transaction")
+                    parsedOperationDetails.Add(jObjOperation.ToObject<PartialTezosTransactionOperation>()!);
+                
+                if (jObjOperation["kind"]?.ToString() == "delegation")
+                    parsedOperationDetails.Add(jObjOperation.ToObject<TezosDelegationOperation>()!);
+            }
+            operationRequest.OperationDetails = parsedOperationDetails;
 
             var nullEqParams = new JObject
             {
@@ -65,10 +79,13 @@ namespace Beacon.Sdk.Core.Domain
 
             for (var i = 0; i < operationRequest.OperationDetails.Count; i++)
             {
-                if (JToken.DeepEquals(operationRequest.OperationDetails[i].Parameters, nullEqParams))
+                if (operationRequest.OperationDetails[i] is not PartialTezosTransactionOperation
+                    transactionOperation) continue;
+                
+                if (JToken.DeepEquals(transactionOperation.Parameters, nullEqParams))
                     operationRequest.OperationDetails[i] = new PartialTezosTransactionOperation(
-                        operationRequest.OperationDetails[i].Amount,
-                        operationRequest.OperationDetails[i].Destination,
+                        transactionOperation.Amount,
+                        transactionOperation.Destination,
                         null);
             }
 
