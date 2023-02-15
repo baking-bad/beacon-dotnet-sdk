@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
 {
-    internal class LibsodiumImpl : ILibsodiumImpl
+    internal class LibsodiumImpl
     {
         internal const string Library = "libsodium";
 
@@ -15,9 +15,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
             crypto_box_seal(c, m, mlen, pk);
         public int CryptoBoxSealOpen(byte[] m, byte[] c, ulong clen, byte[] pk, byte[] sk) =>
             crypto_box_seal_open(m, c, clen, pk, sk);
-        public int CryptoGenericHash(byte[] buffer, int bufferLength, byte[] message, long messageLength, byte[] key, int keyLength) =>
+        public int CryptoGenericHash(byte[] buffer, int bufferLength, byte[] message, ulong messageLength, byte[] key, int keyLength) =>
             crypto_generichash(buffer, bufferLength, message, messageLength, key, keyLength);
-        public int CryptoGenericHashBlake2b(byte[] @out, nuint outlen, byte[] @in, ulong inlen, byte[] key, nuint keylen) =>
+        public int CryptoGenericHashBlake2b(byte[] @out, int outlen, byte[] @in, ulong inlen, byte[] key, int keylen) =>
             crypto_generichash_blake2b(@out, outlen, @in, inlen, key, keylen);
         public int CryptoKxClientSessionKeys(byte[] rx, byte[] tx, byte[] client_pk, byte[] client_sk, byte[] server_pk) =>
             crypto_kx_client_session_keys(rx, tx, client_pk, client_sk, server_pk);
@@ -138,11 +138,11 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
         internal static extern int crypto_generichash_blake2b(
             byte[] @out,
-            nuint outlen,
+            int outlen,
             byte[] @in,
             ulong inlen,
             byte[] key,
-            nuint keylen);
+            int keylen);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
         internal static extern int crypto_secretbox_easy(
@@ -202,7 +202,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
             byte[] buffer,
             int bufferLength,
             byte[] message,
-            long messageLength,
+            ulong messageLength,
             byte[] key,
             int keyLength);
     }

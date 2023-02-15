@@ -2,15 +2,16 @@
 using System.Text;
 
 using Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium;
+using NaCl;
 
 namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 {
     /// <summary> Create and Open SealedPublicKeyBoxes. </summary>
     public static class SealedPublicKeyBox
     {
-        public const int RecipientPublicKeyBytes = Sodium.crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES;
-        public const int RecipientSecretKeyBytes = Sodium.crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES;
-        private const int CryptoBoxSealbytes = Sodium.crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES + Sodium.crypto_box_curve25519xsalsa20poly1305_MACBYTES;
+        public const int RecipientPublicKeyBytes = 32;
+        public const int RecipientSecretKeyBytes = 32;
+        private const int CryptoBoxSealbytes = 32 + 16;
 
         /// <summary> Creates a SealedPublicKeyBox</summary>
         /// <param name="message">The message.</param>
@@ -36,15 +37,21 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             var buffer = new byte[message.Length + CryptoBoxSealbytes];
 
-            Sodium.Initialize();
-            var ret = Sodium.CryptoBoxSeal(
-                buffer,
-                message,
-                (ulong)message.Length,
-                recipientPublicKey);
+            Curve25519XSalsa20Poly1305.KeyPair(out var secretKey, out var publicKey);
 
-            if (ret != 0)
-                throw new Exception("Failed to create SealedBox");
+            var secretBoxSeal = new Curve25519XSalsa20Poly1305(secretKey, publicKey);
+
+            //secretBoxSeal.Encrypt(buffer, message, )
+
+            //Sodium.Initialize();
+            //var ret = Sodium.CryptoBoxSeal(
+            //    buffer,
+            //    message,
+            //    (ulong)message.Length,
+            //    recipientPublicKey);
+
+            //if (ret != 0)
+            //    throw new Exception("Failed to create SealedBox");
 
             return buffer;
         }
@@ -54,8 +61,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         /// <param name="recipientSecretKey">The recipient's secret key.</param>
         /// <param name="recipientPublicKey">The recipient's public key.</param>
         /// <returns>The decrypted message.</returns>
-        /// <exception cref="KeyOutOfRangeException"></exception>
-        /// <exception cref="CryptographicException"></exception>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static byte[] Open(byte[] cipherText, byte[] recipientSecretKey, byte[] recipientPublicKey)
         {
             if (recipientSecretKey == null || recipientSecretKey.Length != RecipientSecretKeyBytes)
@@ -68,16 +74,16 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             var buffer = new byte[cipherText.Length - CryptoBoxSealbytes];
 
-            Sodium.Initialize();
-            var ret = Sodium.CryptoBoxSealOpen(
-                buffer,
-                cipherText,
-                (ulong)cipherText.Length,
-                recipientPublicKey,
-                recipientSecretKey);
+            //Sodium.Initialize();
+            //var ret = Sodium.CryptoBoxSealOpen(
+            //    buffer,
+            //    cipherText,
+            //    (ulong)cipherText.Length,
+            //    recipientPublicKey,
+            //    recipientSecretKey);
 
-            if (ret != 0)
-                throw new Exception("Failed to open SealedBox");
+            //if (ret != 0)
+            //    throw new Exception("Failed to open SealedBox");
 
             return buffer;
         }

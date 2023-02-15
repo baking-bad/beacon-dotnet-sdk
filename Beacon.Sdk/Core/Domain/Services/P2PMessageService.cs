@@ -1,7 +1,7 @@
 namespace Beacon.Sdk.Core.Domain.Services
 {
     using System.Text;
-    using Infrastructure.Cryptography.Libsodium;
+    using global::Beacon.Sdk.Core.Infrastructure.Cryptography;
     using Interfaces;
     using Interfaces.Data;
     using Netezos.Encoding;

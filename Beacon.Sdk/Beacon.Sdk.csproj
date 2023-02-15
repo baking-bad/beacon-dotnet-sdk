@@ -24,6 +24,7 @@
         <PackageReference Include="LiteDB" Version="4.1.4" />
         <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+        <PackageReference Include="NaCl.Net" Version="0.1.13" />
         <PackageReference Include="Netezos" Version="2.4.6" />
         <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
         <PackageReference Include="libsodium" Version="1.0.18.2" />

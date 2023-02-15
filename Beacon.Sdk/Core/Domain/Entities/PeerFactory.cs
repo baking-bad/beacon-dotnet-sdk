@@ -1,7 +1,6 @@
 namespace Beacon.Sdk.Core.Domain.Entities
 {
-    using System;
-    using Infrastructure.Cryptography.Libsodium;
+    using global::Beacon.Sdk.Core.Infrastructure.Cryptography;
     using Interfaces;
     using Netezos.Encoding;
     using Utils;
@@ -17,10 +16,7 @@ namespace Beacon.Sdk.Core.Domain.Entities
 
         public static byte[] Hash(byte[] message, int bufferLength)
         {
-            var buffer = new byte[bufferLength];
-            Sodium.CryptoGenericHash(buffer, bufferLength, message, message.Length, Array.Empty<byte>(), 0);
-
-            return buffer;
+            return GenericHash.Hash(message, bufferLength);
         }
 
         public Peer Create(HexString hexPublicKey, string name, string version, string relayServer, bool isActive = false)

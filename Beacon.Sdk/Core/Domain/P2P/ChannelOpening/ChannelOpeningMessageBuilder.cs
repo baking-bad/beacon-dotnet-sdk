@@ -32,7 +32,7 @@ namespace Beacon.Sdk.Core.Domain.P2P.ChannelOpening
         public void BuildRecipientId(string relayServer, HexString hexPublicKey)
         {
             byte[] publicKeyByteArray = hexPublicKey.ToByteArray();
-            byte[] hash = GenericHash.Hash(publicKeyByteArray, null, publicKeyByteArray.Length)!;
+            byte[] hash = GenericHash.Hash(publicKeyByteArray, publicKeyByteArray.Length)!;
 
             if (!HexString.TryParse(hash, out HexString hexHash))
                 throw new InvalidOperationException("Can not parse hash");
