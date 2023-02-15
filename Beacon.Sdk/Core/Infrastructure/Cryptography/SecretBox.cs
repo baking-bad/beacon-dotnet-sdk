@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text;
 
-using Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium;
 using NaCl;
 
 namespace Beacon.Sdk.Core.Infrastructure.Cryptography
@@ -44,7 +43,17 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             // todo: change to BouncyCastle?
             var secretBox = new XSalsa20Poly1305(key);
 
-            secretBox.Encrypt(buffer, message, nonce);
+            secretBox.Encrypt(
+                cipher: buffer,
+                message: message,
+                nonce: nonce);
+
+            //var ret = Sodium.CryptoSecretBoxEasy(
+            //    buffer,
+            //    message,
+            //    (ulong)message.Length,
+            //    nonce,
+            //    key);
 
             return buffer;
         }
@@ -94,8 +103,20 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             var secretBox = new XSalsa20Poly1305(key);
 
-            if (!secretBox.TryDecrypt(buffer, cipherText, nonce))
+            if (!secretBox.TryDecrypt(
+                message: buffer,
+                cipher: cipherText,
+                nonce: nonce))
+            {
                 throw new Exception("Failed to open SecretBox");
+            }
+
+            //var ret = Sodium.CryptoSecretBoxOpenEasy(
+            //    buffer,
+            //    cipherText,
+            //    (ulong)cipherText.Length,
+            //    nonce,
+            //    key);
 
             return buffer;
         }

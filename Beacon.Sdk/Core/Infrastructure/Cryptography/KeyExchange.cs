@@ -44,8 +44,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             var blake2bDigest = new Blake2bDigest(h.Length * 8);
             blake2bDigest.BlockUpdate(q, 0, q.Length);
-            blake2bDigest.BlockUpdate(clientPublicKey, 0, clientPublicKey.Length);
-            blake2bDigest.BlockUpdate(serverPublicKey, 0, serverPublicKey.Length);
+            blake2bDigest.BlockUpdate(clientPublicKey, 0, PublicKeyBytes);
+            blake2bDigest.BlockUpdate(serverPublicKey, 0, PublicKeyBytes);
             blake2bDigest.DoFinal(h, 0);
 
             Buffer.BlockCopy(h, 0, rx, 0, SessionKeyBytes);
@@ -81,8 +81,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             var blake2bDigest = new Blake2bDigest(h.Length * 8);
             blake2bDigest.BlockUpdate(q, 0, q.Length);
-            blake2bDigest.BlockUpdate(clientPublicKey, 0, clientPublicKey.Length);
-            blake2bDigest.BlockUpdate(serverPublicKey, 0, serverPublicKey.Length);
+            blake2bDigest.BlockUpdate(clientPublicKey, 0, PublicKeyBytes);
+            blake2bDigest.BlockUpdate(serverPublicKey, 0, PublicKeyBytes);
             blake2bDigest.DoFinal(h, 0);
 
             Buffer.BlockCopy(h, 0, tx, 0, SessionKeyBytes);

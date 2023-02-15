@@ -18,7 +18,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             byte[] serverSecretKeyCurve = PublicKeyAuth.ConvertEd25519SecretKeyToCurve25519SecretKey(serverPrivateKey)!;
             byte[] clientPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(clientPublicKey)!;
 
-            return KeyExchange.CreateClientSessionKeyPair(serverPublicKeyCurve, serverSecretKeyCurve,
+            return KeyExchange.CreateClientSessionKeyPair(
+                serverPublicKeyCurve,
+                serverSecretKeyCurve,
                 clientPublicKeyCurve);
         }
 
@@ -28,7 +30,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             byte[] serverSecretKeyCurve = PublicKeyAuth.ConvertEd25519SecretKeyToCurve25519SecretKey(serverPrivateKey)!;
             byte[] clientPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(clientPublicKey)!;
 
-            return KeyExchange.CreateServerSessionKeyPair(serverPublicKeyCurve, serverSecretKeyCurve,
+            return KeyExchange.CreateServerSessionKeyPair(
+                serverPublicKeyCurve,
+                serverSecretKeyCurve,
                 clientPublicKeyCurve);
         }
 

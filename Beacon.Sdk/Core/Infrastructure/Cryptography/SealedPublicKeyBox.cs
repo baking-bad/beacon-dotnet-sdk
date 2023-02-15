@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Text;
 
-using Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium;
 using NaCl;
+using Org.BouncyCastle.Crypto.Digests;
 
 namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 {
@@ -11,7 +11,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     {
         public const int RecipientPublicKeyBytes = 32;
         public const int RecipientSecretKeyBytes = 32;
-        private const int CryptoBoxSealbytes = 32 + 16;
+        private const int PublicKeyBytes = 32;
+        private const int MacBytes = 16;
+        private const int NonceBytes = 24;
 
         /// <summary> Creates a SealedPublicKeyBox</summary>
         /// <param name="message">The message.</param>
@@ -35,15 +37,21 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             if (recipientPublicKey == null || recipientPublicKey.Length != RecipientPublicKeyBytes)
                 throw new ArgumentOutOfRangeException(nameof(recipientPublicKey), recipientPublicKey?.Length ?? 0, $"recipientPublicKey must be {RecipientPublicKeyBytes} bytes in length.");
 
-            var buffer = new byte[message.Length + CryptoBoxSealbytes];
+            var buffer = new byte[message.Length + PublicKeyBytes + MacBytes];
 
-            Curve25519XSalsa20Poly1305.KeyPair(out var secretKey, out var publicKey);
+            Curve25519XSalsa20Poly1305.KeyPair(out var esk, out var epk);
 
-            var secretBoxSeal = new Curve25519XSalsa20Poly1305(secretKey, publicKey);
+            var secretBoxSeal = new Curve25519XSalsa20Poly1305(esk, epk);
 
-            //secretBoxSeal.Encrypt(buffer, message, )
+            var nonce = GetSealNonce(epk, recipientPublicKey);
 
-            //Sodium.Initialize();
+            secretBoxSeal.Encrypt(
+                cipher: new Span<byte>(buffer)[PublicKeyBytes..], // skip first 32 bytes for public key
+                message: message,
+                nonce: nonce);
+
+            Buffer.BlockCopy(epk, 0, buffer, 0, PublicKeyBytes);
+
             //var ret = Sodium.CryptoBoxSeal(
             //    buffer,
             //    message,
@@ -69,12 +77,23 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             if (recipientPublicKey == null || recipientPublicKey.Length != RecipientPublicKeyBytes)
                 throw new ArgumentOutOfRangeException(nameof(recipientPublicKey), recipientPublicKey?.Length ?? 0, $"recipientPublicKey must be {RecipientPublicKeyBytes} bytes in length.");
 
-            if (cipherText.Length < CryptoBoxSealbytes)
+            if (cipherText.Length < PublicKeyBytes + MacBytes)
                 throw new Exception("Failed to open SealedBox");
 
-            var buffer = new byte[cipherText.Length - CryptoBoxSealbytes];
+            var buffer = new byte[cipherText.Length - (PublicKeyBytes + MacBytes)];
 
-            //Sodium.Initialize();
+            var nonce = GetSealNonce(cipherText, recipientPublicKey);
+
+            var secretBoxSeal = new Curve25519XSalsa20Poly1305(recipientSecretKey, recipientPublicKey);
+
+            if (!secretBoxSeal.TryDecrypt(
+                message: buffer,
+                cipher: new ReadOnlySpan<byte>(cipherText)[PublicKeyBytes..],
+                nonce: nonce))
+            {
+                throw new Exception("Failed to open SealedBox");
+            }
+
             //var ret = Sodium.CryptoBoxSealOpen(
             //    buffer,
             //    cipherText,
@@ -86,6 +105,18 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             //    throw new Exception("Failed to open SealedBox");
 
             return buffer;
+        }
+
+        private static byte[] GetSealNonce(byte[] pk1, byte[] pk2)
+        {
+            var nonce = new byte[NonceBytes];
+
+            var blake2bDigest = new Blake2bDigest(NonceBytes * 8);
+            blake2bDigest.BlockUpdate(pk1, 0, PublicKeyBytes);
+            blake2bDigest.BlockUpdate(pk2, 0, PublicKeyBytes);
+            blake2bDigest.DoFinal(nonce, 0);
+
+            return nonce;
         }
     }
 }
