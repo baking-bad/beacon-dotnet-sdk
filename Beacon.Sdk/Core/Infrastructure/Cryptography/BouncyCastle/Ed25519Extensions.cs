@@ -5,7 +5,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.BouncyCastle
 {
     using NaCl;
 
-    internal static class Ed25519Extensions
+    public static class Ed25519Extensions
     {
         private const int PUBLIC_KEY_BYTES = 32;
         private const int SCALAR_BYTES = 32;

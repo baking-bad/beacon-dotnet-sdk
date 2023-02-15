@@ -41,7 +41,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             Curve25519XSalsa20Poly1305.KeyPair(out var esk, out var epk);
 
-            var secretBoxSeal = new Curve25519XSalsa20Poly1305(esk, epk);
+            var secretBoxSeal = new Curve25519XSalsa20Poly1305(esk, recipientPublicKey);
 
             var nonce = GetSealNonce(epk, recipientPublicKey);
 
@@ -84,7 +84,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             var nonce = GetSealNonce(cipherText, recipientPublicKey);
 
-            var secretBoxSeal = new Curve25519XSalsa20Poly1305(recipientSecretKey, recipientPublicKey);
+            var secretBoxSeal = new Curve25519XSalsa20Poly1305(recipientSecretKey, new ReadOnlySpan<byte>(cipherText)[..PublicKeyBytes]);
 
             if (!secretBoxSeal.TryDecrypt(
                 message: buffer,
