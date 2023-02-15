@@ -1,4 +1,4 @@
-namespace Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium
+namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 {
     public struct SessionKeyPair
     {

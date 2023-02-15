@@ -2,7 +2,6 @@ using Beacon.Sdk.Core.Infrastructure.Cryptography;
 
 namespace Beacon.Sdk.Core.Domain.Interfaces.Data
 {
-    using Infrastructure.Cryptography.Libsodium;
     using Utils;
 
     public interface ISessionKeyPairRepository

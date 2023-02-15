@@ -18,53 +18,6 @@ Beacon .NET SDK is [available on NuGet](https://www.nuget.org/packages/Beacon.Sd
 dotnet add package Beacon.Sdk
 ```
 
-### Libsodium library runtime dependencies
-
-Beacon.Sdk uses the [libsodium](https://doc.libsodium.org/) cryptographic library. Some platforms may require additional runtime or static binaries:
-
-#### Windows/Linux/MacOS
-
-All runtime binaries already included. Nothing to do...
-
-#### Android
-
-`libsodium.so` library files for different architectures must be included in project resources:
-```
-Project
-└── Resources
-    └── lib
-        └── arm64-v8a
-            └── libsodium.so      
-        └── armeabi-v7a
-            └── libsodium.so   
-        └── x86_64       
-            └── libsodium.so   
-```
-
-#### iOS static linking
-
-`libsodium.a` static library files must be compiled for all required architectures (arm64, armv7, i386 e.t.c).
-
-Binaries for all architectures must be concatenated to universal (fat) binary file:
-```
-lipo -create -output libsodium.a libsodium-i386.a libsodium-arm64.a libsodium-armv7.a
-```
-
-The resulting `libsodium.a` file must be added to iOS project with the `Build Action` property set to `None`.
-
-The next step is to specify iOS extra build arguments:
-
-```
--gcc_flags "-L${ProjectDir} -lsodium -force_load ${ProjectDir}/libsodium.a"
-```
-
-And the last step is to specify how the library will be used by your application at startup:
-```Csharp
-using Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium;
-
-Sodium.SetLibraryType(SodiumLibraryType.StaticInternal);
-```
-
 ## Usage
 
 For a complete example, refer

@@ -4,14 +4,12 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
     using System.Linq;
     using System.Text;
     using Domain.Interfaces;
-    using Libsodium;
     using Utils;
-    using Sodium = Libsodium.Sodium;
 
     public class CryptographyService : ICryptographyService
     {
-        private static readonly int MacBytes = Sodium.CryptoBoxMacBytes();
-        private static readonly int NonceBytes = Sodium.CryptoBoxNonceBytes();
+        private static readonly int MacBytes = 16;
+        private static readonly int NonceBytes = 24;
 
         public SessionKeyPair CreateClientSessionKeyPair(byte[] clientPublicKey, byte[] serverPrivateKey)
         {
@@ -20,7 +18,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             byte[] serverSecretKeyCurve = PublicKeyAuth.ConvertEd25519SecretKeyToCurve25519SecretKey(serverPrivateKey)!;
             byte[] clientPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(clientPublicKey)!;
 
-            return KeyExchange.CreateClientSessionKeyPair(serverPublicKeyCurve, serverSecretKeyCurve,
+            return KeyExchange.CreateClientSessionKeyPair(
+                serverPublicKeyCurve,
+                serverSecretKeyCurve,
                 clientPublicKeyCurve);
         }
 
@@ -31,25 +31,19 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             byte[] serverSecretKeyCurve = PublicKeyAuth.ConvertEd25519SecretKeyToCurve25519SecretKey(serverPrivateKey)!;
             byte[] clientPublicKeyCurve = PublicKeyAuth.ConvertEd25519PublicKeyToCurve25519PublicKey(clientPublicKey)!;
 
-            return KeyExchange.CreateServerSessionKeyPair(serverPublicKeyCurve, serverSecretKeyCurve,
+            return KeyExchange.CreateServerSessionKeyPair(
+                serverPublicKeyCurve,
+                serverSecretKeyCurve,
                 clientPublicKeyCurve);
         }
 
-        public byte[] Hash(byte[] input) => GenericHash.Hash(input, null, input.Length);
+        public byte[] Hash(byte[] input) => GenericHash.Hash(input, input.Length);
 
-        public byte[] Hash(byte[] message, int bufferLength)
-        {
-            var buffer = new byte[bufferLength];
-
-            Sodium.Initialize();
-            Sodium.CryptoGenericHash(buffer, bufferLength, message, (ulong)message.Length, Array.Empty<byte>(), 0);
- 
-            return buffer;
-        }
+        public byte[] Hash(byte[] message, int resultLength) => GenericHash.Hash(message, resultLength);
 
         public KeyPair GenerateEd25519KeyPair(string seed)
         {
-            byte[] hash = GenericHash.Hash(seed, (byte[]?)null, 32);
+            byte[] hash = GenericHash.Hash(seed, 32);
 
             return PublicKeyAuth.GenerateKeyPair(hash);
         }
@@ -67,14 +61,6 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             return hexPayload;
         }
 
-        // public static class ArrayExtensions
-        // {
-        //     public byte this[Range input]
-        //     {
-        //         get;
-        //         set;
-        //     }
-        // }
         public string Decrypt(HexString hexInput, byte[] key)
         {
             byte[] bytes = hexInput.ToByteArray();
@@ -136,7 +122,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
             long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds() * 1000;
             var message = $"login:{now / 1000 / (5 * 60)}";
 
-            return GenericHash.Hash(message, (byte[]?)null, 32);
+            return GenericHash.Hash(message, 32);
         }
 
         public string GenerateHexSignature(byte[] loginDigest, byte[] secretKey)
@@ -148,7 +134,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
         public string GenerateHexId(byte[] publicKey)
         {
-            byte[] hash = GenericHash.Hash(publicKey, null, publicKey.Length);
+            byte[] hash = GenericHash.Hash(publicKey, publicKey.Length);
 
             return ToHexString(hash);
         }

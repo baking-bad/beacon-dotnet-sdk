@@ -3,7 +3,6 @@ using Beacon.Sdk.Core.Infrastructure.Cryptography;
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
     using System.Collections.Concurrent;
-    using Cryptography.Libsodium;
     using Domain.Interfaces;
     using Domain.Interfaces.Data;
     using Utils;

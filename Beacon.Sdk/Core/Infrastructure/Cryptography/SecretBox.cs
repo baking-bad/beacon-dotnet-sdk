@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Text;
 
-using Beacon.Sdk.Core.Infrastructure.Cryptography.Libsodium;
+using NaCl;
 
 namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 {
     /// <summary>Create and Open Secret Boxes.</summary>
     public static class SecretBox
     {
-        private const int KEY_BYTES = Sodium.crypto_secretbox_xsalsa20poly1305_KEYBYTES;
-        private const int NONCE_BYTES = Sodium.crypto_secretbox_xsalsa20poly1305_NONCEBYTES;
-        private const int MAC_BYTES = Sodium.crypto_secretbox_xsalsa20poly1305_MACBYTES;
+        private const int KEY_BYTES = 32;
+        private const int NONCE_BYTES = 24;
+        private const int MAC_BYTES = 16;
 
         /// <summary>Creates a Secret Box</summary>
         /// <param name="message">Hex-encoded string to be encrypted.</param>
@@ -30,9 +30,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         /// <param name="nonce">The 24 byte nonce.</param>
         /// <param name="key">The 32 byte key.</param>
         /// <returns>The encrypted message.</returns>
-        /// <exception cref="KeyOutOfRangeException"></exception>
-        /// <exception cref="NonceOutOfRangeException"></exception>
-        /// <exception cref="CryptographicException"></exception>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static byte[] Create(byte[] message, byte[] nonce, byte[] key)
         {
             if (key == null || key.Length != KEY_BYTES)
@@ -42,11 +40,20 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             var buffer = new byte[message.Length + MAC_BYTES];
 
-            Sodium.Initialize();
-            var ret = Sodium.CryptoSecretBoxEasy(buffer, message, (ulong)message.Length, nonce, key);
+            // todo: change to BouncyCastle?
+            var secretBox = new XSalsa20Poly1305(key);
 
-            if (ret != 0)
-                throw new Exception("Failed to create SecretBox");
+            secretBox.Encrypt(
+                cipher: buffer,
+                message: message,
+                nonce: nonce);
+
+            //var ret = Sodium.CryptoSecretBoxEasy(
+            //    buffer,
+            //    message,
+            //    (ulong)message.Length,
+            //    nonce,
+            //    key);
 
             return buffer;
         }
@@ -56,9 +63,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
         /// <param name="nonce">The 24 byte nonce.</param>
         /// <param name="key">The 32 byte nonce.</param>
         /// <returns>The decrypted text.</returns>
-        /// <exception cref="KeyOutOfRangeException"></exception>
-        /// <exception cref="NonceOutOfRangeException"></exception>
-        /// <exception cref="CryptographicException"></exception>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static byte[] Open(byte[] cipherText, byte[] nonce, byte[] key)
         {
             if (key == null || key.Length != KEY_BYTES)
@@ -96,11 +101,22 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography
 
             var buffer = new byte[cipherText.Length - MAC_BYTES];
 
-            Sodium.Initialize();
-            var ret = Sodium.CryptoSecretBoxOpenEasy(buffer, cipherText, (ulong)cipherText.Length, nonce, key);
+            var secretBox = new XSalsa20Poly1305(key);
 
-            if (ret != 0)
+            if (!secretBox.TryDecrypt(
+                message: buffer,
+                cipher: cipherText,
+                nonce: nonce))
+            {
                 throw new Exception("Failed to open SecretBox");
+            }
+
+            //var ret = Sodium.CryptoSecretBoxOpenEasy(
+            //    buffer,
+            //    cipherText,
+            //    (ulong)cipherText.Length,
+            //    nonce,
+            //    key);
 
             return buffer;
         }
