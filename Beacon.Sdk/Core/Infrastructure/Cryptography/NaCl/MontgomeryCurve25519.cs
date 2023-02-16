@@ -1,6 +1,5 @@
 ﻿using System;
 
-
 namespace Beacon.Sdk.Core.Infrastructure.Cryptography.NaCl
 {
     using Internal.Ed25519Ref10;
@@ -14,7 +13,11 @@ namespace Beacon.Sdk.Core.Infrastructure.Cryptography.NaCl
             FieldOperations.fe_1(out edwardsZ);
             EdwardsToMontgomeryX(out montgomeryX, ref edwardsY, ref edwardsZ);
             FieldOperations.fe_tobytes(montgomery.Array, montgomery.Offset, ref montgomeryX);
-            montgomery.Array[montgomery.Offset + 31] |= (byte)(edwards.Array[edwards.Offset + 31] & 0x80); // copy sign
+
+            // Sign copying removed to match Libsodium implementation:
+            // https://github.com/jedisct1/libsodium/blob/b7aebe5a1ef46bbb1345e8570fd2e8cea64e587f/src/libsodium/crypto_sign/ed25519/ref10/keypair.c#L64
+            //
+            //montgomery.Array[montgomery.Offset + 31] |= (byte)(edwards.Array[edwards.Offset + 31] & 0x80); // copy sign
         }
 
         private static void EdwardsToMontgomeryX(out FieldElement montgomeryX, ref FieldElement edwardsY,
