@@ -22,7 +22,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
         public async Task<SeedEntity> CreateAsync(string seed)
         {
-            var func = new Func<LiteCollection<SeedEntity>, Task<SeedEntity>>(col =>
+            var func = new Func<ILiteCollection<SeedEntity>, Task<SeedEntity>>(col =>
             {
                 var data = new SeedEntity
                 {

@@ -21,7 +21,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
         public async Task<PermissionInfo> CreateOrUpdateAsync(PermissionInfo permissionInfo)
         {
-            var func = new Func<LiteCollection<PermissionInfo>, Task<PermissionInfo>>(col =>
+            var func = new Func<ILiteCollection<PermissionInfo>, Task<PermissionInfo>>(col =>
             {
                 var id = $"{permissionInfo.SenderId}:{permissionInfo.AccountId}";
                 permissionInfo.PermissionInfoId = id;

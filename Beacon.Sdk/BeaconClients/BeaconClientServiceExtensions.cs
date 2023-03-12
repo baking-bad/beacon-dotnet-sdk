@@ -48,10 +48,7 @@ namespace Beacon.Sdk.BeaconClients
                 AppUrl = string.Empty,
                 IconUrl = string.Empty,
                 KnownRelayServers = Constants.KnownRelayServers,
-
-                DatabaseConnectionString = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                    ? $"Filename={Directory.GetCurrentDirectory()}/beacon.db; Connection=Shared;"
-                    : $"Filename={Directory.GetCurrentDirectory()}/beacon.db; Mode=Exclusive;"
+                DatabaseConnectionString = $"Filename={Directory.GetCurrentDirectory()}/beacon.db;Connection=direct;Upgrade=true"
             };
 
             BeaconOptions beaconOptions = options ?? defaultBeaconOptions;

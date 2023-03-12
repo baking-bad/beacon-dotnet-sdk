@@ -19,7 +19,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
         public async Task<AppMetadata> CreateOrUpdateAsync(AppMetadata appMetadata)
         {
-            var func = new Func<LiteCollection<AppMetadata>, Task<AppMetadata>>(col =>
+            var func = new Func<ILiteCollection<AppMetadata>, Task<AppMetadata>>(col =>
             {
                 var result = col.FindOne(x => x.Name == appMetadata.Name);
                 if (result != null)

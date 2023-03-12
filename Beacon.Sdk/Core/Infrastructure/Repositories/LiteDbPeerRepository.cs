@@ -21,7 +21,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
         public async Task<Peer> CreateAsync(Peer peer)
         {
-            var func = new Func<LiteCollection<Peer>, Task<Peer>>(col =>
+            var func = new Func<ILiteCollection<Peer>, Task<Peer>>(col =>
             {
                 var existingPeer = col.FindOne(p => p.Name == peer.Name);
                 if (existingPeer != null)

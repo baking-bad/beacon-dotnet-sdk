@@ -21,7 +21,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
         public async Task<MatrixSyncEntity> CreateOrUpdateAsync(string nextBatch)
         {
-            var func = new Func<LiteCollection<MatrixSyncEntity>, Task<MatrixSyncEntity>>(col =>
+            var func = new Func<ILiteCollection<MatrixSyncEntity>, Task<MatrixSyncEntity>>(col =>
             {
                 MatrixSyncEntity? matrixSyncEntity = col.FindAll().FirstOrDefault();
 

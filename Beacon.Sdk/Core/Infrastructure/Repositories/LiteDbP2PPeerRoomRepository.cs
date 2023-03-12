@@ -21,7 +21,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
         public async Task<P2PPeerRoom> CreateOrUpdateAsync(P2PPeerRoom p2PPeerRoom)
         {
-            var func = new Func<LiteCollection<P2PPeerRoom>, Task<P2PPeerRoom>>(col =>
+            var func = new Func<ILiteCollection<P2PPeerRoom>, Task<P2PPeerRoom>>(col =>
             {
                 var result = col.FindOne(x => x.PeerName == p2PPeerRoom.PeerName);
                 if (result != null)

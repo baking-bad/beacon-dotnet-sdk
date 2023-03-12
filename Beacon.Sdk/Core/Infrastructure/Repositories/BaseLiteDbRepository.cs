@@ -19,14 +19,14 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             _connectionString = settings.ConnectionString;
         }
 
-        protected Task InConnectionAction(string collectionName, Action<LiteCollection<T>> func)
+        protected Task InConnectionAction(string collectionName, Action<ILiteCollection<T>> func)
         {
             try
             {
                 lock (_syncRoot)
                 {
                     using var db = new LiteDatabase(_connectionString);
-                    LiteCollection<T> col = db.GetCollection<T>(collectionName);
+                    ILiteCollection<T> col = db.GetCollection<T>(collectionName);
 
                     func(col);
                 }
@@ -39,14 +39,14 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             return Task.CompletedTask;
         }
 
-        protected Task<T> InConnection(string collectionName, Func<LiteCollection<T>, Task<T>> func)
+        protected Task<T> InConnection(string collectionName, Func<ILiteCollection<T>, Task<T>> func)
         {
             try
             {
                 lock (_syncRoot)
                 {
                     using var db = new LiteDatabase(_connectionString);
-                    LiteCollection<T> col = db.GetCollection<T>(collectionName);
+                    ILiteCollection<T> col = db.GetCollection<T>(collectionName);
 
                     return func(col);
                 }
@@ -61,14 +61,14 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             //return Task.FromResult<T>(default!);
         }
 
-        protected Task InConnection(string collectionName, Action<LiteDatabase, LiteCollection<T>> func)
+        protected Task InConnection(string collectionName, Action<LiteDatabase, ILiteCollection<T>> func)
         {
             try
             {
                 lock (_syncRoot)
                 {
                     using var db = new LiteDatabase(_connectionString);
-                    LiteCollection<T> col = db.GetCollection<T>(collectionName);
+                    ILiteCollection<T> col = db.GetCollection<T>(collectionName);
 
                     func(db, col);
                 }
@@ -81,14 +81,14 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             return Task.CompletedTask;
         }
 
-        protected Task<T?> InConnectionNullable(string collectionName, Func<LiteCollection<T>, Task<T?>> func)
+        protected Task<T?> InConnectionNullable(string collectionName, Func<ILiteCollection<T>, Task<T?>> func)
         {
             try
             {
                 lock (_syncRoot)
                 {
                     using var db = new LiteDatabase(_connectionString);
-                    LiteCollection<T> col = db.GetCollection<T>(collectionName);
+                    ILiteCollection<T> col = db.GetCollection<T>(collectionName);
 
                     return func(col);
                 }
@@ -101,14 +101,14 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             return Task.FromResult<T?>(default);
         }
 
-        protected Task<T[]?> InConnectionNullable(string collectionName, Func<LiteCollection<T>, Task<T[]?>> func)
+        protected Task<T[]?> InConnectionNullable(string collectionName, Func<ILiteCollection<T>, Task<T[]?>> func)
         {
             try
             {
                 lock (_syncRoot)
                 {
                     using var db = new LiteDatabase(_connectionString);
-                    LiteCollection<T> col = db.GetCollection<T>(collectionName);
+                    ILiteCollection<T> col = db.GetCollection<T>(collectionName);
 
                     return func(col);
                 }
@@ -121,14 +121,14 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             return Task.FromResult<T[]?>(default);
         }
 
-        protected Task<List<T>> InConnection(string collectionName, Func<LiteCollection<T>, Task<List<T>>> func)
+        protected Task<List<T>> InConnection(string collectionName, Func<ILiteCollection<T>, Task<List<T>>> func)
         {
             try
             {
                 lock (_syncRoot)
                 {
                     using var db = new LiteDatabase(_connectionString);
-                    LiteCollection<T> col = db.GetCollection<T>(collectionName);
+                    ILiteCollection<T> col = db.GetCollection<T>(collectionName);
 
                     return func(col);
                 }
