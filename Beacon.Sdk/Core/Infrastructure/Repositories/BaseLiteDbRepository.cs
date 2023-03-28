@@ -3,33 +3,26 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-
     using LiteDB;
     using Microsoft.Extensions.Logging;
 
     public abstract class BaseLiteDbRepository<T>
     {
-        private readonly string _connectionString;
         private readonly ILogger<BaseLiteDbRepository<T>> _logger;
-        private readonly object _syncRoot = new();
+        private readonly LiteDatabase _db;
 
         protected BaseLiteDbRepository(ILogger<BaseLiteDbRepository<T>> logger, RepositorySettings settings)
         {
             _logger = logger;
-            _connectionString = settings.ConnectionString;
+            _db = new LiteDatabase(settings.ConnectionString);
         }
 
         protected Task InConnectionAction(string collectionName, Action<ILiteCollection<T>> func)
         {
             try
             {
-                lock (_syncRoot)
-                {
-                    using var db = new LiteDatabase(_connectionString);
-                    ILiteCollection<T> col = db.GetCollection<T>(collectionName);
-
-                    func(col);
-                }
+                ILiteCollection<T> col = _db.GetCollection<T>(collectionName);
+                func(col);
             }
             catch (Exception e)
             {
@@ -43,35 +36,22 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
             try
             {
-                lock (_syncRoot)
-                {
-                    using var db = new LiteDatabase(_connectionString);
-                    ILiteCollection<T> col = db.GetCollection<T>(collectionName);
-
-                    return func(col);
-                }
+                ILiteCollection<T> col = _db.GetCollection<T>(collectionName);
+                return func(col);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "error in repository");
-
                 throw;
             }
-
-            //return Task.FromResult<T>(default!);
         }
 
         protected Task InConnection(string collectionName, Action<LiteDatabase, ILiteCollection<T>> func)
         {
             try
             {
-                lock (_syncRoot)
-                {
-                    using var db = new LiteDatabase(_connectionString);
-                    ILiteCollection<T> col = db.GetCollection<T>(collectionName);
-
-                    func(db, col);
-                }
+                ILiteCollection<T> col = _db.GetCollection<T>(collectionName);
+                func(_db, col);
             }
             catch (Exception e)
             {
@@ -85,13 +65,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
             try
             {
-                lock (_syncRoot)
-                {
-                    using var db = new LiteDatabase(_connectionString);
-                    ILiteCollection<T> col = db.GetCollection<T>(collectionName);
+                ILiteCollection<T> col = _db.GetCollection<T>(collectionName);
+                return func(col);
 
-                    return func(col);
-                }
             }
             catch (Exception e)
             {
@@ -105,13 +81,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
             try
             {
-                lock (_syncRoot)
-                {
-                    using var db = new LiteDatabase(_connectionString);
-                    ILiteCollection<T> col = db.GetCollection<T>(collectionName);
+                ILiteCollection<T> col = _db.GetCollection<T>(collectionName);
+                return func(col);
 
-                    return func(col);
-                }
             }
             catch (Exception e)
             {
@@ -125,13 +97,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
             try
             {
-                lock (_syncRoot)
-                {
-                    using var db = new LiteDatabase(_connectionString);
-                    ILiteCollection<T> col = db.GetCollection<T>(collectionName);
-
-                    return func(col);
-                }
+                ILiteCollection<T> col = _db.GetCollection<T>(collectionName);
+                return func(col);
             }
             catch (Exception e)
             {
@@ -140,10 +107,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
 
             return Task.FromResult<List<T>>(default!);
         }
-        
-        protected Task DropAsync(string collectionName) => InConnection(collectionName, (db, col) =>
-        {
-            db.DropCollection(col.Name);
-        });
+
+        protected Task DropAsync(string collectionName) =>
+            InConnection(collectionName, (db, col) => { db.DropCollection(col.Name); });
     }
 }
