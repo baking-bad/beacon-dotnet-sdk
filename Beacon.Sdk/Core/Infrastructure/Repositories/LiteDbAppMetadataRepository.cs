@@ -61,7 +61,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             var appMetaData = col.FindOne(a => a.SenderId == senderId);
 
             if (appMetaData != null)
-                col.Delete(senderId);
+                col.Delete(appMetaData.Id);
         });
 
         public Task DeleteAll() =>

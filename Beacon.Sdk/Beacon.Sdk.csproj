@@ -27,6 +27,6 @@
         <PackageReference Include="NaCl.Net" Version="0.1.13" />
         <PackageReference Include="Netezos" Version="2.4.6" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="Matrix.Sdk" Version="1.0.7" />
+        <PackageReference Include="Matrix.Sdk" Version="1.0.8" />
     </ItemGroup>
 </Project>
