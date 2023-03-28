@@ -106,6 +106,11 @@ public class Sample
                     await BeaconDappClient.RequestOperation(operationDetails);
                     break;
                 }
+                case "logout":
+                {
+                    BeaconDappClient.RemoveActiveAccounts();
+                    break;
+                }
             }
         }
     }

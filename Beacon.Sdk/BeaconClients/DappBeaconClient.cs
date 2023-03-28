@@ -66,6 +66,11 @@ namespace Beacon.Sdk.BeaconClients
             return PeerRepository.TryGetActive().Result;
         }
 
+        public void RemoveActiveAccounts()
+        {
+            PeerRepository.MarkAllInactive();
+        }
+
         public PermissionInfo? GetActiveAccount()
         {
             var activePeer = GetActivePeer();

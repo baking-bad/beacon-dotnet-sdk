@@ -12,6 +12,7 @@ namespace Beacon.Sdk.BeaconClients.Abstract
         string GetPairingRequestInfo();
         Peer? GetActivePeer();
         PermissionInfo? GetActiveAccount();
+        void RemoveActiveAccounts();
         Task RequestPermissions(IEnumerable<PermissionScope> permissions, Network network);
         Task RequestOperation(IEnumerable<TezosBaseOperation> operations);
         Task RequestSign(string payload, SignPayloadType payloadType);
