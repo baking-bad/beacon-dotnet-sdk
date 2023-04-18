@@ -86,7 +86,7 @@ namespace Beacon.Sdk.Core.Domain
                     operationRequest.OperationDetails[i] = new PartialTezosTransactionOperation(
                         transactionOperation.Amount,
                         transactionOperation.Destination,
-                        null);
+                        string.Empty);
             }
 
             return operationRequest;

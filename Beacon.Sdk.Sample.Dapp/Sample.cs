@@ -97,10 +97,7 @@ public class Sample
 
                     var operationDetails = new List<PartialTezosTransactionOperation>
                     {
-                        new(
-                            Amount: "0",
-                            Destination: "KT1WguzxyLmuKbJhz3jNuoRzzaUCncfp6PFE",
-                            Parameters: JObject.Parse(stringParams))
+                        new("0", "KT1WguzxyLmuKbJhz3jNuoRzzaUCncfp6PFE", stringParams)
                     };
 
                     await BeaconDappClient.RequestOperation(operationDetails);
