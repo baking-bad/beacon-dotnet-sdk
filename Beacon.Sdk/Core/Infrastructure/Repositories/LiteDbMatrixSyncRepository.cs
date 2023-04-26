@@ -1,21 +1,25 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
 using LiteDB;
+using Microsoft.Extensions.Logging;
 
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
     using Domain.Entities;
     using Domain.Interfaces;
-    using Microsoft.Extensions.Logging;
 
     public class LiteDbMatrixSyncRepository : BaseLiteDbRepository<MatrixSyncEntity>, IMatrixSyncRepository
     {
         private const string CollectionName = "MatrixSync";
         
-        public LiteDbMatrixSyncRepository(ILogger<LiteDbMatrixSyncRepository> logger, RepositorySettings settings)
-            : base(logger, settings)
+        public LiteDbMatrixSyncRepository(
+            ILiteDbConnectionPool connectionPool,
+            ILogger<LiteDbMatrixSyncRepository> logger,
+            RepositorySettings settings)
+            : base(connectionPool, logger, settings)
         {
         }
 

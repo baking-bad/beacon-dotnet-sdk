@@ -1,21 +1,25 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
 using LiteDB;
+using Microsoft.Extensions.Logging;
 
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
     using Domain.Entities;
     using Domain.Interfaces.Data;
-    using Microsoft.Extensions.Logging;
 
     public class LiteDbPermissionInfoRepository : BaseLiteDbRepository<PermissionInfo>, IPermissionInfoRepository
     {
         private const string CollectionName = "PermissionInfo";
 
-        public LiteDbPermissionInfoRepository(ILogger<LiteDbPermissionInfoRepository> logger,
-            RepositorySettings settings) : base(logger, settings)
+        public LiteDbPermissionInfoRepository(
+            ILiteDbConnectionPool connectionPool,
+            ILogger<LiteDbPermissionInfoRepository> logger,
+            RepositorySettings settings)
+            : base(connectionPool, logger, settings)
         {
         }
 

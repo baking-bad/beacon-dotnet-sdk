@@ -1,21 +1,25 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+
 using LiteDB;
+using Microsoft.Extensions.Logging;
 
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
-    using System.Threading.Tasks;
     using Domain.Entities.P2P;
     using Domain.Interfaces.Data;
-    using Microsoft.Extensions.Logging;
     using Utils;
 
     public class LiteDbP2PPeerRoomRepository : BaseLiteDbRepository<P2PPeerRoom>, IP2PPeerRoomRepository
     {
         private const string CollectionName = "P2PPeerRoom";
 
-        public LiteDbP2PPeerRoomRepository(ILogger<LiteDbP2PPeerRoomRepository> logger, RepositorySettings settings) :
-            base(logger, settings)
+        public LiteDbP2PPeerRoomRepository(
+            ILiteDbConnectionPool connectionPool,
+            ILogger<LiteDbP2PPeerRoomRepository> logger,
+            RepositorySettings settings) :
+            base(connectionPool, logger, settings)
         {
         }
 

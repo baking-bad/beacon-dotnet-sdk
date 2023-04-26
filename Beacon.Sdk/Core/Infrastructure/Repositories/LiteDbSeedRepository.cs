@@ -1,22 +1,26 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
 using LiteDB;
+using Microsoft.Extensions.Logging;
 
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
     using Domain.Entities;
     using Domain.Interfaces.Data;
-    using Microsoft.Extensions.Logging;
 
     // Todo: Add secure storage
     public class LiteDbSeedRepository : BaseLiteDbRepository<SeedEntity>, ISeedRepository
     {
         private const string CollectionName = "Seed";
 
-        public LiteDbSeedRepository(ILogger<LiteDbSeedRepository> logger, RepositorySettings settings)
-            : base(logger, settings)
+        public LiteDbSeedRepository(
+            ILiteDbConnectionPool connectionPool,
+            ILogger<LiteDbSeedRepository> logger,
+            RepositorySettings settings)
+            : base(connectionPool, logger, settings)
         {
         }
 

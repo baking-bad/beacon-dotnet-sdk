@@ -1,19 +1,23 @@
 using System;
+using System.Linq;
+using System.Threading.Tasks;
+
 using LiteDB;
+using Microsoft.Extensions.Logging;
 
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
-    using System.Linq;
-    using System.Threading.Tasks;
     using Beacon;
-    using Microsoft.Extensions.Logging;
 
     public class LiteDbAppMetadataRepository : BaseLiteDbRepository<AppMetadata>, IAppMetadataRepository
     {
         private const string CollectionName = "AppMetadata";
 
-        public LiteDbAppMetadataRepository(ILogger<LiteDbAppMetadataRepository> logger, RepositorySettings settings)
-            : base(logger, settings)
+        public LiteDbAppMetadataRepository(
+            ILiteDbConnectionPool connectionPool,
+            ILogger<LiteDbAppMetadataRepository> logger,
+            RepositorySettings settings)
+            : base(connectionPool, logger, settings)
         {
         }
 

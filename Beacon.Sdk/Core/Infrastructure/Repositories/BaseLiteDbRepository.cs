@@ -9,12 +9,12 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     public abstract class BaseLiteDbRepository<T>
     {
         private readonly ILogger<BaseLiteDbRepository<T>> _logger;
-        private readonly LiteDatabase _db;
+        private readonly ILiteDatabase _db;
 
-        protected BaseLiteDbRepository(ILogger<BaseLiteDbRepository<T>> logger, RepositorySettings settings)
+        protected BaseLiteDbRepository(ILiteDbConnectionPool connectionPool, ILogger<BaseLiteDbRepository<T>> logger, RepositorySettings settings)
         {
             _logger = logger;
-            _db = new LiteDatabase(settings.ConnectionString);
+            _db = connectionPool.OpenConnection(new ConnectionString(settings.ConnectionString));
         }
 
         protected Task InConnectionAction(string collectionName, Action<ILiteCollection<T>> func)
@@ -46,7 +46,7 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
             }
         }
 
-        protected Task InConnection(string collectionName, Action<LiteDatabase, ILiteCollection<T>> func)
+        protected Task InConnection(string collectionName, Action<ILiteDatabase, ILiteCollection<T>> func)
         {
             try
             {

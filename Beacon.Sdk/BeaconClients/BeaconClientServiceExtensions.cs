@@ -68,6 +68,7 @@ namespace Beacon.Sdk.BeaconClients
             });
 
             services.AddSingleton<ISessionKeyPairRepository, InMemorySessionKeyPairRepository>();
+            services.AddSingleton<ILiteDbConnectionPool, LiteDbConnectionPool>();
             services.AddSingleton<IPeerRepository, LiteDbPeerRepository>();
             services.AddSingleton<IP2PPeerRoomRepository, LiteDbP2PPeerRoomRepository>();
             services.AddSingleton<ISeedRepository, LiteDbSeedRepository>();
@@ -78,7 +79,6 @@ namespace Beacon.Sdk.BeaconClients
             services.AddSingleton<IJsonSerializerService, JsonSerializerService>();
 
             #endregion
-
 
             #region Domain
 

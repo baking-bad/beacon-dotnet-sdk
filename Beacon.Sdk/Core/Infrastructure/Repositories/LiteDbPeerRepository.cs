@@ -1,21 +1,24 @@
 using System;
 using System.Collections.Generic;
-using LiteDB;
+using System.Threading.Tasks;
 
+using LiteDB;
+using Microsoft.Extensions.Logging;
 
 namespace Beacon.Sdk.Core.Infrastructure.Repositories
 {
-    using System.Threading.Tasks;
     using Domain.Entities;
     using Domain.Interfaces.Data;
-    using Microsoft.Extensions.Logging;
 
     public class LiteDbPeerRepository : BaseLiteDbRepository<Peer>, IPeerRepository
     {
         private const string CollectionName = "Peer";
 
-        public LiteDbPeerRepository(ILogger<LiteDbPeerRepository> logger, RepositorySettings settings)
-            : base(logger, settings)
+        public LiteDbPeerRepository(
+            ILiteDbConnectionPool connectionPool,
+            ILogger<LiteDbPeerRepository> logger,
+            RepositorySettings settings)
+            : base(connectionPool, logger, settings)
         {
         }
 
