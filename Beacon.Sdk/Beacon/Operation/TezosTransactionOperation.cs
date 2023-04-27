@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Beacon.Sdk.Beacon.Operation
@@ -8,6 +9,7 @@ namespace Beacon.Sdk.Beacon.Operation
         public string Destination { get; }
         public JObject? Parameters { get; }
 
+        [JsonConstructor]
         public PartialTezosTransactionOperation(string amount, string destination, JObject? parameters) : base(
             TezosOperationType.transaction)
         {
