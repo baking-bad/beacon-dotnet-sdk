@@ -9,6 +9,7 @@
     {
         event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
         event EventHandler<ConnectedClientsListChangedEventArgs?> OnConnectedClientsListChanged;
+        event Action OnDisconnected;
 
         Task InitAsync();
         void Connect();

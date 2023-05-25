@@ -1,6 +1,7 @@
 namespace Beacon.Sdk.BeaconClients
 {
     using Abstract;
+    using Core.Infrastructure;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
@@ -9,7 +10,6 @@ namespace Beacon.Sdk.BeaconClients
         public static T Create<T>(
             BeaconOptions? options,
             ILoggerProvider? loggerProvider = null) where T : notnull
-
         {
             var beaconServices = new ServiceCollection();
             
@@ -19,8 +19,23 @@ namespace Beacon.Sdk.BeaconClients
             if (typeof(T) == typeof(IDappBeaconClient))
                 beaconServices.AddBeaconDappClient(options, loggerProvider);
             
-            ServiceProvider? beaconServicesProvider = beaconServices.BuildServiceProvider();
-            return beaconServicesProvider.GetRequiredService<T>();
+            var beaconServicesProvider = beaconServices.BuildServiceProvider();
+            var service = beaconServicesProvider.GetRequiredService<T>();
+
+            if (service is IBaseBeaconClient client)
+            {
+                var connectionPool = beaconServicesProvider.GetRequiredService<ILiteDbConnectionPool>();
+
+                if (connectionPool != null)
+                {
+                    client.OnDisconnected += () =>
+                    {
+                        connectionPool.CloseAllConnections(); // close all LiteDb connections after disconnected event
+                    };
+                }
+            }
+
+            return service;
         }
     }
 }

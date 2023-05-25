@@ -9,19 +9,25 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
     public abstract class BaseLiteDbRepository<T>
     {
         private readonly ILogger<BaseLiteDbRepository<T>> _logger;
-        private readonly ILiteDatabase _db;
+        private readonly ILiteDbConnectionPool _connectionPool;
+        private readonly RepositorySettings _settings;
 
-        protected BaseLiteDbRepository(ILiteDbConnectionPool connectionPool, ILogger<BaseLiteDbRepository<T>> logger, RepositorySettings settings)
+        protected BaseLiteDbRepository(
+            ILiteDbConnectionPool connectionPool,
+            ILogger<BaseLiteDbRepository<T>> logger,
+            RepositorySettings settings)
         {
+            _connectionPool = connectionPool ?? throw new ArgumentNullException(nameof(connectionPool));
+            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _logger = logger;
-            _db = connectionPool.OpenConnection(new ConnectionString(settings.ConnectionString));
         }
 
         protected Task InConnectionAction(string collectionName, Action<ILiteCollection<T>> func)
         {
             try
             {
-                ILiteCollection<T> col = _db.GetCollection<T>(collectionName);
+                var db = _connectionPool.OpenConnection(new ConnectionString(_settings.ConnectionString));
+                var col = db.GetCollection<T>(collectionName);
                 func(col);
             }
             catch (Exception e)
@@ -36,7 +42,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
             try
             {
-                ILiteCollection<T> col = _db.GetCollection<T>(collectionName);
+                var db = _connectionPool.OpenConnection(new ConnectionString(_settings.ConnectionString));
+                var col = db.GetCollection<T>(collectionName);
                 return func(col);
             }
             catch (Exception e)
@@ -50,8 +57,9 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
             try
             {
-                ILiteCollection<T> col = _db.GetCollection<T>(collectionName);
-                func(_db, col);
+                var db = _connectionPool.OpenConnection(new ConnectionString(_settings.ConnectionString));
+                var col = db.GetCollection<T>(collectionName);
+                func(db, col);
             }
             catch (Exception e)
             {
@@ -65,7 +73,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
             try
             {
-                ILiteCollection<T> col = _db.GetCollection<T>(collectionName);
+                var db = _connectionPool.OpenConnection(new ConnectionString(_settings.ConnectionString));
+                var col = db.GetCollection<T>(collectionName);
                 return func(col);
 
             }
@@ -81,7 +90,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
             try
             {
-                ILiteCollection<T> col = _db.GetCollection<T>(collectionName);
+                var db = _connectionPool.OpenConnection(new ConnectionString(_settings.ConnectionString));
+                var col = db.GetCollection<T>(collectionName);
                 return func(col);
 
             }
@@ -97,7 +107,8 @@ namespace Beacon.Sdk.Core.Infrastructure.Repositories
         {
             try
             {
-                ILiteCollection<T> col = _db.GetCollection<T>(collectionName);
+                var db = _connectionPool.OpenConnection(new ConnectionString(_settings.ConnectionString));
+                var col = db.GetCollection<T>(collectionName);
                 return func(col);
             }
             catch (Exception e)

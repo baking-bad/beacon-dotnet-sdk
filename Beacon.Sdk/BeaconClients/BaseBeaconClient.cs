@@ -26,6 +26,7 @@ namespace Beacon.Sdk.BeaconClients
         private readonly KeyPairService _keyPairService;
         public event EventHandler<BeaconMessageEventArgs> OnBeaconMessageReceived;
         public event EventHandler<ConnectedClientsListChangedEventArgs?> OnConnectedClientsListChanged;
+        public event Action OnDisconnected;
 
         protected void RaiseOnBeaconMessageReceived(BeaconMessageEventArgs e)
         {
@@ -122,6 +123,8 @@ namespace Beacon.Sdk.BeaconClients
             P2PCommunicationService.OnP2PMessagesReceived -= OnP2PMessagesReceived;
             SerializeMessageHandler.OnPermissionsCreated -= ClientPermissionsCreatedHandler;
             Connected = P2PCommunicationService.Syncing;
+
+            OnDisconnected?.Invoke();
         }
 
         private void ClientPermissionsCreatedHandler(object sender, ConnectedClientsListChangedEventArgs e)
