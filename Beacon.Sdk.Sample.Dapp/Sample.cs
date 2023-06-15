@@ -10,7 +10,6 @@ using BeaconClients;
 using BeaconClients.Abstract;
 using Microsoft.Extensions.Logging;
 using Netezos.Keys;
-using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Extensions.Logging;
 using Hex = Netezos.Encoding.Hex;
