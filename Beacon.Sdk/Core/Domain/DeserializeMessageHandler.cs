@@ -65,6 +65,9 @@ namespace Beacon.Sdk.Core.Domain
                 
                 if (jObjOperation["kind"]?.ToString() == "delegation")
                     parsedOperationDetails.Add(jObjOperation.ToObject<TezosDelegationOperation>()!);
+                
+                if (jObjOperation["kind"]?.ToString() == "origination")
+                    parsedOperationDetails.Add(jObjOperation.ToObject<PartialTezosOriginationOperation>()!);
             }
             operationRequest.OperationDetails = parsedOperationDetails;
 
