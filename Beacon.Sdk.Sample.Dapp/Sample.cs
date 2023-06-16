@@ -1,5 +1,6 @@
 namespace Beacon.Sdk.Sample.Dapp;
 
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Beacon;
 using Beacon.Error;
@@ -8,8 +9,12 @@ using Beacon.Permission;
 using Beacon.Sign;
 using BeaconClients;
 using BeaconClients.Abstract;
+using Core.Domain.Services;
 using Microsoft.Extensions.Logging;
+using Netezos.Encoding;
+using Netezos.Forging.Models;
 using Netezos.Keys;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Extensions.Logging;
 using Hex = Netezos.Encoding.Hex;
@@ -107,6 +112,36 @@ public class Sample
                     BeaconDappClient.RemoveActiveAccounts();
                     break;
                 }
+
+                case "origination":
+                {
+                    var currentDir = GetThisFileDir();
+
+                    var jsonScript = JObject
+                        .Parse(File.ReadAllText($@"{currentDir}/FA2TokenContract.json"));
+                    
+                    var operationDetails = new List<TezosBaseOperation>();
+                    var partialTezosTransactionOperation = new PartialTezosOriginationOperation(
+                        Balance:"0",
+                        Script: jsonScript,
+                        Delegate: null
+                    );
+
+                    operationDetails.Add(partialTezosTransactionOperation);
+            
+                    var operationRequest = new OperationRequest(
+                        type: BeaconMessageType.operation_request,
+                        version: Constants.BeaconVersion,
+                        id: KeyPairService.CreateGuid(),
+                        senderId: BeaconDappClient.SenderId,
+                        network: activeAccountPermissions.Network,
+                        operationDetails: operationDetails,
+                        sourceAddress: pubKey.Address);
+
+                    Log.Debug("requesting operation: " + operationRequest);
+                    await BeaconDappClient.SendResponseAsync(activeAccountPermissions.SenderId, operationRequest);
+                    break;
+                }
             }
         }
     }
@@ -123,9 +158,9 @@ public class Sample
         {
             var network = new Network
             {
-                Type = NetworkType.mainnet,
-                Name = "mainnet",
-                RpcUrl = "https://rpc.tzkt.io/mainnet"
+                Type = NetworkType.ghostnet,
+                Name = "ghostnet",
+                RpcUrl = "https://rpc.tzkt.io/ghostnet"
             };
 
             var permissionScopes = new List<PermissionScope>
@@ -200,5 +235,10 @@ public class Sample
                 break;
             }
         }
+    }
+    
+    private static string GetThisFileDir([CallerFilePath] string path = null)
+    {
+        return Path.GetDirectoryName(path);
     }
 }
