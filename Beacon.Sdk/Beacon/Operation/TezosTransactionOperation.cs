@@ -7,10 +7,13 @@ namespace Beacon.Sdk.Beacon.Operation
     {
         public string Amount { get; }
         public string Destination { get; }
-        public JObject? Parameters { get; }
+        public JToken? Parameters { get; }
 
         [JsonConstructor]
-        public PartialTezosTransactionOperation(string amount, string destination, JObject? parameters) : base(
+        public PartialTezosTransactionOperation(
+            string amount,
+            string destination,
+            JToken? parameters) : base(
             TezosOperationType.transaction)
         {
             Amount = amount;
@@ -18,12 +21,15 @@ namespace Beacon.Sdk.Beacon.Operation
             Parameters = parameters;
         }
 
-        public PartialTezosTransactionOperation(string amount, string destination, string parameters) : base(
+        public PartialTezosTransactionOperation(
+            string amount,
+            string destination,
+            string parameters) : base(
             TezosOperationType.transaction)
         {
             Amount = amount;
             Destination = destination;
-            Parameters = string.IsNullOrEmpty(parameters) ? null : JObject.Parse(parameters);
+            Parameters = string.IsNullOrEmpty(parameters) ? null : JToken.Parse(parameters);
         }
     }
 }

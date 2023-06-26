@@ -54,7 +54,7 @@ namespace Beacon.Sdk.Core.Domain
 
         private BaseBeaconMessage HandleOperationRequest(string message)
         {
-            var jObjOperationRequest = JsonConvert.DeserializeObject<JObject>(message);
+            var jObjOperationRequest = JsonConvert.DeserializeObject<JToken>(message);
             var operationRequest = _jsonSerializerService.Deserialize<OperationRequest>(message);
             var parsedOperationDetails = new List<TezosBaseOperation>();
 
